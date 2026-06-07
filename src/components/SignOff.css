@@ -1,0 +1,193 @@
+.signoff-container {
+  padding: 2rem;
+  margin-top: 1rem;
+}
+
+.status-banner {
+  background: rgba(0, 0, 0, 0.15);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 1.25rem;
+  margin-bottom: 2rem;
+}
+
+.status-progress-bar-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.status-progress-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.status-percentage {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: white;
+}
+
+.status-bar-bg {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.status-bar-fg {
+  height: 100%;
+  border-radius: 4px;
+  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Sign Grid */
+.sign-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 2.5rem;
+}
+
+@media (max-width: 900px) {
+  .sign-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sign-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.sign-header {
+  padding: 1rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.bg-rd {
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.3) 0%, rgba(99, 102, 241, 0.05) 100%);
+  border-bottom: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.bg-pe {
+  background: linear-gradient(135deg, rgba(168, 85, 247, 0.3) 0%, rgba(168, 85, 247, 0.05) 100%);
+  border-bottom: 1px solid rgba(168, 85, 247, 0.2);
+}
+
+.bg-vendor {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(16, 185, 129, 0.05) 100%);
+  border-bottom: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.badge-role {
+  font-size: 0.68rem;
+  padding: 2px 6px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  font-weight: 550;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.sign-body {
+  padding: 1.25rem;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.sign-terms {
+  font-size: 0.76rem;
+  color: #6b7280;
+  line-height: 1.4;
+  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  padding-top: 0.75rem;
+}
+
+/* Warnings and success boxes */
+.export-warning, .export-success {
+  display: flex;
+  gap: 1rem;
+  padding: 1.25rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+}
+
+.export-warning {
+  background: rgba(245, 158, 11, 0.06);
+  border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.export-success {
+  background: rgba(16, 185, 129, 0.06);
+  border: 1px solid rgba(16, 185, 129, 0.15);
+}
+
+.warning-emoji, .success-emoji {
+  font-size: 1.5rem;
+  flex-shrink: 0;
+}
+
+.warning-title {
+  font-weight: 600;
+  color: var(--warning-color);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+.warning-detail, .success-detail {
+  font-size: 0.85rem;
+  color: #9ca3af;
+  line-height: 1.5;
+}
+
+.success-title {
+  font-weight: 600;
+  color: var(--success-color);
+  font-size: 0.95rem;
+  margin-bottom: 4px;
+}
+
+/* Export Buttons */
+.export-action-row {
+  display: flex;
+  justify-content: center;
+}
+
+.btn-large {
+  padding: 1rem 2.5rem;
+  font-size: 1.05rem;
+  border-radius: 12px;
+}
+
+.download-icon {
+  width: 22px;
+  height: 22px;
+}
+
+/* Spinner Animation */
+.spinner {
+  width: 20px;
+  height: 20px;
+  border: 3px solid rgba(255, 255, 255, 0.3);
+  border-radius: 50%;
+  border-top-color: white;
+  animation: spin 1s ease-in-out infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

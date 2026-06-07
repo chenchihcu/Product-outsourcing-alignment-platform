@@ -1,0 +1,137 @@
+import React, { useState, useRef } from 'react';
+import { parseRequirementExcel } from '../utils/excelParser';
+import * as XLSX from 'xlsx';
+import './Uploader.css';
+
+export default function Uploader({ onDataLoaded }) {
+  const [dragActive, setDragActive] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const fileInputRef = useRef(null);
+
+  const handleDrag = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.type === "dragenter" || e.type === "dragover") {
+      setDragActive(true);
+    } else if (e.type === "dragleave") {
+      setDragActive(false);
+    }
+  };
+
+  const processFile = async (file) => {
+    if (!file) return;
+    if (!file.name.endsWith('.xlsx')) {
+      setError('請上傳 .xlsx 格式的 Excel 檔案！');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const ab = e.target.result;
+          // 解析出 JSON 資料
+          const parsedData = parseRequirementExcel(ab);
+          
+          // 保留原始的 workbook 物件，以利後續修改與匯出
+          const originalWb = XLSX.read(ab, { type: 'array' });
+          
+          onDataLoaded(parsedData, originalWb, file.name);
+        } catch (err) {
+          console.error(err);
+          setError('解析 Excel 檔案失敗，請確保此檔案符合「新機種製作需求一覽表2026 v2」格式。');
+        } finally {
+          setLoading(false);
+        }
+      };
+      reader.readAsArrayBuffer(file);
+    } catch (err) {
+      setError('讀取檔案出錯，請重試。');
+      setLoading(false);
+    }
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setDragActive(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+      processFile(e.dataTransfer.files[0]);
+    }
+  };
+
+  const handleChange = (e) => {
+    e.preventDefault();
+    if (e.target.files && e.target.files[0]) {
+      processFile(e.target.files[0]);
+    }
+  };
+
+  return (
+    <div className="uploader-container glass-card">
+      <div 
+        className={`drop-zone ${dragActive ? 'active' : ''} ${loading ? 'loading' : ''}`}
+        onDragEnter={handleDrag}
+        onDragOver={handleDrag}
+        onDragLeave={handleDrag}
+        onDrop={handleDrop}
+        onClick={() => fileInputRef.current.click()}
+      >
+        <input 
+          ref={fileInputRef}
+          type="file" 
+          className="file-input" 
+          accept=".xlsx" 
+          onChange={handleChange}
+          disabled={loading}
+        />
+        
+        {loading ? (
+          <div className="loader-wrapper">
+            <div className="pulse-loader"></div>
+            <p className="upload-title">正在解析 Excel 資料表...</p>
+            <p className="upload-subtitle">正在建構資訊對齊結構與防呆規則</p>
+          </div>
+        ) : (
+          <div className="upload-prompt">
+            <div className="upload-icon-wrapper">
+              <svg className="upload-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+              </svg>
+            </div>
+            <p className="upload-title">點擊或拖放 Excel 確認表至此</p>
+            <p className="upload-subtitle">支援：新機種製作需求一覽表2026 v2.xlsx</p>
+          </div>
+        )}
+      </div>
+
+      {error && (
+        <div className="error-alert">
+          <svg className="error-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+          <span>{error}</span>
+        </div>
+      )}
+
+      <div className="uploader-footer">
+        <div className="footer-item">
+          <span className="dot success"></span>
+          <span>防呆與比對</span>
+        </div>
+        <div className="footer-item">
+          <span className="dot info"></span>
+          <span>資料完整性檢核</span>
+        </div>
+        <div className="footer-item">
+          <span className="dot warning"></span>
+          <span>線上雙向對齊</span>
+        </div>
+      </div>
+    </div>
+  );
+}
