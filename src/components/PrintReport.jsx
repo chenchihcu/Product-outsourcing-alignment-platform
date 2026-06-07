@@ -135,7 +135,8 @@ export default function PrintReport({ data }) {
             <td className="cell-label">SMT 首件檢查項目</td>
             <td className="cell-value" style={{ width: '35%' }}>
               <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.polarity)} 極性方向檢查</span> <br />
-              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.measureLcr)} 量測 LCR</span>
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.measureLcr)} 量測 LCR (電容/電阻/電感)</span> <br />
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.spi)} SPI 錫膏厚度測試</span>
             </td>
             <td className="cell-label" style={{ width: '15%' }}>SMT 焊接順序</td>
             <td className="cell-value" style={{ width: '25%' }}>
@@ -143,6 +144,29 @@ export default function PrintReport({ data }) {
               {renderCheck(pc.smtOrder?.tToB)} 先焊頂面 (T→B)
             </td>
           </tr>
+          {bi.processItems?.dip && (
+            <>
+              <tr>
+                <td className="cell-label">DIP 首件檢查項目</td>
+                <td className="cell-value">
+                  <span className="print-checkbox">{renderCheck(pc.dipFirstPiece?.cutLead)} 剪腳前置作業</span>
+                </td>
+                <td className="cell-label">DIP 焊接順序</td>
+                <td className="cell-value">
+                  {renderCheck(pc.dipOrder?.bToT)} 先焊底面 (B→T) <br />
+                  {renderCheck(pc.dipOrder?.tToB)} 先焊頂面 (T→B)
+                </td>
+              </tr>
+              {pc.dipFirstPiece?.memo && (
+                <tr>
+                  <td className="cell-label">DIP 注意事項</td>
+                  <td className="cell-value" colSpan={3}>
+                    {pc.dipFirstPiece.memo}
+                  </td>
+                </tr>
+              )}
+            </>
+          )}
           {/* Underfill 與膠材 */}
           <tr>
             <td className="cell-label">Underfill 後烘烤</td>
@@ -156,13 +180,25 @@ export default function PrintReport({ data }) {
               {pc.underfill?.glueModel || '—'}
             </td>
           </tr>
-          {/* PCBA 包材 */}
+          {/* PCBA/FPCA 包材 */}
           <tr>
             <td className="cell-label">PCBA 包材種類</td>
             <td className="cell-value" colSpan={3}>
-              <span className="print-checkbox">{renderCheck(pc.packaging?.staticBag)} 靜電袋</span>
-              <span className="print-checkbox">{renderCheck(pc.packaging?.honeycomb)} 蜂巢式抗靜電隔板</span>
-              <span className="print-checkbox">{renderCheck(pc.packaging?.tray)} Tray 抗靜電脆盤</span>
+              <span className="print-checkbox">{renderCheck(pc.pcbaPackaging?.staticBag)} 靜電袋</span>
+              <span className="print-checkbox">{renderCheck(pc.pcbaPackaging?.honeycomb)} 蜂巢式抗靜電隔板</span>
+              <span className="print-checkbox">{renderCheck(pc.pcbaPackaging?.tray)} Tray 抗靜電脆盤</span>
+              <span className="print-checkbox">{renderCheck(pc.pcbaPackaging?.sensorCover)} Sensor 保護貼</span>
+              <span className="print-checkbox">{renderCheck(pc.pcbaPackaging?.cameraCover)} Camera 保護貼</span>
+            </td>
+          </tr>
+          <tr>
+            <td className="cell-label">FPCA 包材種類</td>
+            <td className="cell-value" colSpan={3}>
+              <span className="print-checkbox">{renderCheck(pc.fpcaPackaging?.staticBag)} 靜電袋</span>
+              <span className="print-checkbox">{renderCheck(pc.fpcaPackaging?.honeycomb)} 蜂巢式抗靜電隔板</span>
+              <span className="print-checkbox">{renderCheck(pc.fpcaPackaging?.tray)} Tray 抗靜電脆盤</span>
+              <span className="print-checkbox">{renderCheck(pc.fpcaPackaging?.sensorCover)} Sensor 保護貼</span>
+              <span className="print-checkbox">{renderCheck(pc.fpcaPackaging?.cameraCover)} Camera 保護貼</span>
             </td>
           </tr>
         </tbody>
@@ -241,12 +277,20 @@ export default function PrintReport({ data }) {
           <tr>
             <td className="cell-bold" colSpan={2} style={{ background: '#f9fafb' }}>📸 D. 照片提供</td>
           </tr>
-          {tr.photoRecords?.map((rec) => (
-            <tr key={rec.id}>
-              <td style={{ paddingLeft: '20px' }}>{rec.name}</td>
-              <td className="text-center">{rec.checked ? '已對齊 ✓' : '未完成 —'}</td>
-            </tr>
-          ))}
+          {tr.photoRecords?.map((rec) => {
+            let displayName = rec.name;
+            if (rec.isXray && rec.parts) {
+              const partsStr = rec.parts.filter(Boolean).join(', ');
+              const baseName = String(rec.name).split(/指定零件/)[0] + '指定零件:';
+              displayName = partsStr ? `${baseName} ${partsStr}` : baseName;
+            }
+            return (
+              <tr key={rec.id}>
+                <td style={{ paddingLeft: '20px' }}>{displayName}</td>
+                <td className="text-center">{rec.checked ? '已對齊 ✓' : '未完成 —'}</td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
 

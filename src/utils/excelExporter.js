@@ -304,6 +304,12 @@ export function exportRequirementExcel(originalWorkbook, data) {
     const smtFirst = pc.smtFirstPiece || {};
     writeCheckbox(sheet2, 'B8', '極性方向', smtFirst.polarity);
     writeCheckbox(sheet2, 'D8', '量測電容、電阻、電感', smtFirst.measureLcr);
+    writeCheckbox(sheet2, 'C8', 'SPI錫膏厚度測試', smtFirst.spi);
+
+    // 新增: DIP 首件
+    const dipFirst = pc.dipFirstPiece || {};
+    writeCheckbox(sheet2, 'B9', '剪腳前置作業', dipFirst.cutLead);
+    writeCell(sheet2, 'D9', dipFirst.memo ? `注意事項: ${dipFirst.memo}` : '');
 
     // 焊接順序
     const smtOrder = pc.smtOrder || {};
@@ -319,15 +325,19 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet2, 'B12', '有', kp.has);
     writeCheckbox(sheet2, 'C12', '無', kp.none);
 
-    // 測溫點
-    if (pc.tempPoints && pc.tempPoints.length >= 2) {
+    // 測溫點 (第 1 點單獨，第 2~6 點拼接寫入 B16/C16/D16)
+    if (pc.tempPoints && pc.tempPoints.length > 0) {
       writeCell(sheet2, 'B15', pc.tempPoints[0].pos || '');
       writeCell(sheet2, 'C15', pc.tempPoints[0].desc || '');
       writeCell(sheet2, 'D15', pc.tempPoints[0].memo || '');
 
-      writeCell(sheet2, 'B16', pc.tempPoints[1].pos || '');
-      writeCell(sheet2, 'C16', pc.tempPoints[1].desc || '');
-      writeCell(sheet2, 'D16', pc.tempPoints[1].memo || '');
+      const remainPos = pc.tempPoints.slice(1).map(p => p.pos).filter(Boolean).join(', ');
+      const remainDesc = pc.tempPoints.slice(1).map(p => p.desc).filter(Boolean).join(', ');
+      const remainMemo = pc.tempPoints.slice(1).map(p => p.memo).filter(Boolean).join(', ');
+
+      writeCell(sheet2, 'B16', remainPos);
+      writeCell(sheet2, 'C16', remainDesc);
+      writeCell(sheet2, 'D16', remainMemo);
     }
 
     // Underfill (將溫度與時間拼接回寫)
@@ -345,11 +355,24 @@ export function exportRequirementExcel(originalWorkbook, data) {
     // 特殊備註
     writeCell(sheet2, 'A22', pc.specialProcessMemo || '');
 
-    // 包材
-    const pkg = pc.packaging || {};
-    writeCheckbox(sheet2, 'B25', '靜電袋', pkg.staticBag);
-    writeCheckbox(sheet2, 'D25', '蜂巢式抗靜電隔板', pkg.honeycomb);
-    writeCheckbox(sheet2, 'F25', 'Tray 抗靜電脆盤', pkg.tray);
+    // 包材種類回寫 (PCBA 寫入 B25，FPCA 寫入 B26，並清空原 checkbox 的重複儲存格)
+    const formatPkgStr = (pkg) => {
+      const items = [];
+      if (pkg.staticBag) items.push('☑ 靜電袋');
+      if (pkg.honeycomb) items.push('☑ 蜂巢式抗靜電隔板');
+      if (pkg.tray) items.push('☑ Tray 抗靜電脆盤');
+      if (pkg.sensorCover) items.push('☑ Sensor 保護貼');
+      if (pkg.cameraCover) items.push('☑ Camera 保護貼');
+      return items.join(', ') || '☐ 無';
+    };
+
+    writeCell(sheet2, 'B25', formatPkgStr(pc.pcbaPackaging || {}));
+    writeCell(sheet2, 'D25', '');
+    writeCell(sheet2, 'F25', '');
+
+    writeCell(sheet2, 'B26', formatPkgStr(pc.fpcaPackaging || {}));
+    writeCell(sheet2, 'D26', '');
+    writeCell(sheet2, 'F26', '');
 
     // 簽核 (稽核人員確認 - 回寫品保確認人)
     const sign = bi.signOff || {};
@@ -365,7 +388,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 驗證目標保持原有模版內容，不進行寫入
 
-    // 更新列表（A.印刷紀錄, B.檢驗紀錄, D.照片提供）
+    // 更新列表（A.印刷紀錄, B.檢驗紀錄）
     const updateRecords = (records, startRow) => {
       records.forEach((rec, idx) => {
         const r = startRow + idx;
@@ -373,9 +396,22 @@ export function exportRequirementExcel(originalWorkbook, data) {
       });
     };
 
+    // 專用更新照片提供清單（B25 指定零件拼接）
+    const updatePhotoRecords = (records, startRow) => {
+      records.forEach((rec, idx) => {
+        const r = startRow + idx;
+        writeCheckbox(sheet3, `C${r}`, '', rec.checked);
+        if (rec.isXray && rec.parts) {
+          const filled = rec.parts.filter(Boolean).join(', ');
+          const prefix = "X-Ray 照片 / BGA, QFN 檢驗紀錄表 : BGA、QFN、指定零件:";
+          writeCell(sheet3, `B${r}`, `${prefix} ${filled}`);
+        }
+      });
+    };
+
     if (tr.printRecords) updateRecords(tr.printRecords, 6);
     if (tr.inspectRecords) updateRecords(tr.inspectRecords, 12);
-    if (tr.photoRecords) updateRecords(tr.photoRecords, 24);
+    if (tr.photoRecords) updatePhotoRecords(tr.photoRecords, 24);
   }
 
   // 在寫出前對每個要輸出的 sheet 套用排版改善

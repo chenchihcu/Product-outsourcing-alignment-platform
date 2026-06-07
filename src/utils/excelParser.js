@@ -219,7 +219,18 @@ export function parseRequirementExcel(arrayBuffer) {
 
     data.processControl.smtFirstPiece = {
       polarity: parseCheckbox(getVal('B8')),
-      measureLcr: parseCheckbox(getVal('D8'))
+      measureLcr: parseCheckbox(getVal('D8')),
+      spi: parseCheckbox(getVal('C8'))
+    };
+
+    const cleanDipMemo = (val) => {
+      if (!val) return '';
+      return String(val).replace(/^注意事項[:：]\s*/, '').trim();
+    };
+
+    data.processControl.dipFirstPiece = {
+      cutLead: parseCheckbox(getVal('B9')),
+      memo: cleanDipMemo(getVal('D9'))
     };
 
     // SMT/DIP 製程管制
@@ -237,21 +248,28 @@ export function parseRequirementExcel(arrayBuffer) {
       none: parseCheckbox(getVal('C12'))
     };
 
-    // 測溫點配置
-    data.processControl.tempPoints = [
-      {
-        id: 1,
-        pos: getVal('B15') || '',
-        desc: getVal('C15') || '',
-        memo: getVal('D15') || ''
-      },
-      {
-        id: 2,
-        pos: getVal('B16') || '',
-        desc: getVal('C16') || '',
-        memo: getVal('D16') || ''
-      }
-    ];
+    // 測溫點配置 (點 1 獨立，點 2~6 拼接拆分)
+    const pts = [];
+    pts.push({
+      id: 1,
+      pos: String(getVal('B15') || '').trim(),
+      desc: String(getVal('C15') || '').trim(),
+      memo: String(getVal('D15') || '').trim()
+    });
+
+    const rawPos = String(getVal('B16') || '').split(/[,，\s\n]+/);
+    const rawDesc = String(getVal('C16') || '').split(/[,痕，\s\n]+/);
+    const rawMemo = String(getVal('D16') || '').split(/[,，\s\n]+/);
+
+    for (let i = 0; i < 5; i++) {
+      pts.push({
+        id: i + 2,
+        pos: (rawPos[i] || '').trim(),
+        desc: (rawDesc[i] || '').trim(),
+        memo: (rawMemo[i] || '').trim()
+      });
+    }
+    data.processControl.tempPoints = pts;
 
     // Underfill
     const rawBake = getVal('B18') || '';
@@ -287,12 +305,21 @@ export function parseRequirementExcel(arrayBuffer) {
     // 特殊製程備註
     data.processControl.specialProcessMemo = getVal('A22') || '';
 
-    // 包裝方式
-    data.processControl.packaging = {
-      staticBag: parseCheckbox(getVal('B25')),
-      honeycomb: parseCheckbox(getVal('D25')),
-      tray: parseCheckbox(getVal('F25'))
+    // 包裝與包材方式 (解析 B25 的 PCBA，以及 B26 的 FPCA)
+    const parsePkgStr = (val) => {
+      if (!val) return { staticBag: false, honeycomb: false, tray: false, sensorCover: false, cameraCover: false };
+      const str = String(val);
+      return {
+        staticBag: str.includes('靜電袋'),
+        honeycomb: str.includes('蜂巢式抗靜電隔板') || str.includes('蜂巢隔板'),
+        tray: str.includes('Tray 抗靜電脆盤') || str.includes('脆盤'),
+        sensorCover: str.includes('Sensor 保護貼') || str.includes('Sensor保護貼'),
+        cameraCover: str.includes('Camera 保護貼') || str.includes('Camera保護貼')
+      };
     };
+
+    data.processControl.pcbaPackaging = parsePkgStr(getVal('B25'));
+    data.processControl.fpcaPackaging = parsePkgStr(getVal('B26'));
   }
 
   // 3. 解析【試產報告要求】工作表
@@ -321,9 +348,32 @@ export function parseRequirementExcel(arrayBuffer) {
     ];
 
     // D. 照片提供
+    const parseXrayParts = (val) => {
+      if (!val) return ['', '', '', ''];
+      const str = String(val);
+      const match = str.match(/指定零件[:：]\s*(.*)/);
+      if (match && match[1]) {
+        const parts = match[1].split(/[,，\s]+/).map(p => p.trim()).filter(Boolean);
+        const res = ['', '', '', ''];
+        for (let i = 0; i < 4; i++) {
+          res[i] = parts[i] || '';
+        }
+        return res;
+      }
+      return ['', '', '', ''];
+    };
+
+    const photoB25 = getVal('B25') || '';
     data.trialReport.photoRecords = [
       { id: 1, name: getVal('B24') || '', checked: parseCheckbox(getVal('C24')), date: '' },
-      { id: 2, name: getVal('B25') || '', checked: parseCheckbox(getVal('C25')), date: '' },
+      { 
+        id: 2, 
+        name: photoB25, 
+        checked: parseCheckbox(getVal('C25')), 
+        date: '',
+        isXray: true,
+        parts: parseXrayParts(photoB25)
+      },
       { id: 3, name: getVal('B26') || '', checked: parseCheckbox(getVal('C26')), date: '' },
       { id: 4, name: getVal('B27') || '', checked: parseCheckbox(getVal('C27')), date: '' },
       { id: 5, name: getVal('B28') || '', checked: parseCheckbox(getVal('C28')), date: '' }

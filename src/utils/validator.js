@@ -72,8 +72,17 @@ export function validateAlignment(data) {
   check(hasSample, '加工廠未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
 
   const smtFirst = pc.smtFirstPiece || {};
-  const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr;
-  check(hasSmtFirst, '加工廠未確認「SMT 首件檢查」項目（極性方向 / LCR量測）', 'error');
+  const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi;
+  check(hasSmtFirst, '加工廠未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI）', 'error');
+
+  // 新增: DIP 首件校驗 (如果加工項目包含 DIP)
+  if (pi.dip) {
+    const dipFirst = pc.dipFirstPiece || {};
+    check(dipFirst.cutLead, '加工廠未勾選 DIP 首件「剪腳前置作業」', 'error');
+    if (dipFirst.memo) {
+      check(dipFirst.memo.length <= 50, 'DIP 注意事項字數不得超過 50 字', 'error');
+    }
+  }
 
   // SMT/DIP 焊接順序
   const smtOrder = pc.smtOrder || {};
@@ -86,18 +95,22 @@ export function validateAlignment(data) {
     check(hasDipOrder, '加工廠未確認「DIP 焊接順序」', 'error');
   }
 
-  // 測溫點配置：如果有關鍵零件 (或者有 SMT) 且有設測溫點
+  // 測溫點配置：如果有關鍵零件，最少要有 6 個位置
   const hasKeyParts = pc.keyParts?.has;
   if (hasKeyParts) {
     const tempPoints = pc.tempPoints || [];
     const validPoints = tempPoints.filter(p => !!p.pos && !!p.desc);
-    check(validPoints.length >= 2, '已勾選有關鍵零件，但「測溫點配置」未填滿至少 2 點（位置與描述）', 'error');
+    check(validPoints.length >= 6, '已勾選有關鍵零件，但「測溫點配置」未填滿至少 6 點（位置與描述）', 'error');
   }
 
-  // 包材種類
-  const pkg = pc.packaging || {};
-  const hasPkg = pkg.staticBag || pkg.honeycomb || pkg.tray;
-  check(hasPkg, '加工廠未確認「PCBA 包材種類」（靜電袋 / 蜂巢隔板 / 抗靜電脆盤）', 'error');
+  // 包材種類 (PCBA 與 FPCA 各需確認至少一項)
+  const pcbaPkg = pc.pcbaPackaging || {};
+  const hasPcbaPkg = pcbaPkg.staticBag || pcbaPkg.honeycomb || pcbaPkg.tray || pcbaPkg.sensorCover || pcbaPkg.cameraCover;
+  check(hasPcbaPkg, '加工廠未確認「PCBA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+
+  const fpcaPkg = pc.fpcaPackaging || {};
+  const hasFpcaPkg = fpcaPkg.staticBag || fpcaPkg.honeycomb || fpcaPkg.tray || fpcaPkg.sensorCover || fpcaPkg.cameraCover;
+  check(hasFpcaPkg, '加工廠未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
 
   // 簽核欄對齊
   const sign = bi.signOff || {};

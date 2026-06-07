@@ -65,6 +65,17 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
     onChange({ ...data, trialReport: updated });
   };
 
+  const handleXrayPartChange = (partIdx, val) => {
+    const records = [...data.trialReport.photoRecords];
+    const xrayIdx = records.findIndex(r => r.isXray);
+    if (xrayIdx !== -1) {
+      const parts = [...(records[xrayIdx].parts || ['', '', '', ''])];
+      parts[partIdx] = val;
+      records[xrayIdx] = { ...records[xrayIdx], parts };
+      onChange({ ...data, trialReport: { ...data.trialReport, photoRecords: records } });
+    }
+  };
+
   return (
     <div className="sections-container glass-card">
       
@@ -123,6 +134,22 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                     onChange={(e) => handleStageChange(k, e.target.checked)}
                   />
                   <span>{k === 'politRun' ? 'Polit-run' : k.toUpperCase()}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          <div className="form-group required-highlight" style={{ marginTop: '12px' }}>
+            <label className="form-label">主要加工項目 <span className="req">*</span></label>
+            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
+              {[['smt', 'SMT'], ['dip', 'DIP']].map(([key, label]) => (
+                <label key={key} className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.basicInfo.processItems?.[key] || false} 
+                    onChange={(e) => handleProcessItemsChange(key, e.target.checked)}
+                  />
+                  <span>{label}</span>
                 </label>
               ))}
             </div>
@@ -362,6 +389,14 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   />
                   <span>量測 LCR (電容/電阻/電感)</span>
                 </label>
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.processControl?.smtFirstPiece?.spi || false}
+                    onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, spi: e.target.checked })}
+                  />
+                  <span>SPI 錫膏厚度測試</span>
+                </label>
               </div>
             </div>
 
@@ -389,6 +424,63 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
               </div>
             </div>
           </div>
+
+          {/* DIP 首件與注意事項 */}
+          {data.basicInfo.processItems.dip && (
+            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div className="form-row-grid">
+                <div className="form-group required-highlight">
+                  <label className="form-label">DIP 首件檢查項目 <span className="req">*</span></label>
+                  <div className="checkbox-flex">
+                    <label className="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={data.processControl?.dipFirstPiece?.cutLead || false}
+                        onChange={(e) => handleProcessChange('dipFirstPiece', { ...data.processControl.dipFirstPiece, cutLead: e.target.checked })}
+                      />
+                      <span>剪腳前置作業</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div className="form-group required-highlight">
+                  <label className="form-label">DIP 焊接順序 <span className="req">*</span></label>
+                  <div className="radio-group">
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name="dipOrder" 
+                        checked={data.processControl?.dipOrder?.bToT || false}
+                        onChange={() => handleProcessChange('dipOrder', { bToT: true, tToB: false })}
+                      />
+                      <span>先焊底面 (B→T)</span>
+                    </label>
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name="dipOrder" 
+                        checked={data.processControl?.dipOrder?.tToB || false}
+                        onChange={() => handleProcessChange('dipOrder', { bToT: false, tToB: true })}
+                      />
+                      <span>先焊頂面 (T→B)</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">DIP 注意事項 (限 50 字)</label>
+                <input 
+                  type="text" 
+                  className="form-input edit-active" 
+                  placeholder="請輸入 DIP 注意事項 (50 字內)..."
+                  maxLength={50}
+                  value={data.processControl?.dipFirstPiece?.memo || ''}
+                  onChange={(e) => handleProcessChange('dipFirstPiece', { ...data.processControl.dipFirstPiece, memo: e.target.value })}
+                />
+              </div>
+            </div>
+          )}
 
           <div className="divider"></div>
 
@@ -431,7 +523,7 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   </tr>
                 </thead>
                 <tbody>
-                  {[0, 1].map((idx) => {
+                  {[0, 1, 2, 3, 4, 5].map((idx) => {
                     const point = data.processControl.tempPoints?.[idx] || {};
                     return (
                       <tr key={idx}>
@@ -510,33 +602,37 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
             </div>
           </div>
 
+          {/* PCBA 包材種類 */}
           <div className="form-group required-highlight">
             <label className="form-label">PCBA 包材種類 <span className="req">*</span></label>
-            <div className="checkbox-flex">
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={data.processControl?.packaging?.staticBag || false}
-                  onChange={(e) => handleProcessChange('packaging', { ...data.processControl.packaging, staticBag: e.target.checked })}
-                />
-                <span>靜電袋</span>
-              </label>
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={data.processControl?.packaging?.honeycomb || false}
-                  onChange={(e) => handleProcessChange('packaging', { ...data.processControl.packaging, honeycomb: e.target.checked })}
-                />
-                <span>蜂巢式抗靜電隔板</span>
-              </label>
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={data.processControl?.packaging?.tray || false}
-                  onChange={(e) => handleProcessChange('packaging', { ...data.processControl.packaging, tray: e.target.checked })}
-                />
-                <span>Tray 抗靜電脆盤</span>
-              </label>
+            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
+              {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
+                <label key={key} className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.processControl?.pcbaPackaging?.[key] || false}
+                    onChange={(e) => handleProcessChange('pcbaPackaging', { ...data.processControl.pcbaPackaging, [key]: e.target.checked })}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+
+          {/* FPCA 包材種類 */}
+          <div className="form-group required-highlight" style={{ marginTop: '12px' }}>
+            <label className="form-label">FPCA 包材種類 <span className="req">*</span></label>
+            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
+              {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
+                <label key={key} className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.processControl?.fpcaPackaging?.[key] || false}
+                    onChange={(e) => handleProcessChange('fpcaPackaging', { ...data.processControl.fpcaPackaging, [key]: e.target.checked })}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
           </div>
 
@@ -606,15 +702,35 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
           <div className="record-list-section">
             <h4 className="list-group-title">📸 D. 照片提供</h4>
             {data.trialReport?.photoRecords?.map((rec, idx) => (
-              <div key={rec.id} className="record-row edit-active">
-                <label className="checkbox-label flex-1">
+              <div key={rec.id} className="record-row edit-active" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
+                <label className="checkbox-label flex-1" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <input 
                     type="checkbox" 
                     checked={rec.checked || false}
                     onChange={(e) => handleRecordChange('photoRecords', idx, 'checked', e.target.checked)}
                   />
-                  <span className="record-name">{rec.name}</span>
+                  <span className="record-name">
+                    {rec.isXray ? String(rec.name).split(/指定零件/)[0] + '指定零件:' : rec.name}
+                  </span>
                 </label>
+
+                {rec.isXray && (
+                  <div className="xray-parts-inputs animate-fade-in" style={{ display: 'flex', gap: '8px', marginLeft: '28px', flexWrap: 'wrap', alignItems: 'center' }}>
+                    {[0, 1, 2, 3].map((pIdx) => (
+                      <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                        <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{pIdx + 1}:</span>
+                        <input 
+                          type="text" 
+                          className="form-input edit-active compact" 
+                          placeholder={`例如: U${pIdx + 1}`}
+                          value={rec.parts?.[pIdx] || ''}
+                          onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
+                          style={{ width: '80px', padding: '2px 6px', fontSize: '0.85rem' }}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ))}
           </div>
