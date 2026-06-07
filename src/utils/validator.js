@@ -21,6 +21,7 @@ export function validateAlignment(data) {
 
   // --- 發包方 (研發/工程) 填寫檢核 ---
   const bi = data.basicInfo || {};
+  const pi = bi.processItems || {};
   check(!!bi.productNo, '發包方未填寫「產品料號」', 'error');
   check(!!bi.productDesc, '發包方未填寫「產品名稱 / 描述」', 'warning');
 
@@ -28,35 +29,6 @@ export function validateAlignment(data) {
   const stage = bi.stage || {};
   const hasStage = stage.evt || stage.dvt || stage.pvt || stage.mpSmall || stage.ecn;
   check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / 量產 / ECN）', 'error');
-
-  // 產品類別至少勾選一個
-  const cat = bi.category || {};
-  const hasCat = cat.general || cat.medical;
-  check(hasCat, '發包方未勾選「產品類別」（一般 / 醫療）', 'error');
-
-  // 品質水準要求與 IPC 標準
-  const ql = bi.qualityLevel || {};
-  const hasQl = ql.class2 || ql.class3;
-  check(hasQl, '發包方未勾選「品質水準要求」（Class 2 / Class 3）', 'warning');
-
-  const ipc = bi.ipcStandard || {};
-  const hasIpc = ipc.ipcA610 || ipc.jStd001;
-  check(hasIpc, '發包方未勾選「IPC 標準」（IPC-A-610 / J-STD-001）', 'warning');
-
-  // PCBA 資訊
-  const pcba = bi.pcbaType || {};
-  const hasPcba = pcba.single || pcba.double;
-  check(hasPcba, '發包方未勾選「PCBA 資訊」（單面 / 雙面）', 'error');
-
-  // 加工項目至少勾選一項
-  const pi = bi.processItems || {};
-  const hasPi = Object.values(pi).some(v => v);
-  check(hasPi, '發包方未勾選任何「加工項目」（如 SMT, DIP 等）', 'error');
-
-  // 工程文件至少勾選一項
-  const docs = bi.documents || {};
-  const hasDocs = Object.values(docs).some(v => v);
-  check(hasDocs, '發包方未勾選任何已具備的「工程文件」（BOM, Gerber 等）', 'warning');
 
   // --- 委外加工廠回填檢核 ---
   check(!!bi.factory, '加工廠未填寫「委外加工廠」名稱', 'error');

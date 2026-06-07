@@ -114,13 +114,13 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
           {/* 產品階段 */}
           <div className="form-group">
             <label className="form-label">產品階段</label>
-            <div className="checkbox-flex readonly-flex">
+            <div className="checkbox-flex">
               {Object.keys(data.basicInfo.stage || {}).map(k => (
                 <label key={k} className="checkbox-label">
                   <input 
                     type="checkbox" 
                     checked={data.basicInfo.stage[k] || false} 
-                    disabled 
+                    onChange={(e) => handleStageChange(k, e.target.checked)}
                   />
                   <span>{k.toUpperCase()}</span>
                 </label>
@@ -216,11 +216,12 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   </label>
                 </div>
                 {item.need && (
-                  <div className="fixture-qty-input animate-fade-in">
+                  <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '240px', width: '240px' }}>
+                    <span style={{ fontSize: '0.85rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>提供數量:</span>
                     <input 
                       type="text" 
                       className="form-input edit-active compact" 
-                      placeholder="填寫數量, 例: 2 SETs" 
+                      placeholder="例: 2 SETs" 
                       value={item.qty || ''}
                       onChange={(e) => handleToolingChange(key, 'qty', e.target.value)}
                     />
@@ -539,7 +540,6 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
       {activeSection === 'trialReport' && (
         <div className="section-form animate-fade-in">
           <h2 className="section-title">C. 試產報告與對齊確認</h2>
-          <p className="section-subtitle">核對印刷、檢驗紀錄與所須上傳的照片清單。</p>
 
           {/* 報告清單與完成日期確認 */}
           <h3 className="sub-section-title">📂 試產交付文件、檢驗紀錄與照片清單</h3>
