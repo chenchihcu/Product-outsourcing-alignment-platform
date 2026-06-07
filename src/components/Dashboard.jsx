@@ -80,7 +80,7 @@ export default function Dashboard({ data, onGoToSection }) {
           </div>
           <div className="info-row">
             <span className="info-label">委外加工廠</span>
-            <span className="info-val">{data.basicInfo.factory ? `${data.basicInfo.factory} (${data.basicInfo.factoryArea || '未填廠區'})` : <span className="placeholder">未填寫</span>}</span>
+            <span className="info-val">{data.basicInfo.factory || <span className="placeholder">未填寫</span>}</span>
           </div>
           <div className="info-row">
             <span className="info-label">製程階段</span>

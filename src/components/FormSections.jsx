@@ -74,48 +74,15 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
           <h2 className="section-title">A. 產品基本資料</h2>
           <p className="section-subtitle">請核對發包方資訊，並請加工廠確實填寫工廠區及治工具資訊。</p>
 
-          <div className="form-row-grid">
-            <div className="form-group">
-              <label className="form-label">填表日期 (發包方)</label>
-              <input 
-                type="text" 
-                className="form-input readonly" 
-                value={data.basicInfo.date || ''} 
-                readOnly
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">版本別</label>
-              <input 
-                type="text" 
-                className="form-input readonly" 
-                value={data.basicInfo.version || ''} 
-                readOnly
-              />
-            </div>
-          </div>
-
-          <div className="form-row-grid">
-            <div className="form-group required-highlight">
-              <label className="form-label">委外加工廠 <span className="req">*</span></label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: 富士康 / 捷普" 
-                value={data.basicInfo.factory || ''} 
-                onChange={(e) => handleBasicChange('factory', e.target.value)}
-              />
-            </div>
-            <div className="form-group required-highlight">
-              <label className="form-label">加工廠區 (CM) <span className="req">*</span></label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: 深圳龍華 A區" 
-                value={data.basicInfo.factoryArea || ''} 
-                onChange={(e) => handleBasicChange('factoryArea', e.target.value)}
-              />
-            </div>
+          <div className="form-group required-highlight">
+            <label className="form-label">委外加工廠 <span className="req">*</span></label>
+            <input 
+              type="text" 
+              className="form-input edit-active" 
+              placeholder="例如: 富士康 / 捷普" 
+              value={data.basicInfo.factory || ''} 
+              onChange={(e) => handleBasicChange('factory', e.target.value)}
+            />
           </div>
 
           <div className="divider"></div>
@@ -570,48 +537,11 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
       {activeSection === 'trialReport' && (
         <div className="section-form animate-fade-in">
           <h2 className="section-title">C. 試產報告與對齊確認</h2>
-          <p className="section-subtitle">設定試產目標，並核對印刷、檢驗紀錄與所須上傳的照片清單。</p>
-
-          {/* 驗證目標 */}
-          <h3 className="sub-section-title">🎯 試產驗證目標 (Pass Criteria)</h3>
-          <div className="form-row-grid">
-            <div className="form-group">
-              <label className="form-label">SMT 生產良率目標</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: ≥ 98%" 
-                value={data.trialReport?.passCriteria?.smtYield || ''}
-                onChange={(e) => handleTrialChange('smtYield', e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">板彎 / 翹曲基準</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: ≤ 7/1000" 
-                value={data.trialReport?.passCriteria?.boardBending || ''}
-                onChange={(e) => handleTrialChange('boardBending', e.target.value)}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">錫膏印刷 CPK (厚度)</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: ≥ 1.33" 
-                value={data.trialReport?.passCriteria?.spiCpk || ''}
-                onChange={(e) => handleTrialChange('spiCpk', e.target.value)}
-              />
-            </div>
-          </div>
-
-          <div className="divider"></div>
+          <p className="section-subtitle">核對印刷、檢驗紀錄與所須上傳的照片清單。</p>
 
           {/* 報告清單與完成日期確認 */}
           <h3 className="sub-section-title">📂 試產交付文件、檢驗紀錄與照片清單</h3>
-          <p className="description-text">請勾選確認已完成的項目，並填寫完成日期以利兩端追蹤。</p>
+          <p className="description-text">請勾選確認已完成的項目以利兩端追蹤。</p>
 
           {/* A. 印刷品質 */}
           <div className="record-list-section">
@@ -626,15 +556,6 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   />
                   <span className="record-name">{rec.name}</span>
                 </label>
-                <div className="date-input-wrapper">
-                  <input 
-                    type="text" 
-                    className="form-input edit-active compact" 
-                    placeholder="YYYY/MM/DD"
-                    value={rec.date || ''}
-                    onChange={(e) => handleRecordChange('printRecords', idx, 'date', e.target.value)}
-                  />
-                </div>
               </div>
             ))}
           </div>
@@ -652,15 +573,6 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   />
                   <span className="record-name">{rec.name}</span>
                 </label>
-                <div className="date-input-wrapper">
-                  <input 
-                    type="text" 
-                    className="form-input edit-active compact" 
-                    placeholder="YYYY/MM/DD"
-                    value={rec.date || ''}
-                    onChange={(e) => handleRecordChange('inspectRecords', idx, 'date', e.target.value)}
-                  />
-                </div>
               </div>
             ))}
           </div>
@@ -678,15 +590,6 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                   />
                   <span className="record-name">{rec.name}</span>
                 </label>
-                <div className="date-input-wrapper">
-                  <input 
-                    type="text" 
-                    className="form-input edit-active compact" 
-                    placeholder="YYYY/MM/DD"
-                    value={rec.date || ''}
-                    onChange={(e) => handleRecordChange('photoRecords', idx, 'date', e.target.value)}
-                  />
-                </div>
               </div>
             ))}
           </div>

@@ -21,7 +21,6 @@ export function validateAlignment(data) {
 
   // --- 發包方 (研發/工程) 填寫檢核 ---
   const bi = data.basicInfo || {};
-  check(!!bi.date, '發包方未填寫「填表日期」', 'error');
   check(!!bi.productNo, '發包方未填寫「產品料號」', 'error');
   check(!!bi.productDesc, '發包方未填寫「產品名稱 / 描述」', 'warning');
 
@@ -61,7 +60,6 @@ export function validateAlignment(data) {
 
   // --- 委外加工廠回填檢核 ---
   check(!!bi.factory, '加工廠未填寫「委外加工廠」名稱', 'error');
-  check(!!bi.factoryArea, '加工廠未填寫「加工廠區(CM)」', 'error');
 
   // 烘烤參數確認
   const pc = data.processControl || {};

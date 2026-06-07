@@ -32,127 +32,124 @@ export function exportRequirementExcel(originalWorkbook, data) {
     const bi = data.basicInfo || {};
     
     // 基本欄位
-    writeCell(sheet1, 'B2', bi.date || '');
-    writeCell(sheet1, 'E2', bi.version || '');
-    writeCell(sheet1, 'B5', bi.factory || '');
-    writeCell(sheet1, 'G5', bi.factoryArea || '');
+    writeCell(sheet1, 'B4', bi.factory || '');
 
     // 產品階段 Checkbox
     const stage = bi.stage || {};
-    writeCheckbox(sheet1, 'B6', 'EVT', stage.evt);
-    writeCheckbox(sheet1, 'C6', 'DVT', stage.dvt);
-    writeCheckbox(sheet1, 'E6', '量產', stage.pvt); // 依原始對應
-    writeCheckbox(sheet1, 'F6', 'MP(小量)', stage.mpSmall);
-    writeCheckbox(sheet1, 'G6', 'ECN改版', stage.ecn);
+    writeCheckbox(sheet1, 'B5', 'EVT', stage.evt);
+    writeCheckbox(sheet1, 'C5', 'DVT', stage.dvt);
+    writeCheckbox(sheet1, 'E5', '量產', stage.pvt); 
+    writeCheckbox(sheet1, 'F5', 'MP(小量)', stage.mpSmall);
+    writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
 
     // 烘烤
-    writeCell(sheet1, 'D6', bi.pcbBake || '');
-    writeCell(sheet1, 'D7', bi.fpcaBake || '');
+    writeCell(sheet1, 'D5', bi.pcbBake || '');
+    writeCell(sheet1, 'D6', bi.fpcaBake || '');
 
     // 產品類別
     const cat = bi.category || {};
-    writeCheckbox(sheet1, 'B7', '一般', cat.general);
-    writeCheckbox(sheet1, 'C7', '醫療', cat.medical);
+    writeCheckbox(sheet1, 'B6', '一般', cat.general);
+    writeCheckbox(sheet1, 'C6', '醫療', cat.medical);
 
-    writeCell(sheet1, 'B8', bi.productNo || '');
-    writeCell(sheet1, 'B9', bi.productDesc || '');
+    writeCell(sheet1, 'B7', bi.productNo || '');
+    writeCell(sheet1, 'B8', bi.productDesc || '');
 
     // PCB 板材
-    writeCell(sheet1, 'B10', bi.pcbMaterial || '');
-    writeCell(sheet1, 'D10', bi.pcbLayers || '');
+    writeCell(sheet1, 'B9', bi.pcbMaterial || '');
+    writeCell(sheet1, 'D9', bi.pcbLayers || '');
     const pcbSurf = bi.pcbSurface || {};
-    writeCheckbox(sheet1, 'F10', 'ENIG', pcbSurf.enig);
-    writeCheckbox(sheet1, 'G10', 'OSP', pcbSurf.osp);
+    writeCheckbox(sheet1, 'F9', 'ENIG', pcbSurf.enig);
+    writeCheckbox(sheet1, 'G9', 'OSP', pcbSurf.osp);
 
     // 品質水準
     const ql = bi.qualityLevel || {};
-    writeCheckbox(sheet1, 'B11', 'Class 2', ql.class2);
-    writeCheckbox(sheet1, 'C11', 'Class 3', ql.class3);
+    writeCheckbox(sheet1, 'B10', 'Class 2', ql.class2);
+    writeCheckbox(sheet1, 'C10', 'Class 3', ql.class3);
     const ipc = bi.ipcStandard || {};
-    writeCheckbox(sheet1, 'E11', 'IPC-A-610', ipc.ipcA610);
-    writeCheckbox(sheet1, 'F11', 'J-STD-001', ipc.jStd001);
+    writeCheckbox(sheet1, 'E10', 'IPC-A-610', ipc.ipcA610);
+    writeCheckbox(sheet1, 'F10', 'J-STD-001', ipc.jStd001);
 
     // PCBA 資訊
     const pcba = bi.pcbaType || {};
-    writeCheckbox(sheet1, 'B12', '單面', pcba.single);
-    writeCheckbox(sheet1, 'C12', '雙面', pcba.double);
+    writeCheckbox(sheet1, 'B11', '單面', pcba.single);
+    writeCheckbox(sheet1, 'C11', '雙面', pcba.double);
 
     // 加工項目
     const pi = bi.processItems || {};
-    writeCheckbox(sheet1, 'A15', 'SMT', pi.smt);
-    writeCheckbox(sheet1, 'B15', 'DIP', pi.dip);
-    writeCheckbox(sheet1, 'C15', 'ICT', pi.ict);
-    writeCheckbox(sheet1, 'D15', '組裝', pi.assembly);
-    writeCheckbox(sheet1, 'E15', '三防膠塗覆', pi.coating);
-    writeCheckbox(sheet1, 'F15', '包裝', pi.packing);
-    writeCheckbox(sheet1, 'A16', 'FCT', pi.fct);
-    writeCheckbox(sheet1, 'B16', 'Flying Probe', pi.flyingProbe);
-    writeCheckbox(sheet1, 'C16', '成品測試', pi.finalTest);
+    writeCheckbox(sheet1, 'A14', 'SMT', pi.smt);
+    writeCheckbox(sheet1, 'B14', 'DIP', pi.dip);
+    writeCheckbox(sheet1, 'C14', 'ICT', pi.ict);
+    writeCheckbox(sheet1, 'D14', '組裝', pi.assembly);
+    writeCheckbox(sheet1, 'E14', '三防膠塗覆', pi.coating);
+    writeCheckbox(sheet1, 'F14', '包裝', pi.packing);
+    writeCheckbox(sheet1, 'A15', 'FCT', pi.fct);
+    writeCheckbox(sheet1, 'B15', 'Flying Probe', pi.flyingProbe);
+    writeCheckbox(sheet1, 'C15', '成品測試', pi.finalTest);
 
     // AOI
     const aoi = bi.aoi || {};
-    writeCheckbox(sheet1, 'B17', 'Top', aoi.top);
-    writeCheckbox(sheet1, 'C17', 'Bottom', aoi.bottom);
+    writeCheckbox(sheet1, 'B16', 'Top', aoi.top);
+    writeCheckbox(sheet1, 'C16', 'Bottom', aoi.bottom);
 
     // 點膠與 QR code
-    writeCheckbox(sheet1, 'A18', '點膠', bi.glue);
+    writeCheckbox(sheet1, 'A17', '點膠', bi.glue);
     const qr = bi.qrCode || {};
-    writeCheckbox(sheet1, 'E18', '需要', qr.need);
-    writeCheckbox(sheet1, 'F18', '不需要', qr.noNeed);
+    writeCheckbox(sheet1, 'E17', '需要', qr.need);
+    writeCheckbox(sheet1, 'F17', '不需要', qr.noNeed);
 
     // 序號管控
     const sn = bi.snControl || {};
-    writeCheckbox(sheet1, 'B19', '需要', sn.need);
-    writeCheckbox(sheet1, 'C19', '不需要', sn.noNeed);
+    writeCheckbox(sheet1, 'B18', '需要', sn.need);
+    writeCheckbox(sheet1, 'C18', '不需要', sn.noNeed);
 
     // 特殊零件
     if (bi.riskParts && bi.riskParts.length >= 2) {
-      writeCell(sheet1, 'B23', bi.riskParts[0].name || '');
-      writeCell(sheet1, 'D23', bi.riskParts[0].packageType || '');
-      writeCell(sheet1, 'E23', bi.riskParts[0].riskDesc || '');
+      writeCell(sheet1, 'B22', bi.riskParts[0].name || '');
+      writeCell(sheet1, 'D22', bi.riskParts[0].packageType || '');
+      writeCell(sheet1, 'E22', bi.riskParts[0].riskDesc || '');
 
-      writeCell(sheet1, 'B24', bi.riskParts[1].name || '');
-      writeCell(sheet1, 'D24', bi.riskParts[1].packageType || '');
-      writeCell(sheet1, 'E24', bi.riskParts[1].riskDesc || '');
+      writeCell(sheet1, 'B23', bi.riskParts[1].name || '');
+      writeCell(sheet1, 'D23', bi.riskParts[1].packageType || '');
+      writeCell(sheet1, 'E23', bi.riskParts[1].riskDesc || '');
     }
 
     // 工程文件
     const docs = bi.documents || {};
-    writeCheckbox(sheet1, 'A28', '材料清單 BOM', docs.bom);
-    writeCheckbox(sheet1, 'C28', 'Gerber file / CAD', docs.gerber);
-    writeCheckbox(sheet1, 'E28', '座標檔', docs.coordinate);
-    writeCheckbox(sheet1, 'G28', '零件位置圖', docs.placement);
-    writeCheckbox(sheet1, 'A29', '原物料規格書', docs.materialSpec);
-    writeCheckbox(sheet1, 'C29', '機構圖', docs.mechDrawing);
-    writeCheckbox(sheet1, 'E29', '產品規格書', docs.productSpec);
-    writeCheckbox(sheet1, 'G29', 'Reflow 建議曲線圖', docs.reflowProfile);
-    writeCheckbox(sheet1, 'A30', '組裝作業標準書', docs.assemblySop);
-    writeCheckbox(sheet1, 'C30', '測試作業標準書', docs.testSop);
-    writeCheckbox(sheet1, 'E30', 'SMT工藝規範', docs.smtSpec);
-    writeCheckbox(sheet1, 'G30', '包裝作業標準書', docs.packingSop);
+    writeCheckbox(sheet1, 'A27', '材料清單 BOM', docs.bom);
+    writeCheckbox(sheet1, 'C27', 'Gerber file / CAD', docs.gerber);
+    writeCheckbox(sheet1, 'E27', '座標檔', docs.coordinate);
+    writeCheckbox(sheet1, 'G27', '零件位置圖', docs.placement);
+    writeCheckbox(sheet1, 'A28', '原物料規格書', docs.materialSpec);
+    writeCheckbox(sheet1, 'C28', '機構圖', docs.mechDrawing);
+    writeCheckbox(sheet1, 'E28', '產品規格書', docs.productSpec);
+    writeCheckbox(sheet1, 'G28', 'Reflow 建議曲線圖', docs.reflowProfile);
+    writeCheckbox(sheet1, 'A29', '組裝作業標準書', docs.assemblySop);
+    writeCheckbox(sheet1, 'C29', '測試作業標準書', docs.testSop);
+    writeCheckbox(sheet1, 'E29', 'SMT工藝規範', docs.smtSpec);
+    writeCheckbox(sheet1, 'G29', '包裝作業標準書', docs.packingSop);
 
     // 治工具
     const tool = bi.tooling || {};
-    writeCell(sheet1, 'B34', tool.stencil?.thickness || '');
-    writeCell(sheet1, 'C34', tool.stencil?.apertureRatio || '');
-    writeCheckbox(sheet1, 'D34', '雷射切割', tool.stencil?.laserCut);
-    writeCell(sheet1, 'E34', tool.stencil?.qty || '');
+    writeCell(sheet1, 'B33', tool.stencil?.thickness || '');
+    writeCell(sheet1, 'C33', tool.stencil?.apertureRatio || '');
+    writeCheckbox(sheet1, 'D33', '雷射切割', tool.stencil?.laserCut);
+    writeCell(sheet1, 'E33', tool.stencil?.qty || '');
 
     const checkFixtureWrite = (addrNeed, addrNoNeed, addrQty, fData) => {
       writeCheckbox(sheet1, addrNeed, '', fData?.need);
       writeCheckbox(sheet1, addrNoNeed, '', fData?.noNeed);
       writeCell(sheet1, addrQty, fData?.qty || '');
     };
-    checkFixtureWrite('B35', 'C35', 'D35', tool.routingFixture);
-    checkFixtureWrite('B36', 'C36', 'D36', tool.glueFixture);
-    checkFixtureWrite('B37', 'C37', 'D37', tool.testFixture);
-    checkFixtureWrite('B38', 'C38', 'D38', tool.assemblyFixture);
+    checkFixtureWrite('B34', 'C34', 'D34', tool.routingFixture);
+    checkFixtureWrite('B35', 'C35', 'D35', tool.glueFixture);
+    checkFixtureWrite('B36', 'C36', 'D36', tool.testFixture);
+    checkFixtureWrite('B37', 'C37', 'D37', tool.assemblyFixture);
 
     // 簽核
     const sign = bi.signOff || {};
-    writeCell(sheet1, 'B41', sign.supplierConfirm || '');
-    writeCell(sheet1, 'D41', sign.engineeringReview || '');
-    writeCell(sheet1, 'G41', sign.rdConfirm || '');
+    writeCell(sheet1, 'B40', sign.supplierConfirm || '');
+    writeCell(sheet1, 'D40', sign.engineeringReview || '');
+    writeCell(sheet1, 'G40', sign.rdConfirm || '');
   }
 
   // 2. 更新【製程管制與前置作業】
@@ -240,25 +237,19 @@ export function exportRequirementExcel(originalWorkbook, data) {
     const bi = data.basicInfo || {};
     writeCell(sheet3, 'B2', bi.productNo || '');
 
-    // 驗證目標
-    const pc = tr.passCriteria || {};
-    writeCell(sheet3, 'C6', pc.smtYield || '');
-    writeCell(sheet3, 'C7', pc.boardBending || '');
-    writeCell(sheet3, 'C8', pc.spiCpk || '');
-    writeCell(sheet3, 'C9', pc.dfmPoints || '');
+    // 驗證目標保持原有模版內容，不進行寫入
 
     // 更新列表（A.印刷紀錄, B.檢驗紀錄, D.照片提供）
     const updateRecords = (records, startRow) => {
       records.forEach((rec, idx) => {
         const r = startRow + idx;
         writeCheckbox(sheet3, `C${r}`, '', rec.checked);
-        writeCell(sheet3, `D${r}`, rec.date || '');
       });
     };
 
-    if (tr.printRecords) updateRecords(tr.printRecords, 13);
-    if (tr.inspectRecords) updateRecords(tr.inspectRecords, 19);
-    if (tr.photoRecords) updateRecords(tr.photoRecords, 31);
+    if (tr.printRecords) updateRecords(tr.printRecords, 6);
+    if (tr.inspectRecords) updateRecords(tr.inspectRecords, 12);
+    if (tr.photoRecords) updateRecords(tr.photoRecords, 24);
   }
 
   // 將修改後的 workbook 寫出為 arrayBuffer
