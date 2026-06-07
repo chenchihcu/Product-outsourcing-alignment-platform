@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import Uploader from './components/Uploader';
+import ProjectList from './components/ProjectList';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
 import SignOff from './components/SignOff';
@@ -11,6 +11,8 @@ import * as XLSX from 'xlsx';
 import './App.css';
 
 export default function App() {
+  const [projects, setProjects] = useState([]);
+  const [currentProjectId, setCurrentProjectId] = useState(null);
   const [data, setData] = useState(null);
   const [originalWb, setOriginalWb] = useState(null);
   const [fileName, setFileName] = useState('');
@@ -41,13 +43,87 @@ export default function App() {
     return saved ? JSON.parse(saved) : defaultAccounts;
   });
 
-  // 每次資料更新時，重算對齊率
+  // 1. 初始化與讀取本地機種清單
+  const initLocalProjects = async () => {
+    const saved = localStorage.getItem('ag_projects');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) {
+          setProjects(parsed);
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    // 載入預設範本
+    try {
+      const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
+      if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
+      const ab = await response.arrayBuffer();
+      const parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
+      
+      // 轉為 Base64 以供後續匯出回寫
+      const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
+      const base64 = btoa(binaryString);
+
+      const defaultProj = {
+        id: 'default-template',
+        name: '新機種製作需求一覽表2026 v2.xlsx (預設範本)',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        alignmentRate: 0,
+        data: parsedData,
+        originalWbBase64: base64
+      };
+
+      const newList = [defaultProj];
+      localStorage.setItem('ag_projects', JSON.stringify(newList));
+      setProjects(newList);
+      return newList;
+    } catch (err) {
+      console.error('載入預設範本失敗:', err);
+      localStorage.setItem('ag_projects', JSON.stringify([]));
+      setProjects([]);
+      return [];
+    }
+  };
+
   useEffect(() => {
-    if (data) {
+    if (currentUser) {
+      initLocalProjects();
+    }
+  }, [currentUser]);
+
+  // 2. 自動存檔與更新對齊率 (Debounce 800ms)
+  useEffect(() => {
+    if (currentProjectId && data) {
       const report = validateAlignment(data);
       setAlignmentRate(report.alignmentRate);
+
+      const saveTimeout = setTimeout(() => {
+        setProjects(prev => {
+          const updated = prev.map(p => 
+            p.id === currentProjectId 
+              ? { 
+                  ...p, 
+                  name: fileName, 
+                  data: data, 
+                  alignmentRate: report.alignmentRate, 
+                  updatedAt: new Date().toISOString() 
+                } 
+              : p
+          );
+          localStorage.setItem('ag_projects', JSON.stringify(updated));
+          return updated;
+        });
+      }, 800);
+
+      return () => clearTimeout(saveTimeout);
     }
-  }, [data]);
+  }, [data, currentProjectId, fileName]);
 
   useEffect(() => {
     localStorage.setItem('ag_factories', JSON.stringify(factories));
@@ -83,35 +159,130 @@ export default function App() {
     setAccounts(accounts.filter(a => a.username !== uname));
   };
 
-  const handleDataLoaded = (parsedData, wb, name) => {
-    setData(parsedData);
-    setOriginalWb(wb);
-    setFileName(name);
-    window.uploadedFileName = name; // 存入全域供 Exporter 使用
-    setActiveTab('dashboard');
-  };
+  // 3. 選取機種並載入詳細資料
+  const handleSelectProject = (id, currentList = projects) => {
+    const project = currentList.find(p => p.id === id);
+    if (project) {
+      setData(project.data);
+      setFileName(project.name);
+      window.uploadedFileName = project.name; // 存入全域以供匯出使用
 
-  // 載入預設範本
-  const handleLoadTemplate = async () => {
-    try {
-      const response = await fetch('/新機種製作需求一覽表2026 v2.xlsx');
-      if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
-      const ab = await response.arrayBuffer();
-      const parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
-      const wb = XLSX.read(ab, { type: 'array' });
-      handleDataLoaded(parsedData, wb, '新機種製作需求一覽表2026 v2.xlsx');
-    } catch (err) {
-      console.error(err);
-      alert('載入預設範本失敗，請手動拖放上傳。');
+      // 解析原始 Excel 二進位資料為 Workbook 物件
+      if (project.originalWbBase64) {
+        const binaryString = atob(project.originalWbBase64);
+        const len = binaryString.length;
+        const bytes = new Uint8Array(len);
+        for (let i = 0; i < len; i++) {
+          bytes[i] = binaryString.charCodeAt(i);
+        }
+        const wb = XLSX.read(bytes.buffer, { type: 'array' });
+        setOriginalWb(wb);
+      }
+      
+      setCurrentProjectId(id);
+      setActiveTab('dashboard');
+    } else {
+      alert('找不到該機種資料。');
     }
   };
 
-  const handleReset = () => {
+  // 4. 線上直接新增機種 (複製預設範本)
+  const handleCreateProject = async (name) => {
+    try {
+      // 嘗試複製列表中的預設範本，如果沒有則重新拉取 Excel 檔
+      let base64 = '';
+      let parsedData = null;
+      const template = projects.find(p => p.id === 'default-template');
+      
+      if (template) {
+        base64 = template.originalWbBase64;
+        parsedData = JSON.parse(JSON.stringify(template.data)); // 深拷貝
+      } else {
+        const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
+        if (!response.ok) throw new Error('無法載入範本');
+        const ab = await response.arrayBuffer();
+        parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
+        const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
+        base64 = btoa(binaryString);
+      }
+
+      const newProj = {
+        id: 'proj_' + Math.random().toString(36).substr(2, 9),
+        name: name || `未命名機種_${new Date().toLocaleDateString()}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        alignmentRate: 0,
+        data: parsedData,
+        originalWbBase64: base64
+      };
+
+      const newList = [...projects, newProj];
+      localStorage.setItem('ag_projects', JSON.stringify(newList));
+      setProjects(newList);
+      
+      // 直接載入新機種編輯
+      handleSelectProject(newProj.id, newList);
+    } catch (err) {
+      console.error(err);
+      alert('建立新機種失敗！');
+    }
+  };
+
+  // 5. 匯入 Excel 機種
+  const handleImportExcel = async (name, fileBase64) => {
+    try {
+      // 在前端解析 base64 檔案
+      const binaryString = atob(fileBase64);
+      const len = binaryString.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryString.charCodeAt(i);
+      }
+      
+      const { parseRequirementExcel } = await import('./utils/excelParser');
+      const parsedData = parseRequirementExcel(bytes.buffer);
+
+      const newProj = {
+        id: 'proj_' + Math.random().toString(36).substr(2, 9),
+        name: name || `未命名機種_${new Date().toLocaleDateString()}`,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        alignmentRate: 0,
+        data: parsedData,
+        originalWbBase64: fileBase64
+      };
+
+      const newList = [...projects, newProj];
+      localStorage.setItem('ag_projects', JSON.stringify(newList));
+      setProjects(newList);
+      
+      // 直接載入新機種編輯
+      handleSelectProject(newProj.id, newList);
+    } catch (err) {
+      console.error(err);
+      alert('解析或匯入 Excel 失敗，請確認檔案格式是否正確。');
+    }
+  };
+
+  // 6. 刪除機種
+  const handleDeleteProject = (id) => {
+    const newList = projects.filter(p => p.id !== id);
+    localStorage.setItem('ag_projects', JSON.stringify(newList));
+    setProjects(newList);
+
+    if (currentProjectId === id) {
+      handleBackToList();
+    }
+  };
+
+  const handleBackToList = () => {
     setData(null);
     setOriginalWb(null);
     setFileName('');
+    setCurrentProjectId(null);
     setActiveTab('dashboard');
     setShowSuccessOverlay(false);
+    fetchProjects();
   };
 
   const handleExportComplete = () => {
@@ -213,19 +384,19 @@ export default function App() {
               <span className="user-name">{currentUser.name}</span>
               <span className="user-role-desc">{currentUser.unit} ({currentUser.level})</span>
             </div>
-            <button className="btn-logout" onClick={() => { setCurrentUser(null); setActiveTab('dashboard'); }} title="登出系統">
+            <button className="btn-logout" onClick={() => { setCurrentUser(null); handleBackToList(); }} title="登出系統">
               🚪 登出
             </button>
           </div>
 
-          {data && (
+          {currentProjectId && (
             <div className="header-file-info animate-fade-in">
               <div className="file-badge">
                 <span className="file-badge-icon">📄</span>
                 <span className="file-name-text" title={fileName}>{fileName}</span>
               </div>
-              <button className="btn btn-secondary compact-btn" onClick={handleReset}>
-                重新上傳
+              <button className="btn btn-secondary compact-btn" onClick={handleBackToList}>
+                📁 回機種列表
               </button>
             </div>
           )}
@@ -234,22 +405,14 @@ export default function App() {
 
       {/* 主畫面排版 */}
       <main className="app-main">
-        {!data ? (
-          <div className="welcome-layout animate-fade-in">
-            <div className="welcome-intro text-center">
-              <h2>確保兩邊接收資訊同步對齊</h2>
-              <p>避免委外加工廠遺漏正確訊息的製程管制與前置作業確認系統</p>
-            </div>
-            
-            <Uploader onDataLoaded={handleDataLoaded} />
-            
-            <div className="text-center mt-2">
-              <span className="or-text">或是</span>
-              <button className="btn btn-secondary template-btn" onClick={handleLoadTemplate}>
-                ⚡ 載入本地機種確認表範本進行測試
-              </button>
-            </div>
-          </div>
+        {!currentProjectId ? (
+          <ProjectList 
+            projects={projects}
+            onSelectProject={handleSelectProject}
+            onCreateProject={handleCreateProject}
+            onDeleteProject={handleDeleteProject}
+            onImportExcel={handleImportExcel}
+          />
         ) : (
           <div className="editor-layout animate-fade-in">
             {/* 分頁導覽 */}
@@ -328,8 +491,8 @@ export default function App() {
               <button className="btn btn-primary" onClick={() => setShowSuccessOverlay(false)}>
                 確定
               </button>
-              <button className="btn btn-secondary" onClick={handleReset}>
-                開始新機種對齊
+              <button className="btn btn-secondary" onClick={handleBackToList}>
+                回到機種列表
               </button>
             </div>
           </div>
