@@ -60,11 +60,17 @@ export default function PrintReport({ data }) {
             <tr>
               <td className="cell-bold">SMT 鋼板</td>
               <td>
-                厚度: {tooling.stencil?.thickness || '—'} mm <br />
-                開口比例: {tooling.stencil?.apertureRatio || '—'} % <br />
-                {renderCheck(tooling.stencil?.laserCut)} 雷射切割
+                {renderCheck(tooling.stencil?.need)} 需要
+                <span style={{ marginLeft: '16px' }}>{renderCheck(tooling.stencil?.noNeed)} 不需要</span>
+                {tooling.stencil?.need && (
+                  <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
+                    厚度: {tooling.stencil?.thickness || '—'} mm | 
+                    開口比例: {tooling.stencil?.apertureRatio || '—'} % | 
+                    類型: {tooling.stencil?.stencilType || '—'}
+                  </div>
+                )}
               </td>
-              <td>{tooling.stencil?.qty || '—'}</td>
+              <td>—</td>
             </tr>
           )}
           {/* Routing 治具 */}
@@ -102,6 +108,34 @@ export default function PrintReport({ data }) {
               <span style={{ marginLeft: '16px' }}>{renderCheck(tooling.assemblyFixture?.noNeed)} 不需要</span>
             </td>
             <td>{tooling.assemblyFixture?.need ? (tooling.assemblyFixture?.qty || '—') : '—'}</td>
+          </tr>
+          {/* SMT刷錫載具 */}
+          <tr>
+            <td className="cell-bold">SMT刷錫載具</td>
+            <td>
+              {renderCheck(tooling.smtCarrier?.need)} 需要
+              <span style={{ marginLeft: '16px' }}>{renderCheck(tooling.smtCarrier?.noNeed)} 不需要</span>
+              {tooling.smtCarrier?.need && (
+                <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
+                  選項: {renderCheck(tooling.smtCarrier?.upper)} 上載板 | {renderCheck(tooling.smtCarrier?.lower)} 下載板
+                </div>
+              )}
+            </td>
+            <td>—</td>
+          </tr>
+          {/* 其他治具 */}
+          <tr>
+            <td className="cell-bold">其他治具</td>
+            <td>
+              {renderCheck(tooling.otherFixture?.need)} 需要
+              <span style={{ marginLeft: '16px' }}>{renderCheck(tooling.otherFixture?.noNeed)} 不需要</span>
+              {tooling.otherFixture?.need && (
+                <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
+                  名稱: {tooling.otherFixture?.name || '—'}
+                </div>
+              )}
+            </td>
+            <td>{tooling.otherFixture?.need ? (tooling.otherFixture?.qty || '—') : '—'}</td>
           </tr>
         </tbody>
       </table>

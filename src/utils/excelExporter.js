@@ -255,10 +255,17 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 治工具
     const tool = bi.tooling || {};
-    writeCell(sheet1, 'B33', tool.stencil?.thickness || '');
-    writeCell(sheet1, 'C33', tool.stencil?.apertureRatio || '');
-    writeCheckbox(sheet1, 'D33', '雷射切割', tool.stencil?.laserCut);
-    writeCell(sheet1, 'E33', tool.stencil?.qty || '');
+    writeCheckbox(sheet1, 'A33', '鋼板規格', tool.stencil?.need);
+    writeCell(sheet1, 'B33', tool.stencil?.need ? (tool.stencil?.thickness || '') : '');
+    writeCell(sheet1, 'C33', tool.stencil?.need ? (tool.stencil?.apertureRatio || '') : '');
+    
+    // 鋼板類型三選一
+    const st = tool.stencil?.need ? (tool.stencil?.stencilType || '') : '';
+    const markGeneral = st === '一般鋼板' ? '☑' : '☐';
+    const markNano = st === '奈米鋼板' ? '☑' : '☐';
+    const markStep = st === '階梯鋼板' ? '☑' : '☐';
+    writeCell(sheet1, 'D33', `${markGeneral} 一般鋼板  ${markNano} 奈米鋼板  ${markStep} 階梯鋼板`);
+    writeCell(sheet1, 'E33', ''); // 移除數量
 
     const checkFixtureWrite = (addrNeed, addrNoNeed, addrQty, fData) => {
       writeCheckbox(sheet1, addrNeed, '', fData?.need);
@@ -270,11 +277,35 @@ export function exportRequirementExcel(originalWorkbook, data) {
     checkFixtureWrite('B36', 'C36', 'D36', tool.testFixture);
     checkFixtureWrite('B37', 'C37', 'D37', tool.assemblyFixture);
 
+    // 回寫 Row 38 - SMT 刷錫載具 與 其他治具
+    if (tool.smtCarrier?.need) {
+      const markUpper = tool.smtCarrier?.upper ? '☑' : '☐';
+      const markLower = tool.smtCarrier?.lower ? '☑' : '☐';
+      writeCell(sheet1, 'A38', `☑ SMT刷錫載具: ${markUpper} 上載板  ${markLower} 下載板`);
+    } else if (tool.smtCarrier?.noNeed) {
+      writeCell(sheet1, 'A38', '☐ SMT刷錫載具');
+    } else {
+      writeCell(sheet1, 'A38', '');
+    }
+
+    if (tool.otherFixture?.need) {
+      writeCell(sheet1, 'B38', `☑ 其他治具: ${tool.otherFixture?.name || ''}  數量: ${tool.otherFixture?.qty || ''}`);
+    } else if (tool.otherFixture?.noNeed) {
+      writeCell(sheet1, 'B38', '☐ 其他治具');
+    } else {
+      writeCell(sheet1, 'B38', '');
+    }
+
     // 簽核回寫對齊 (B40 研發, D40 工程, G40 品保)
     const sign = bi.signOff || {};
     writeCell(sheet1, 'B40', sign.rdConfirm || '');
     writeCell(sheet1, 'D40', sign.engineeringReview || '');
     writeCell(sheet1, 'G40', sign.qaConfirm || '');
+
+    // 儲存防呆鎖定狀態 owners 到 G1 (可跨檔案、重整後還原鎖定)
+    if (data._owners) {
+      writeCell(sheet1, 'G1', JSON.stringify(data._owners));
+    }
   }
 
   // 2. 更新【製程管制與前置作業】

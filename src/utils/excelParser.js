@@ -15,14 +15,27 @@ function parseCheckbox(val) {
 // 輔助函數：去除 Checkbox 符號，只拿文字
 function cleanText(val) {
   if (val === null || val === undefined) return '';
-  return String(val).replace(/[☑☐]/g, '').trim();
+  return cleanPlaceholder(String(val).replace(/[☑☐]/g, '').trim());
 }
 
 // 輔助函數：清洗數量欄位，去除 Checkbox 符號及方格字元
 function cleanQty(val) {
   if (val === null || val === undefined) return '';
-  return String(val).replace(/[☑☐□口]/g, '').trim();
+  return cleanPlaceholder(String(val).replace(/[☑☐□口]/g, '').trim());
 }
+
+// 輔助函數：清洗 Excel 佔位符
+function cleanPlaceholder(val) {
+  if (val === null || val === undefined) return '';
+  const str = String(val).trim();
+  if (/__+/.test(str)) return '';
+  if (/^厚度\s*_+/i.test(str) || str.includes('厚度 ____ mm')) return '';
+  if (/^開口比\s*_+/i.test(str) || str.includes('開口比 ____ %')) return '';
+  if (str === '數量' || str === '數量:' || str === 'qty' || str === '______') return '';
+  if (str === '委外加工廠' || str === '加工廠' || str === '公司名稱') return '';
+  return str;
+}
+
 
 /**
  * 解析新機種製作需求一覽表 Excel 檔案
@@ -47,7 +60,7 @@ export function parseRequirementExcel(arrayBuffer) {
     data.basicInfo.title = getVal('A1') || '';
     data.basicInfo.date = '';
     data.basicInfo.version = '';
-    data.basicInfo.factory = getVal('B4') || '';
+    data.basicInfo.factory = cleanPlaceholder(getVal('B4'));
     data.basicInfo.factoryArea = '';
 
     // 產品階段 (Checkbox)
@@ -161,12 +174,56 @@ export function parseRequirementExcel(arrayBuffer) {
     };
 
     // 治工具一覽表
+    const d33Val = String(getVal('D33') || '');
+    let stencilType = '';
+    if (d33Val.includes('☑ 一般鋼板')) stencilType = '一般鋼板';
+    else if (d33Val.includes('☑ 奈米鋼板')) stencilType = '奈米鋼板';
+    else if (d33Val.includes('☑ 階梯鋼板')) stencilType = '階梯鋼板';
+    else if (d33Val.trim() === '一般鋼板') stencilType = '一般鋼板';
+    else if (d33Val.trim() === '奈米鋼板') stencilType = '奈米鋼板';
+    else if (d33Val.trim() === '階梯鋼板') stencilType = '階梯鋼板';
+
+    // 解析 A38 SMT刷錫載具
+    const a38Val = String(getVal('A38') || '');
+    const smtCarrier = {
+      need: a38Val.includes('☑ SMT刷錫載具'),
+      noNeed: a38Val.includes('☐ SMT刷錫載具') || (a38Val !== '' && !a38Val.includes('☑ SMT刷錫載具')),
+      upper: a38Val.includes('☑ 上載板'),
+      lower: a38Val.includes('☑ 下載板')
+    };
+    if (!smtCarrier.need && !smtCarrier.noNeed) {
+      smtCarrier.need = false;
+      smtCarrier.noNeed = false;
+    }
+
+    // 解析 B38 其他治具
+    const b38Val = String(getVal('B38') || '');
+    const otherFixture = {
+      need: b38Val.includes('☑ 其他治具'),
+      noNeed: b38Val.includes('☐ 其他治具') || (b38Val !== '' && !b38Val.includes('☑ 其他治具')),
+      name: '',
+      qty: ''
+    };
+    if (otherFixture.need) {
+      const match = b38Val.match(/☑ 其他治具:\s*(.*?)(?:\s+數量:\s*(.*))?$/);
+      if (match) {
+        otherFixture.name = match[1].trim();
+        otherFixture.qty = match[2] ? match[2].trim() : '';
+      }
+    }
+    if (!otherFixture.need && !otherFixture.noNeed) {
+      otherFixture.need = false;
+      otherFixture.noNeed = false;
+    }
+
+    const stencilNeed = parseCheckbox(getVal('A33')) || String(getVal('A33') || '').includes('☑');
     data.basicInfo.tooling = {
       stencil: {
-        thickness: getVal('B33') || '',
-        apertureRatio: getVal('C33') || '',
-        laserCut: parseCheckbox(getVal('D33')),
-        qty: cleanQty(getVal('E33'))
+        need: stencilNeed,
+        noNeed: !stencilNeed && (String(getVal('A33') || '').includes('☐') || parseCheckbox(getVal('A33')) === false),
+        thickness: cleanPlaceholder(getVal('B33')),
+        apertureRatio: cleanPlaceholder(getVal('C33')),
+        stencilType: stencilType
       },
       routingFixture: {
         need: parseCheckbox(getVal('B34')),
@@ -187,7 +244,9 @@ export function parseRequirementExcel(arrayBuffer) {
         need: parseCheckbox(getVal('B37')),
         noNeed: parseCheckbox(getVal('C37')),
         qty: cleanQty(getVal('D37'))
-      }
+      },
+      smtCarrier,
+      otherFixture
     };
 
     // 簽核欄 (更新對應：B40 研發, D40 工程, G40 品保)
@@ -196,6 +255,23 @@ export function parseRequirementExcel(arrayBuffer) {
       engineeringReview: getVal('D40') || '',
       qaConfirm: getVal('G40') || ''
     };
+
+    // 解析 G1 儲存格以還原防呆鎖定狀態
+    const g1Val = getVal('G1');
+    if (g1Val) {
+      try {
+        data._owners = JSON.parse(g1Val);
+      } catch (e) {
+        data._owners = {};
+      }
+    } else {
+      data._owners = {};
+      // 第一次載入且無 G1 備份時，自動初始化特定角色欄位擁有權
+      if (data.basicInfo.stage?.evt) data._owners['stage.evt'] = '研發單位';
+      if (data.basicInfo.stage?.dvt) data._owners['stage.dvt'] = '研發單位';
+      if (data.basicInfo.stage?.pvt) data._owners['stage.pvt'] = '工程單位';
+      if (data.basicInfo.stage?.politRun) data._owners['stage.politRun'] = '工程單位';
+    }
   }
 
   // 2. 解析【製程管制與前置作業】工作表

@@ -47,18 +47,21 @@ export function validateAlignment(data) {
   // 治工具對齊檢核
   const tooling = bi.tooling || {};
   if (pi.smt) {
-    // 鋼板厚度與開口比
-    check(!!tooling.stencil.thickness && !tooling.stencil.thickness.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
-    check(!!tooling.stencil.apertureRatio && !tooling.stencil.apertureRatio.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
-    check(tooling.stencil.laserCut, '加工廠未確認鋼板是否為「雷射切割」', 'warning');
-    check(!!tooling.stencil.qty && !tooling.stencil.qty.includes('__'), '加工廠未填寫鋼板「數量」', 'error');
+    const hasStencilConfirm = tooling.stencil?.need || tooling.stencil?.noNeed;
+    check(hasStencilConfirm, '加工廠未確認「SMT 鋼板」是否需要', 'error');
+    if (tooling.stencil?.need) {
+      check(!!tooling.stencil.thickness && !tooling.stencil.thickness.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
+      check(!!tooling.stencil.apertureRatio && !tooling.stencil.apertureRatio.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
+      const hasType = ['一般鋼板', '奈米鋼板', '階梯鋼板'].includes(tooling.stencil.stencilType);
+      check(hasType, '加工廠未選擇鋼板類型「一般鋼板 / 奈米鋼板 / 階梯鋼板」', 'error');
+    }
   }
 
   // 治具對齊：若加工項目需要，應確認治具
   const checkFixture = (fixture, name) => {
-    const hasFixtureConfirm = fixture.need || fixture.noNeed;
+    const hasFixtureConfirm = fixture?.need || fixture?.noNeed;
     check(hasFixtureConfirm, `加工廠未確認「${name}」是否需要或提供`, 'error');
-    if (fixture.need) {
+    if (fixture?.need) {
       check(!!fixture.qty && !fixture.qty.includes('__'), `已確認需要「${name}」，但未填寫數量`, 'error');
     }
   };
@@ -66,6 +69,23 @@ export function validateAlignment(data) {
   checkFixture(tooling.glueFixture, '塗膠治具');
   checkFixture(tooling.testFixture, '測試治具');
   checkFixture(tooling.assemblyFixture, '組裝治具');
+
+  // 新增治具校驗
+  const smtCarrier = tooling.smtCarrier || {};
+  const hasCarrierConfirm = smtCarrier.need || smtCarrier.noNeed;
+  check(hasCarrierConfirm, '加工廠未確認「SMT 刷錫載具」是否需要', 'error');
+  if (smtCarrier.need) {
+    const hasCarrierOption = smtCarrier.upper || smtCarrier.lower;
+    check(hasCarrierOption, '已勾選需要「SMT 刷錫載具」，但未選擇「上載板」或「下載板」', 'error');
+  }
+
+  const otherFixture = tooling.otherFixture || {};
+  const hasOtherConfirm = otherFixture.need || otherFixture.noNeed;
+  check(hasOtherConfirm, '加工廠未確認「其他治具」是否需要', 'error');
+  if (otherFixture.need) {
+    check(!!otherFixture.name && !otherFixture.name.includes('___'), '已勾選需要「其他治具」，但未填寫治具名稱', 'error');
+    check(!!otherFixture.qty && !otherFixture.qty.includes('__'), '已勾選需要「其他治具」，但未填寫治具數量', 'error');
+  }
 
   // SMT/DIP 首件檢查與樣品提供
   const hasSample = pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart;

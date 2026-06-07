@@ -3,7 +3,7 @@ import { validateAlignment } from '../utils/validator';
 import { exportRequirementExcel } from '../utils/excelExporter';
 import './SignOff.css';
 
-export default function SignOff({ data, originalWb, onChange, onExportComplete }) {
+export default function SignOff({ data, originalWb, onChange, onExportComplete, currentUser }) {
   const report = validateAlignment(data);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
@@ -11,7 +11,14 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
   const handleSignChange = (field, val) => {
     const updatedSign = { ...data.basicInfo.signOff, [field]: val };
     const updatedBasic = { ...data.basicInfo, signOff: updatedSign };
-    onChange({ ...data, basicInfo: updatedBasic });
+    const path = `basicInfo.signOff.${field}`;
+    const owners = { ...(data._owners || {}) };
+    if (val !== '') {
+      owners[path] = currentUser.unit;
+    } else {
+      delete owners[path];
+    }
+    onChange({ ...data, basicInfo: updatedBasic, _owners: owners });
   };
 
   const handleExport = () => {
@@ -85,9 +92,10 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
               <input 
                 type="text" 
                 className="form-input edit-active" 
-                placeholder="請輸入研發姓名" 
+                placeholder={currentUser.role !== 'rd' && currentUser.role !== 'admin' ? "僅限研發單位填寫" : "請輸入研發姓名"} 
                 value={data.basicInfo.signOff?.rdConfirm || ''}
                 onChange={(e) => handleSignChange('rdConfirm', e.target.value)}
+                disabled={currentUser.role !== 'rd' && currentUser.role !== 'admin'}
               />
             </div>
             <p className="sign-terms">本簽章確認：產品基本資料與風險零件已填寫完整，並經研發部門確認。</p>
@@ -106,9 +114,10 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
               <input 
                 type="text" 
                 className="form-input edit-active" 
-                placeholder="請輸入工程姓名" 
+                placeholder={currentUser.role !== 'eng' && currentUser.role !== 'admin' ? "僅限工程單位填寫" : "請輸入工程姓名"} 
                 value={data.basicInfo.signOff?.engineeringReview || ''}
                 onChange={(e) => handleSignChange('engineeringReview', e.target.value)}
+                disabled={currentUser.role !== 'eng' && currentUser.role !== 'admin'}
               />
             </div>
             <p className="sign-terms">本簽章確認：生產治工具規格、鋼板開口以及製程工程參數已審查通過。</p>
@@ -127,10 +136,16 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
               <input 
                 type="text" 
                 className="form-input edit-active" 
-                placeholder={(!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) ? "待研發與工程完成簽核" : "請輸入品保處姓名"} 
+                placeholder={
+                  (!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) 
+                    ? "待研發與工程完成簽核" 
+                    : (currentUser.role !== 'qa' && currentUser.role !== 'admin')
+                    ? "僅品保處審核員可填寫"
+                    : "請輸入品保處姓名"
+                } 
                 value={data.basicInfo.signOff?.qaConfirm || ''}
                 onChange={(e) => handleSignChange('qaConfirm', e.target.value)}
-                disabled={!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview}
+                disabled={(currentUser.role !== 'qa' && currentUser.role !== 'admin') || !data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview}
               />
             </div>
             {(!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) ? (
