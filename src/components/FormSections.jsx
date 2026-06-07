@@ -93,18 +93,20 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
               <label className="form-label">產品料號</label>
               <input 
                 type="text" 
-                className="form-input readonly" 
-                value={data.basicInfo.productNo || '未填寫'} 
-                readOnly
+                className="form-input edit-active" 
+                placeholder="請輸入產品料號"
+                value={data.basicInfo.productNo || ''} 
+                onChange={(e) => handleBasicChange('productNo', e.target.value)}
               />
             </div>
             <div className="form-group">
               <label className="form-label">產品名稱 / 描述</label>
               <input 
                 type="text" 
-                className="form-input readonly" 
-                value={data.basicInfo.productDesc || '未填寫'} 
-                readOnly
+                className="form-input edit-active" 
+                placeholder="請輸入產品名稱 / 描述"
+                value={data.basicInfo.productDesc || ''} 
+                onChange={(e) => handleBasicChange('productDesc', e.target.value)}
               />
             </div>
           </div>
