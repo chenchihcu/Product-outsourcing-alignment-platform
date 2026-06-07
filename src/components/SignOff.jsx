@@ -115,11 +115,11 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
           </div>
         </div>
 
-        {/* 委外加工廠 */}
+        {/* 品保處審核 */}
         <div className="sign-box">
-          <div className="sign-header bg-vendor">
-            <span>供應商確認簽章</span>
-            <span className="badge-role">加工廠 (CM)</span>
+          <div className="sign-header bg-vendor" style={{ background: 'linear-gradient(135deg, #059669 0%, #10b981 100%)' }}>
+            <span>品保處最後審核</span>
+            <span className="badge-role">品保處 (QA)</span>
           </div>
           <div className="sign-body">
             <div className="form-group">
@@ -127,12 +127,19 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
               <input 
                 type="text" 
                 className="form-input edit-active" 
-                placeholder="請輸入加工廠確認人" 
-                value={data.basicInfo.signOff?.supplierConfirm || ''}
-                onChange={(e) => handleSignChange('supplierConfirm', e.target.value)}
+                placeholder={(!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) ? "待研發與工程完成簽核" : "請輸入品保處姓名"} 
+                value={data.basicInfo.signOff?.qaConfirm || ''}
+                onChange={(e) => handleSignChange('qaConfirm', e.target.value)}
+                disabled={!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview}
               />
             </div>
-            <p className="sign-terms">本簽章確認：已確實了解此機種之前置作業與製程管制點，無遺漏正確訊息。</p>
+            {(!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) ? (
+              <p className="sign-terms" style={{ color: '#ef4444', fontWeight: 'bold' }}>
+                ⚠️ 需等研發與工程確認人皆完成簽章後，方可由品保處進行最後審核。
+              </p>
+            ) : (
+              <p className="sign-terms">本簽章確認：兩端資訊與防呆管制點皆已完成填寫與覆核，符合量產試產要求。</p>
+            )}
           </div>
         </div>
       </div>
@@ -143,7 +150,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
           <span className="warning-emoji">⚠️</span>
           <div className="warning-desc">
             <p className="warning-title">注意：尚有必填的防呆檢查未完成！</p>
-            <p className="warning-detail">為了避免委外加工廠遺漏正確訊息，建議先前往前述分頁完成對齊。如果您仍要強行簽章並匯出 Excel，請點擊下方按鈕。</p>
+            <p className="warning-detail">為了避免委外加工廠遺漏正確訊息，建議先前往前述分頁完成對齊。如果您仍要強行簽章並匯出文件，請點擊下方按鈕。</p>
           </div>
         </div>
       ) : (
@@ -151,15 +158,26 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
           <span className="success-emoji">🎉</span>
           <div className="success-desc">
             <p className="success-title">完美！兩端資訊已完全同步！</p>
-            <p className="success-detail">恭喜！所有必填與關鍵管制點皆已完成填寫與對齊。點擊下方按鈕即可匯出最終簽章版 Excel 文件。</p>
+            <p className="success-detail">恭喜！所有必填與關鍵管制點皆已完成填寫與對齊。點擊下方按鈕即可匯出最終簽章版文件。</p>
           </div>
         </div>
       )}
 
       {/* 匯出動作按鈕 */}
-      <div className="export-action-row">
+      <div className="export-action-row" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
         <button 
           className="btn btn-primary btn-large"
+          onClick={() => window.print()}
+          style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
+        >
+          <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+          </svg>
+          <span>匯出並下載 PDF 報告 (A4直式)</span>
+        </button>
+
+        <button 
+          className="btn btn-secondary btn-large"
           onClick={handleExport}
           disabled={exportLoading}
         >
@@ -170,10 +188,10 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete }
             </>
           ) : (
             <>
-              <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
-              <span>匯出並下載對齊簽核版 Excel</span>
+              <span>匯出並下載 Excel 文件</span>
             </>
           )}
         </button>

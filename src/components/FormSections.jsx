@@ -122,7 +122,7 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                     checked={data.basicInfo.stage[k] || false} 
                     onChange={(e) => handleStageChange(k, e.target.checked)}
                   />
-                  <span>{k.toUpperCase()}</span>
+                  <span>{k === 'politRun' ? 'Polit-run' : k.toUpperCase()}</span>
                 </label>
               ))}
             </div>
@@ -201,7 +201,12 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                       type="radio" 
                       name={key} 
                       checked={item.need || false}
-                      onChange={() => handleToolingChange(key, 'need', true)} 
+                      onChange={() => {
+                        const tool = data.basicInfo.tooling[key] || {};
+                        const updatedTool = { ...tool, need: true, noNeed: false };
+                        const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
+                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
+                      }} 
                     />
                     <span>需要</span>
                   </label>
@@ -210,7 +215,12 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
                       type="radio" 
                       name={key} 
                       checked={item.noNeed || false}
-                      onChange={() => handleToolingChange(key, 'noNeed', true)} 
+                      onChange={() => {
+                        const tool = data.basicInfo.tooling[key] || {};
+                        const updatedTool = { ...tool, need: false, noNeed: true, qty: '' };
+                        const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
+                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
+                      }} 
                     />
                     <span>不需要</span>
                   </label>
@@ -467,13 +477,26 @@ export default function FormSections({ data, activeSection, onChange, onNext }) 
           <div className="form-row-grid">
             <div className="form-group">
               <label className="form-label">Underfill 後烘烤</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: 110°C × 30min" 
-                value={data.processControl?.underfill?.bakeCond || ''}
-                onChange={(e) => handleProcessChange('underfill', { ...data.processControl.underfill, bakeCond: e.target.value })}
-              />
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input 
+                  type="text" 
+                  className="form-input edit-active compact" 
+                  placeholder="溫度" 
+                  value={data.processControl?.underfill?.bakeTemp || ''}
+                  onChange={(e) => handleProcessChange('underfill', { ...data.processControl.underfill, bakeTemp: e.target.value })}
+                  style={{ width: '80px' }}
+                />
+                <span style={{ color: '#9ca3af' }}>°C x</span>
+                <input 
+                  type="text" 
+                  className="form-input edit-active compact" 
+                  placeholder="時間" 
+                  value={data.processControl?.underfill?.bakeTime || ''}
+                  onChange={(e) => handleProcessChange('underfill', { ...data.processControl.underfill, bakeTime: e.target.value })}
+                  style={{ width: '80px' }}
+                />
+                <span style={{ color: '#9ca3af' }}>min</span>
+              </div>
             </div>
             <div className="form-group">
               <label className="form-label">膠材型號</label>

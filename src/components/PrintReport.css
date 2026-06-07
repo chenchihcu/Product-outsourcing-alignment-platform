@@ -1,0 +1,198 @@
+/* 螢幕顯示模式下完全隱藏 */
+@media screen {
+  .print-report-container {
+    display: none !important;
+  }
+}
+
+/* 列印模式下的精緻 A4 直式樣式 */
+@media print {
+  @page {
+    size: A4 portrait;
+    margin: 1.5cm;
+  }
+
+  body {
+    background: #fff !important;
+    color: #000 !important;
+    font-family: "Microsoft JhengHei", "微軟正黑體", sans-serif !important;
+    font-size: 11pt !important;
+    line-height: 1.4 !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* 隱藏網頁端的所有原始元素 */
+  .app-container,
+  header,
+  nav,
+  button,
+  footer,
+  .success-overlay,
+  .status-banner {
+    display: none !important;
+  }
+
+  .print-report-container {
+    display: block !important;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 報表標頭 */
+  .print-header {
+    text-align: center;
+    margin-bottom: 20px;
+    border-bottom: 2px double #000;
+    padding-bottom: 8px;
+  }
+
+  .print-title {
+    font-size: 18pt;
+    font-weight: bold;
+    margin: 0 0 4px 0;
+    color: #000;
+  }
+
+  .print-subtitle {
+    font-size: 10pt;
+    color: #555;
+    margin: 0;
+  }
+
+  /* 表格樣式 */
+  .print-section-title {
+    font-size: 12pt;
+    font-weight: bold;
+    margin: 20px 0 8px 0;
+    border-left: 4px solid #000;
+    padding-left: 8px;
+    page-break-after: avoid;
+  }
+
+  .print-sub-section-title {
+    font-size: 11pt;
+    font-weight: bold;
+    margin: 10px 0 6px 0;
+    page-break-after: avoid;
+  }
+
+  .print-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 12px;
+    page-break-inside: avoid;
+  }
+
+  .print-table th,
+  .print-table td {
+    border: 1px solid #000;
+    padding: 6px 10px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 9.5pt;
+  }
+
+  .print-table th {
+    background-color: #f3f4f6 !important;
+    font-weight: bold;
+  }
+
+  .cell-label {
+    background-color: #f9fafb !important;
+    font-weight: bold;
+    width: 20%;
+  }
+
+  .cell-value {
+    background-color: #fff !important;
+  }
+
+  .cell-bold {
+    font-weight: bold;
+  }
+
+  .print-checkbox {
+    display: inline-block;
+    margin-right: 14px;
+    font-size: 9.5pt;
+  }
+
+  /* 備註對話框 */
+  .print-memo-box {
+    border: 1px solid #000;
+    padding: 8px 12px;
+    background: #fff;
+    font-size: 9.5pt;
+    min-height: 50px;
+    white-space: pre-wrap;
+  }
+
+  /* 雙向線上簽核區 */
+  .print-sign-grid {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+    margin-top: 15px;
+    border-collapse: separate;
+    border-spacing: 12px 0;
+    page-break-inside: avoid;
+  }
+
+  .print-sign-box {
+    display: table-cell;
+    border: 1px solid #000;
+    background: #fff;
+    vertical-align: top;
+  }
+
+  .print-sign-header {
+    background: #f3f4f6 !important;
+    border-bottom: 1px solid #000;
+    padding: 6px;
+    font-weight: bold;
+    text-align: center;
+    font-size: 10pt;
+  }
+
+  .print-sign-body {
+    padding: 10px;
+    font-size: 9pt;
+  }
+
+  .print-sign-name {
+    font-size: 11pt;
+    font-weight: bold;
+    margin-bottom: 8px;
+    border-bottom: 1px dashed #777;
+    padding-bottom: 4px;
+  }
+
+  .sign-text {
+    color: #111827;
+    font-family: "Courier New", monospace;
+    font-weight: bold;
+  }
+
+  .print-sign-terms {
+    color: #555;
+    line-height: 1.3;
+  }
+
+  /* 分頁控制 */
+  .page-break {
+    page-break-before: always;
+  }
+
+  /* 報表頁尾 */
+  .print-footer {
+    margin-top: 30px;
+    border-top: 1px solid #000;
+    padding-top: 6px;
+    text-align: center;
+    font-size: 8pt;
+    color: #666;
+    page-break-inside: avoid;
+  }
+}

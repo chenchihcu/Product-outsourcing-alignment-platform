@@ -3,6 +3,7 @@ import Uploader from './components/Uploader';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
 import SignOff from './components/SignOff';
+import PrintReport from './components/PrintReport';
 import { validateAlignment } from './utils/validator';
 import * as XLSX from 'xlsx';
 import './App.css';
@@ -107,7 +108,9 @@ export default function App() {
   };
 
   return (
-    <div className="app-container">
+    <>
+      <PrintReport data={data} />
+      <div className="app-container">
       {/* 頂部 Header */}
       <header className="app-header glass-card">
         <div className="header-logo">
@@ -230,6 +233,7 @@ export default function App() {
         <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
         <p className="footer-meta">Vite + React Premium 製程管制平台</p>
       </footer>
-    </div>
+      </div>
+    </>
   );
 }

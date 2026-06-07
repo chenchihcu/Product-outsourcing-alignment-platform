@@ -16,6 +16,131 @@ function writeCheckbox(sheet, addr, label, isChecked) {
   writeCell(sheet, addr, `${mark} ${label}`);
 }
 
+// 套用排版格式（欄寬、合併儲存格、以及簽核區對齊）
+function applyFormatting(sheet) {
+  if (!sheet) return;
+
+  // 設定更佳的欄寬（wch = characters width）以避免內容被裁切
+  sheet['!cols'] = [
+    { wch: 8 },  // A
+    { wch: 22 }, // B
+    { wch: 18 }, // C
+    { wch: 15 }, // D
+    { wch: 22 }, // E
+    { wch: 15 }, // F
+    { wch: 18 }, // G
+  ];
+
+  // 設定統一列高以優化行距與排版
+  sheet['!rows'] = sheet['!rows'] || [];
+  for (let i = 0; i < 45; i++) {
+    sheet['!rows'][i] = sheet['!rows'][i] || {};
+    if (i === 0) {
+      sheet['!rows'][i].hpt = 32; // 跨欄標題行高
+    } else {
+      sheet['!rows'][i].hpt = 22; // 一般欄位行高
+    }
+  }
+
+  // 初始化 merges 容器
+  sheet['!merges'] = sheet['!merges'] || [];
+
+  // 嘗試合併簽核區，使簽核欄位看起來像正式報表
+  // B40:C40 (供應商確認)、D40:E40 (工程覆核)、F40:G40 (RD確認)
+  try {
+    sheet['!merges'].push({ s: { r: 39, c: 1 }, e: { r: 39, c: 2 } });
+    sheet['!merges'].push({ s: { r: 39, c: 3 }, e: { r: 39, c: 4 } });
+    sheet['!merges'].push({ s: { r: 39, c: 5 }, e: { r: 39, c: 6 } });
+  } catch (e) {
+    // ignore merge errors
+  }
+
+  // 嘗試合併標題列（若存在 A1）為跨欄標題，提升報表感
+  try {
+    if (sheet['A1']) {
+      // 合併 A1 到 G1
+      sheet['!merges'].push({ s: { r: 0, c: 0 }, e: { r: 0, c: 6 } });
+      sheet['A1'].s = sheet['A1'].s || {};
+      sheet['A1'].s.font = sheet['A1'].s.font || {};
+      sheet['A1'].s.font.sz = 14;
+      sheet['A1'].s.font.bold = true;
+      sheet['A1'].s.font.name = '微軟正黑體';
+      sheet['A1'].s.alignment = sheet['A1'].s.alignment || {};
+      sheet['A1'].s.alignment.horizontal = 'center';
+      sheet['A1'].s.alignment.vertical = 'center';
+
+      // 設定第一列高度（點數）
+      sheet['!rows'] = sheet['!rows'] || [];
+      sheet['!rows'][0] = sheet['!rows'][0] || {};
+      sheet['!rows'][0].hpt = 22; // height in points
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  // 設定列印與頁面方向（A4 橫向）
+  try {
+    sheet['!pageSetup'] = sheet['!pageSetup'] || {};
+    sheet['!pageSetup'].orientation = 'landscape';
+    sheet['!pageSetup'].paperSize = 9; // A4
+    sheet['!pageSetup'].fitToPage = true;
+  } catch (e) {
+    // ignore
+  }
+
+  // 邊框 helper：為儲存格設定細邊框
+  const setThinBorder = (cell) => {
+    if (!cell) return;
+    cell.s = cell.s || {};
+    cell.s.border = {
+      top: { style: 'thin', color: { rgb: '000000' } },
+      bottom: { style: 'thin', color: { rgb: '000000' } },
+      left: { style: 'thin', color: { rgb: '000000' } },
+      right: { style: 'thin', color: { rgb: '000000' } },
+    };
+  };
+
+  // 為標題列 A1:G1 設邊框
+  try {
+    const headerAddrs = ['A1','B1','C1','D1','E1','F1','G1'];
+    headerAddrs.forEach(a => setThinBorder(sheet[a]));
+  } catch (e) {}
+
+  // 為簽核合併區設定邊框與列高
+  try {
+    // 簽核列在 40（index 39）
+    sheet['!rows'] = sheet['!rows'] || [];
+    sheet['!rows'][39] = sheet['!rows'][39] || {};
+    sheet['!rows'][39].hpt = 26;
+
+    // top-left cells of merged sign areas
+    setThinBorder(sheet['B40']);
+    setThinBorder(sheet['D40']);
+    setThinBorder(sheet['F40']);
+  } catch (e) {}
+
+  // 將簽核儲存格置中對齊（如果存在）
+  const setAlign = (addr) => {
+    const cell = sheet[addr];
+    if (!cell) return;
+    cell.s = cell.s || {};
+    cell.s.alignment = cell.s.alignment || {};
+    cell.s.alignment.horizontal = 'center';
+    cell.s.alignment.vertical = 'center';
+  };
+
+  setAlign('B40');
+  setAlign('D40');
+  setAlign('G40');
+
+  // 對於第一行或重要表頭，可嘗試置中（若存在）
+  if (sheet['A1']) {
+    sheet['A1'].s = sheet['A1'].s || {};
+    sheet['A1'].s.alignment = sheet['A1'].s.alignment || {};
+    sheet['A1'].s.alignment.horizontal = 'center';
+  }
+}
+
 /**
  * 將使用者填寫好的資料回填至原始 Excel 活頁簿中並導出
  * @param {Object} originalWorkbook - 原始讀入的 SheetJS workbook 物件
@@ -34,12 +159,12 @@ export function exportRequirementExcel(originalWorkbook, data) {
     // 基本欄位
     writeCell(sheet1, 'B4', bi.factory || '');
 
-    // 產品階段 Checkbox
+    // 產品階段 Checkbox (mpSmall 改為 politRun)
     const stage = bi.stage || {};
     writeCheckbox(sheet1, 'B5', 'EVT', stage.evt);
     writeCheckbox(sheet1, 'C5', 'DVT', stage.dvt);
     writeCheckbox(sheet1, 'E5', '量產', stage.pvt); 
-    writeCheckbox(sheet1, 'F5', 'MP(小量)', stage.mpSmall);
+    writeCheckbox(sheet1, 'F5', 'Polit-run', stage.politRun);
     writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
 
     // 烘烤
@@ -145,11 +270,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
     checkFixtureWrite('B36', 'C36', 'D36', tool.testFixture);
     checkFixtureWrite('B37', 'C37', 'D37', tool.assemblyFixture);
 
-    // 簽核
+    // 簽核回寫對齊 (B40 研發, D40 工程, G40 品保)
     const sign = bi.signOff || {};
-    writeCell(sheet1, 'B40', sign.supplierConfirm || '');
+    writeCell(sheet1, 'B40', sign.rdConfirm || '');
     writeCell(sheet1, 'D40', sign.engineeringReview || '');
-    writeCell(sheet1, 'G40', sign.rdConfirm || '');
+    writeCell(sheet1, 'G40', sign.qaConfirm || '');
   }
 
   // 2. 更新【製程管制與前置作業】
@@ -205,10 +330,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
       writeCell(sheet2, 'D16', pc.tempPoints[1].memo || '');
     }
 
-    // Underfill
+    // Underfill (將溫度與時間拼接回寫)
     const uf = pc.underfill || {};
-    writeCell(sheet2, 'B18', uf.bakeCond || '');
-    writeCell(sheet2, 'D18', uf.glueModel || '');
+    const bakeCond = (uf.bakeTemp && uf.bakeTime) ? `${uf.bakeTemp}°C × ${uf.bakeTime}min` : '';
+    writeCell(sheet2, 'B18', bakeCond);
+    writeCell(sheet2, 'D18', uf.glueModel ? `膠材型號: ${uf.glueModel}` : '');
 
     // 重工記號
     const rework = pc.reworkMark || {};
@@ -225,9 +351,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet2, 'D25', '蜂巢式抗靜電隔板', pkg.honeycomb);
     writeCheckbox(sheet2, 'F25', 'Tray 抗靜電脆盤', pkg.tray);
 
-    // 簽核 (稽核人員確認)
+    // 簽核 (稽核人員確認 - 回寫品保確認人)
     const sign = bi.signOff || {};
-    writeCell(sheet2, 'E34', sign.supplierConfirm || ''); // 可寫入供應商確認人
+    writeCell(sheet2, 'E34', sign.qaConfirm || '');
   }
 
   // 3. 更新【試產報告要求】
@@ -252,7 +378,19 @@ export function exportRequirementExcel(originalWorkbook, data) {
     if (tr.photoRecords) updateRecords(tr.photoRecords, 24);
   }
 
-  // 將修改後的 workbook 寫出為 arrayBuffer
+  // 在寫出前對每個要輸出的 sheet 套用排版改善
+  try {
+    const s1 = wb.Sheets['產品基本資料'] || wb.Sheets[wb.SheetNames[0]];
+    const s2 = wb.Sheets['製程管制與前置作業'];
+    const s3 = wb.Sheets['試產報告要求'];
+    applyFormatting(s1);
+    applyFormatting(s2);
+    applyFormatting(s3);
+  } catch (e) {
+    // 忽略格式化錯誤，仍然嘗試輸出
+    console.warn('applyFormatting error', e);
+  }
+
   const wopts = { bookType: 'xlsx', bookSST: false, type: 'array' };
   const out = XLSX.write(wb, wopts);
   return out;

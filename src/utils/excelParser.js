@@ -18,6 +18,12 @@ function cleanText(val) {
   return String(val).replace(/[☑☐]/g, '').trim();
 }
 
+// 輔助函數：清洗數量欄位，去除 Checkbox 符號及方格字元
+function cleanQty(val) {
+  if (val === null || val === undefined) return '';
+  return String(val).replace(/[☑☐□口]/g, '').trim();
+}
+
 /**
  * 解析新機種製作需求一覽表 Excel 檔案
  * @param {ArrayBuffer} arrayBuffer 
@@ -49,7 +55,7 @@ export function parseRequirementExcel(arrayBuffer) {
       evt: parseCheckbox(getVal('B5')),
       dvt: parseCheckbox(getVal('C5')),
       pvt: parseCheckbox(getVal('E5')), 
-      mpSmall: parseCheckbox(getVal('F5')),
+      politRun: parseCheckbox(getVal('F5')),
       ecn: parseCheckbox(getVal('G5'))
     };
     
@@ -160,35 +166,35 @@ export function parseRequirementExcel(arrayBuffer) {
         thickness: getVal('B33') || '',
         apertureRatio: getVal('C33') || '',
         laserCut: parseCheckbox(getVal('D33')),
-        qty: getVal('E33') || ''
+        qty: cleanQty(getVal('E33'))
       },
       routingFixture: {
         need: parseCheckbox(getVal('B34')),
         noNeed: parseCheckbox(getVal('C34')),
-        qty: getVal('D34') || ''
+        qty: cleanQty(getVal('D34'))
       },
       glueFixture: {
         need: parseCheckbox(getVal('B35')),
         noNeed: parseCheckbox(getVal('C35')),
-        qty: getVal('D35') || ''
+        qty: cleanQty(getVal('D35'))
       },
       testFixture: {
         need: parseCheckbox(getVal('B36')),
         noNeed: parseCheckbox(getVal('C36')),
-        qty: getVal('D36') || ''
+        qty: cleanQty(getVal('D36'))
       },
       assemblyFixture: {
         need: parseCheckbox(getVal('B37')),
         noNeed: parseCheckbox(getVal('C37')),
-        qty: getVal('D37') || ''
+        qty: cleanQty(getVal('D37'))
       }
     };
 
-    // 簽核欄
+    // 簽核欄 (更新對應：B40 研發, D40 工程, G40 品保)
     data.basicInfo.signOff = {
-      supplierConfirm: getVal('B40') || getVal('A40') || '',
-      engineeringReview: getVal('D40') || getVal('C40') || '',
-      rdConfirm: getVal('G40') || getVal('F40') || ''
+      rdConfirm: getVal('B40') || '',
+      engineeringReview: getVal('D40') || '',
+      qaConfirm: getVal('G40') || ''
     };
   }
 
@@ -248,9 +254,27 @@ export function parseRequirementExcel(arrayBuffer) {
     ];
 
     // Underfill
+    const rawBake = getVal('B18') || '';
+    let bakeTemp = '';
+    let bakeTime = '';
+    if (rawBake && !String(rawBake).includes('__')) {
+      const match = String(rawBake).match(/(\d+)\s*°C.*(\d+)\s*min/i);
+      if (match) {
+        bakeTemp = match[1];
+        bakeTime = match[2];
+      }
+    }
+
+    const rawGlue = getVal('D18') || '';
+    let glueModel = String(rawGlue).trim();
+    if (glueModel.includes('___') || glueModel === '膠材型號:' || glueModel === '膠材型號:___________') {
+      glueModel = '';
+    }
+
     data.processControl.underfill = {
-      bakeCond: getVal('B18') || '',
-      glueModel: getVal('D18') || ''
+      bakeTemp,
+      bakeTime,
+      glueModel
     };
 
     // PCBA 重工/維修記號

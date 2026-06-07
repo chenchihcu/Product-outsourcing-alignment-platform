@@ -25,10 +25,10 @@ export function validateAlignment(data) {
   check(!!bi.productNo, '發包方未填寫「產品料號」', 'error');
   check(!!bi.productDesc, '發包方未填寫「產品名稱 / 描述」', 'warning');
 
-  // 產品階段至少勾選一個
+  // 產品階段至少勾選一個 (mpSmall 改為 politRun)
   const stage = bi.stage || {};
-  const hasStage = stage.evt || stage.dvt || stage.pvt || stage.mpSmall || stage.ecn;
-  check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / 量產 / ECN）', 'error');
+  const hasStage = stage.evt || stage.dvt || stage.pvt || stage.politRun || stage.ecn;
+  check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / Polit-run / ECN）', 'error');
 
   // --- 委外加工廠回填檢核 ---
   check(!!bi.factory, '加工廠未填寫「委外加工廠」名稱', 'error');
@@ -101,9 +101,9 @@ export function validateAlignment(data) {
 
   // 簽核欄對齊
   const sign = bi.signOff || {};
-  check(!!sign.supplierConfirm, '「供應商確認」簽核未填寫', 'error');
-  check(!!sign.engineeringReview, '「工程審核」簽核未填寫', 'warning');
-  check(!!sign.rdConfirm, '「研發確認」簽核未填寫', 'error');
+  check(!!sign.rdConfirm, '「研發」簽章未填寫', 'error');
+  check(!!sign.engineeringReview, '「工程」簽章未填寫', 'warning');
+  check(!!sign.qaConfirm, '「品保處」簽章未填寫', 'error');
 
   // 計算對齊率
   const alignmentRate = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) : 0;
