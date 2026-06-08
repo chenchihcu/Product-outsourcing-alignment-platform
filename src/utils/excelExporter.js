@@ -164,7 +164,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'B5', 'EVT', stage.evt);
     writeCheckbox(sheet1, 'C5', 'DVT', stage.dvt);
     writeCheckbox(sheet1, 'E5', '量產', stage.pvt); 
-    writeCheckbox(sheet1, 'F5', 'Polit-run', stage.politRun);
+    writeCheckbox(sheet1, 'F5', 'Pilot-run', stage.politRun);
     writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
 
     // 烘烤

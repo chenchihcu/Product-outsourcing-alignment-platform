@@ -38,7 +38,7 @@ export default function PrintReport({ data }) {
               <span className="print-checkbox">{renderCheck(bi.stage?.evt)} EVT</span>
               <span className="print-checkbox">{renderCheck(bi.stage?.dvt)} DVT</span>
               <span className="print-checkbox">{renderCheck(bi.stage?.pvt)} PVT</span>
-              <span className="print-checkbox">{renderCheck(bi.stage?.politRun)} Polit-run</span>
+              <span className="print-checkbox">{renderCheck(bi.stage?.politRun)} Pilot-run</span>
               <span className="print-checkbox">{renderCheck(bi.stage?.ecn)} ECN</span>
             </td>
           </tr>
@@ -152,7 +152,7 @@ export default function PrintReport({ data }) {
             </td>
           </tr>
           <tr>
-            <td className="cell-label">PCB / FPC 烘烤需求</td>
+            <td className="cell-label">PCB / FPCA 烘烤需求</td>
             <td className="cell-value" colSpan={3}>
               {renderCheck(pc.bakeRequired?.need)} 需要烘烤
               <span style={{ marginLeft: '20px' }}>{renderCheck(pc.bakeRequired?.noNeed)} 不需要</span>

@@ -350,7 +350,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       {activeSection === 'basicInfo' && (
         <div className="section-form animate-fade-in">
           <h2 className="section-title">基本資料</h2>
-          <p className="section-subtitle">請核對發包方資訊，並請加工廠確實填寫工廠區及治工具資訊。</p>
+          <p className="section-subtitle">請核對發包方資訊，並由加工廠確實填寫廠區及治工具資訊。</p>
 
           {/* 卡片 1: 機種基本資訊 */}
           <div className="form-section-card glass-card">
@@ -377,8 +377,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   })()}
                 </select>
               </div>
-              <div className={`form-group ${getFieldHighlightClass('productNo')}`}>
-                <label className="form-label">產品料號</label>
+              <div className={`form-group required-highlight ${getFieldHighlightClass('productNo')}`}>
+                <label className="form-label">產品料號 <span className="req">*</span></label>
                 <input 
                   type="text" 
                   className="form-input edit-active" 
@@ -402,8 +402,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
 
             <div className="form-row-grid-2" style={{ marginTop: '16px' }}>
-              <div className={`form-group ${getFieldHighlightClass('stage')}`}>
-                <label className="form-label">產品階段</label>
+              <div className={`form-group required-highlight ${getFieldHighlightClass('stage')}`}>
+                <label className="form-label">產品階段 <span className="req">*</span></label>
                 <div className="checkbox-flex">
                   {Object.keys(data.basicInfo.stage || {}).map(k => (
                     <label key={k} className="checkbox-label">
@@ -652,7 +652,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
                     }}
                     disabled={!data.basicInfo.processItems?.otherProcess || isFieldDisabled('basicInfo.processItems.otherProcessText')}
-                    style={{ width: '160px', padding: '4px 8px', fontSize: '0.82rem' }}
+                    style={{ width: '160px', maxWidth: '100%', padding: '4px 8px', fontSize: '0.82rem' }}
                   />
                 </div>
               </div>
@@ -983,7 +983,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
 
             <div className={`form-group required-highlight ${getFieldHighlightClass('bakeRequired')}`}>
-              <label className="form-label">PCB / FPC 烘烤需求 <span className="req">*</span></label>
+              <label className="form-label">PCB / FPCA 烘烤需求 <span className="req">*</span></label>
               <div className="radio-group">
                 <label className="radio-label">
                   <input 
@@ -1255,7 +1255,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   onChange={() => handleProcessChange('keyParts', { has: true, none: false })}
                   disabled={isFieldDisabled('processControl.keyParts.has')}
                 />
-                <span>有關鍵零件 (需配置至少 2 點測溫)</span>
+                <span>有關鍵零件 (需配置至少 6 點測溫)</span>
               </label>
               <label className="radio-label">
                 <input 

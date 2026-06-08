@@ -18,6 +18,8 @@ export default function Settings({
   // 新增帳號表單 State
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  // 帳號清單密碼遮罩：預設隱藏，可逐列切換顯示
+  const [revealedPasswords, setRevealedPasswords] = useState({});
   const [newName, setNewName] = useState('');
   const [newUnit, setNewUnit] = useState('研發單位');
   const [newRole, setNewRole] = useState('rd');
@@ -284,7 +286,18 @@ export default function Settings({
                         <td>{acc.name} {currentUser.username === acc.username && '(您)'}</td>
                         <td>{acc.unit}</td>
                         <td><code>{acc.username}</code></td>
-                        <td><code>{acc.password}</code></td>
+                        <td>
+                          <code>{revealedPasswords[acc.username] ? acc.password : '••••••'}</code>
+                          <button
+                            type="button"
+                            className="btn-reveal-pw"
+                            onClick={() => setRevealedPasswords(prev => ({ ...prev, [acc.username]: !prev[acc.username] }))}
+                            title={revealedPasswords[acc.username] ? '隱藏密碼' : '顯示密碼'}
+                            aria-label={revealedPasswords[acc.username] ? '隱藏密碼' : '顯示密碼'}
+                          >
+                            {revealedPasswords[acc.username] ? '🙈' : '👁'}
+                          </button>
+                        </td>
                         <td>
                           <select
                             className="table-select-level"

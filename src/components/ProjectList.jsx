@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import './ProjectList.css';
 
 export default function ProjectList({ projects, onSelectProject, onCreateProject, onDeleteProject, onImportExcel }) {
@@ -13,6 +13,16 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
   const [fontSize, setFontSize] = useState('medium'); // 預設中字型
   const [rowSpacing, setRowSpacing] = useState('normal'); // 預設標準行距
   const [currentPage, setCurrentPage] = useState(1);
+
+  // ESC 鍵關閉「建立新機種」Modal
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const onKeyDown = (e) => {
+      if (e.key === 'Escape') setShowCreateModal(false);
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [showCreateModal]);
 
   const handleSubmitCreate = (e) => {
     e.preventDefault();

@@ -2,6 +2,23 @@
   width: 100%;
 }
 
+/* 帳號清單密碼顯示/隱藏切換鈕 */
+.btn-reveal-pw {
+  margin-left: 6px;
+  padding: 0 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+  line-height: 1;
+  opacity: 0.7;
+  vertical-align: middle;
+}
+
+.btn-reveal-pw:hover {
+  opacity: 1;
+}
+
 .settings-grid {
   display: grid;
   grid-template-columns: 1fr 2fr;

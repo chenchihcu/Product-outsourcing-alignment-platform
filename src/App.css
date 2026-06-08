@@ -78,6 +78,13 @@
   border-radius: 8px;
 }
 
+/* 簽核區極小型按鈕：取代散落各處的 inline { fontSize:0.72rem; padding:4px 8px } */
+.btn-xs {
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  border-radius: 8px;
+}
+
 /* App Main Welcome Layout */
 .app-main {
   flex: 1;

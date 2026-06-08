@@ -118,7 +118,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 {data.basicInfo.signOff?.rdSignature ? (
                   <img src={data.basicInfo.signOff.rdSignature} alt="RD Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>尚未設定電子簽章</span>
                 )}
               </div>
               
@@ -127,14 +127,13 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   {currentUser.signature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn"
+                      className="btn btn-secondary btn-xs"
                       onClick={() => {
                         handleSignChange('rdSignature', currentUser.signature);
                         if (!data.basicInfo.signOff?.rdConfirm) {
                           handleSignChange('rdConfirm', currentUser.name);
                         }
                       }}
-                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                     >
                       🖋️ 套用我的簽章
                     </button>
@@ -162,18 +161,17 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   />
                   <button 
                     type="button" 
-                    className="btn btn-primary compact-btn"
+                    className="btn btn-primary btn-xs"
                     onClick={() => document.getElementById('rd-sig-upload').click()}
-                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                   >
                     📤 上傳簽章
                   </button>
                   {data.basicInfo.signOff?.rdSignature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn" 
+                      className="btn btn-secondary btn-xs" 
                       onClick={() => handleSignChange('rdSignature', '')}
-                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}
                     >
                       ✕
                     </button>
@@ -223,7 +221,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 {data.basicInfo.signOff?.engineeringReviewSignature ? (
                   <img src={data.basicInfo.signOff.engineeringReviewSignature} alt="PE Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>尚未設定電子簽章</span>
                 )}
               </div>
               
@@ -232,14 +230,13 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   {currentUser.signature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn"
+                      className="btn btn-secondary btn-xs"
                       onClick={() => {
                         handleSignChange('engineeringReviewSignature', currentUser.signature);
                         if (!data.basicInfo.signOff?.engineeringReview) {
                           handleSignChange('engineeringReview', currentUser.name);
                         }
                       }}
-                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                     >
                       🖋️ 套用我的簽章
                     </button>
@@ -267,18 +264,17 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   />
                   <button 
                     type="button" 
-                    className="btn btn-primary compact-btn"
+                    className="btn btn-primary btn-xs"
                     onClick={() => document.getElementById('pe-sig-upload').click()}
-                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                   >
                     📤 上傳簽章
                   </button>
                   {data.basicInfo.signOff?.engineeringReviewSignature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn" 
+                      className="btn btn-secondary btn-xs" 
                       onClick={() => handleSignChange('engineeringReviewSignature', '')}
-                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}
                     >
                       ✕
                     </button>
@@ -334,7 +330,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 {data.basicInfo.signOff?.qaSignature ? (
                   <img src={data.basicInfo.signOff.qaSignature} alt="QA Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
                 ) : (
-                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>尚未設定電子簽章</span>
                 )}
               </div>
               
@@ -343,14 +339,13 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   {currentUser.signature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn"
+                      className="btn btn-secondary btn-xs"
                       onClick={() => {
                         handleSignChange('qaSignature', currentUser.signature);
                         if (!data.basicInfo.signOff?.qaConfirm) {
                           handleSignChange('qaConfirm', currentUser.name);
                         }
                       }}
-                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                     >
                       🖋️ 套用我的簽章
                     </button>
@@ -378,18 +373,17 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                   />
                   <button 
                     type="button" 
-                    className="btn btn-primary compact-btn"
+                    className="btn btn-primary btn-xs"
                     onClick={() => document.getElementById('qa-sig-upload').click()}
-                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
                   >
                     📤 上傳簽章
                   </button>
                   {data.basicInfo.signOff?.qaSignature && (
                     <button 
                       type="button" 
-                      className="btn btn-secondary compact-btn" 
+                      className="btn btn-secondary btn-xs" 
                       onClick={() => handleSignChange('qaSignature', '')}
-                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}
                     >
                       ✕
                     </button>

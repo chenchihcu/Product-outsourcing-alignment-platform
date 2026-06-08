@@ -28,7 +28,7 @@ export function validateAlignment(data) {
   // 產品階段至少勾選一個 (mpSmall 改為 politRun)
   const stage = bi.stage || {};
   const hasStage = stage.evt || stage.dvt || stage.pvt || stage.politRun || stage.ecn;
-  check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / Polit-run / ECN）', 'error');
+  check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）', 'error');
 
   // --- 委外加工廠回填檢核 ---
   check(!!bi.factory, '加工廠未填寫「委外加工廠」名稱', 'error');
@@ -37,7 +37,7 @@ export function validateAlignment(data) {
   const pc = data.processControl || {};
   const bake = pc.bakeRequired || {};
   const hasBakeSelect = bake.need || bake.noNeed;
-  check(hasBakeSelect, '加工廠未確認是否需要「PCB / FPC 烘烤」', 'error');
+  check(hasBakeSelect, '加工廠未確認是否需要「PCB / FPCA 烘烤」', 'error');
   
   if (bake.need) {
     const pcbValid = !!bake.pcbBakeTemp && !!bake.pcbBakeTol && !!bake.pcbBakeHr;
