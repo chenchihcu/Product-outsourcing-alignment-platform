@@ -199,17 +199,30 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'B11', '單面', pcba.single);
     writeCheckbox(sheet1, 'C11', '雙面', pcba.double);
 
+    // 材質分類
+    writeCell(sheet1, 'D11', '材質分類');
+    writeCheckbox(sheet1, 'E11', 'PCB硬板', bi.materialType === 'pcb');
+    writeCheckbox(sheet1, 'F11', 'FPC軟板', bi.materialType === 'fpc');
+
     // 加工項目
     const pi = bi.processItems || {};
     writeCheckbox(sheet1, 'A14', 'SMT', pi.smt);
     writeCheckbox(sheet1, 'B14', 'DIP', pi.dip);
-    writeCheckbox(sheet1, 'C14', 'ICT', pi.ict);
+    writeCheckbox(sheet1, 'C14', 'In-Circuit Test', pi.ict);
     writeCheckbox(sheet1, 'D14', '組裝', pi.assembly);
     writeCheckbox(sheet1, 'E14', '三防膠塗覆', pi.coating);
     writeCheckbox(sheet1, 'F14', '包裝', pi.packing);
-    writeCheckbox(sheet1, 'A15', 'FCT', pi.fct);
-    writeCheckbox(sheet1, 'B15', 'Flying Probe', pi.flyingProbe);
+    writeCheckbox(sheet1, 'A15', 'FCT 功能測試', pi.fct);
+    writeCheckbox(sheet1, 'B15', '飛針測試', pi.flyingProbe);
     writeCheckbox(sheet1, 'C15', '成品測試', pi.finalTest);
+    writeCheckbox(sheet1, 'D15', 'Underfill 塗膠', pi.underfillGlue);
+    writeCheckbox(sheet1, 'E15', '半成品測試', pi.semiFinishedTest);
+    
+    if (pi.otherProcess) {
+      writeCell(sheet1, 'F15', `☑ 其他: ${pi.otherProcessText || ''}`);
+    } else {
+      writeCell(sheet1, 'F15', `☐ 其他: ________________`);
+    }
 
     // AOI
     const aoi = bi.aoi || {};
@@ -245,13 +258,13 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'E27', '座標檔', docs.coordinate);
     writeCheckbox(sheet1, 'G27', '零件位置圖', docs.placement);
     writeCheckbox(sheet1, 'A28', '原物料規格書', docs.materialSpec);
-    writeCheckbox(sheet1, 'C28', '機構圖', docs.mechDrawing);
-    writeCheckbox(sheet1, 'E28', '產品規格書', docs.productSpec);
+    writeCell(sheet1, 'C28', '');
+    writeCell(sheet1, 'E28', '');
     writeCheckbox(sheet1, 'G28', 'Reflow 建議曲線圖', docs.reflowProfile);
-    writeCheckbox(sheet1, 'A29', '組裝作業標準書', docs.assemblySop);
+    writeCheckbox(sheet1, 'A29', '組裝(包裝)作業標準書', docs.assemblyPackingSop);
     writeCheckbox(sheet1, 'C29', '測試作業標準書', docs.testSop);
-    writeCheckbox(sheet1, 'E29', 'SMT工藝規範', docs.smtSpec);
-    writeCheckbox(sheet1, 'G29', '包裝作業標準書', docs.packingSop);
+    writeCell(sheet1, 'E29', '');
+    writeCell(sheet1, 'G29', '');
 
     // 治工具
     const tool = bi.tooling || {};

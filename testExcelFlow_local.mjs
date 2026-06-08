@@ -46,8 +46,38 @@ function runTest() {
     ecn: true
   };
 
+  // 材質分類
+  data.basicInfo.materialType = 'pcb';
+
   // 鋼板設定為需要，並填寫規格
-  data.basicInfo.processItems = { smt: true, dip: true };
+  data.basicInfo.processItems = {
+    smt: true,
+    dip: true,
+    ict: true,
+    assembly: true,
+    coating: false,
+    packing: true,
+    fct: true,
+    flyingProbe: false,
+    finalTest: true,
+    underfillGlue: true,
+    semiFinishedTest: true,
+    otherProcess: true,
+    otherProcessText: '防靜電塗層加工'
+  };
+
+  // 工程文件一覽表
+  data.basicInfo.documents = {
+    bom: true,
+    gerber: true,
+    coordinate: false,
+    placement: true,
+    materialSpec: true,
+    reflowProfile: true,
+    assemblyPackingSop: true,
+    testSop: false
+  };
+
   data.basicInfo.tooling.stencil = {
     need: true,
     noNeed: false,
@@ -166,6 +196,25 @@ function runTest() {
   assert(reParsedData.processControl.smtFirstPiece.ledTest, 'yes', 'SMT首件檢查 LED點亮測試還原');
   assert(reParsedData.processControl.smtFirstPiece.pcbReflow, true, 'SMT首件檢查 PCB外觀檢查還原');
   assert(reParsedData.processControl.smtFirstPiece.solderability, false, 'SMT首件檢查 濕潤性檢查還原');
+
+  // 驗證新增的材質分類
+  assert(reParsedData.basicInfo.materialType, 'pcb', '材質分類還原');
+
+  // 驗證新增與修改的加工項目
+  assert(reParsedData.basicInfo.processItems.ict, true, '加工項目 In-Circuit Test 還原');
+  assert(reParsedData.basicInfo.processItems.fct, true, '加工項目 FCT 功能測試 還原');
+  assert(reParsedData.basicInfo.processItems.flyingProbe, false, '加工項目 飛針測試 還原');
+  assert(reParsedData.basicInfo.processItems.underfillGlue, true, '加工項目 Underfill 塗膠 還原');
+  assert(reParsedData.basicInfo.processItems.semiFinishedTest, true, '加工項目 半成品測試 還原');
+  assert(reParsedData.basicInfo.processItems.otherProcess, true, '加工項目 其他 還原');
+  assert(reParsedData.basicInfo.processItems.otherProcessText, '防靜電塗層加工', '加工項目 其他說明文字 還原');
+
+  // 驗證工程文件
+  assert(reParsedData.basicInfo.documents.bom, true, '工程文件 BOM 還原');
+  assert(reParsedData.basicInfo.documents.gerber, true, '工程文件 Gerber 還原');
+  assert(reParsedData.basicInfo.documents.assemblyPackingSop, true, '工程文件 組裝(包裝)作業標準書 還原');
+  assert(reParsedData.basicInfo.documents.testSop, false, '工程文件 測試作業標準書 還原');
+  assert(reParsedData.basicInfo.documents.productSpec, undefined, '工程文件 移除之產品規格書 為空');
 
   assert(reParsedData.basicInfo.signOff.rdConfirm, 'RD張三', '研發確認簽章還原');
   assert(reParsedData.basicInfo.signOff.engineeringReview, 'PE李四', '工程審核簽章還原');

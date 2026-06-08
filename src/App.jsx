@@ -11,20 +11,11 @@ import * as XLSX from 'xlsx';
 import './App.css';
 
 export default function App() {
-  const [projects, setProjects] = useState(() => {
-    const saved = localStorage.getItem('ag_projects');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0) {
-          return parsed;
-        }
-      } catch (e) {
-        console.error(e);
-      }
-    }
-    return [];
-  });
+  const getProjectsKey = (user) => {
+    return user && user.role === 'guest' ? 'ag_projects_guest' : 'ag_projects';
+  };
+
+  const [projects, setProjects] = useState([]);
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [data, setData] = useState(null);
   const [originalWb, setOriginalWb] = useState(null);
@@ -64,7 +55,8 @@ export default function App() {
     { username: 'rd', password: 'rd123', name: '研發處專員', unit: '研發單位', role: 'rd', level: 'Standard' },
     { username: 'eng', password: 'eng123', name: '工程處專員', unit: '工程單位', role: 'eng', level: 'Standard' },
     { username: 'qa', password: 'qa123', name: '品保處審核員', unit: '審核單位(品保處)', role: 'qa', level: 'Standard' },
-    { username: 'admin', password: 'admin123', name: '系統管理員', unit: '管理處', role: 'admin', level: 'Administrator' }
+    { username: 'admin', password: 'admin123', name: '系統管理員', unit: '管理處', role: 'admin', level: 'Administrator' },
+    { username: 'guest', password: 'guest123', name: '訪客測試帳號', unit: '測試單位', role: 'guest', level: 'Guest' }
   ];
 
   const [accounts, setAccounts] = useState(() => {
@@ -78,7 +70,18 @@ export default function App() {
   // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
   useEffect(() => {
     const loadDefaultTemplate = async () => {
-      if (projects.length === 0) {
+      const key = getProjectsKey(currentUser);
+      const saved = localStorage.getItem(key);
+      let list = [];
+      if (saved) {
+        try {
+          list = JSON.parse(saved);
+        } catch (e) {
+          console.error(e);
+        }
+      }
+
+      if (list.length === 0) {
         try {
           const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
           if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
@@ -100,18 +103,22 @@ export default function App() {
           };
 
           const newList = [defaultProj];
-          localStorage.setItem('ag_projects', JSON.stringify(newList));
+          localStorage.setItem(key, JSON.stringify(newList));
           setProjects(newList);
         } catch (err) {
           console.error('載入預設範本失敗:', err);
         }
+      } else {
+        setProjects(list);
       }
     };
 
     if (currentUser) {
       loadDefaultTemplate();
+    } else {
+      setProjects([]);
     }
-  }, [currentUser, projects.length]);
+  }, [currentUser]);
 
   // 2. 自動存檔功能 (提供即時與 Debounce 800ms 機制)
   const saveProjectData = (projId, name, projData) => {
@@ -129,7 +136,8 @@ export default function App() {
             } 
           : p
       );
-      localStorage.setItem('ag_projects', JSON.stringify(updated));
+      const key = getProjectsKey(currentUser);
+      localStorage.setItem(key, JSON.stringify(updated));
       return updated;
     });
   };
@@ -246,7 +254,8 @@ export default function App() {
       };
 
       const newList = [...projects, newProj];
-      localStorage.setItem('ag_projects', JSON.stringify(newList));
+      const key = getProjectsKey(currentUser);
+      localStorage.setItem(key, JSON.stringify(newList));
       setProjects(newList);
       
       // 直接載入新機種編輯
@@ -292,7 +301,8 @@ export default function App() {
       };
 
       const newList = [...projects, newProj];
-      localStorage.setItem('ag_projects', JSON.stringify(newList));
+      const key = getProjectsKey(currentUser);
+      localStorage.setItem(key, JSON.stringify(newList));
       setProjects(newList);
       
       // 直接載入新機種編輯
@@ -306,7 +316,8 @@ export default function App() {
   // 6. 刪除機種
   const handleDeleteProject = (id) => {
     const newList = projects.filter(p => p.id !== id);
-    localStorage.setItem('ag_projects', JSON.stringify(newList));
+    const key = getProjectsKey(currentUser);
+    localStorage.setItem(key, JSON.stringify(newList));
     setProjects(newList);
 
     if (currentProjectId === id) {

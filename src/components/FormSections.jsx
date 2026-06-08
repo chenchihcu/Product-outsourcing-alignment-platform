@@ -50,28 +50,13 @@ const getDocumentIcon = (key) => {
           <polyline points="10 9 9 9 8 9" />
         </svg>
       );
-    case 'mechDrawing': // 機構圖 2D/3D (3D立方體)
-      return (
-        <svg {...commonProps}>
-          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
-          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
-          <line x1="12" y1="22.08" x2="12" y2="12" />
-        </svg>
-      );
-    case 'productSpec': // 產品規格書 (核對清單)
-      return (
-        <svg {...commonProps}>
-          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-          <polyline points="22 4 12 14.01 9 11.01" />
-        </svg>
-      );
     case 'reflowProfile': // Reflow 建議曲線 (溫度曲線)
       return (
         <svg {...commonProps}>
           <path d="M3 20h18M3 17l4-4 4 4 6-10 3 3" />
         </svg>
       );
-    case 'assemblySop': // 組裝作業標準書 (螺絲起子與工具)
+    case 'assemblyPackingSop': // 組裝(包裝)作業標準書 (螺絲起子與工具)
       return (
         <svg {...commonProps}>
           <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
@@ -81,21 +66,6 @@ const getDocumentIcon = (key) => {
       return (
         <svg {...commonProps}>
           <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
-        </svg>
-      );
-    case 'smtSpec': // SMT 工藝規範 (精密齒輪)
-      return (
-        <svg {...commonProps}>
-          <circle cx="12" cy="12" r="3" />
-          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
-        </svg>
-      );
-    case 'packingSop': // 包裝作業標準書 (快遞箱子)
-      return (
-        <svg {...commonProps}>
-          <polyline points="21 8 21 21 3 21 3 8" />
-          <rect x="1" y="3" width="22" height="5" />
-          <line x1="10" y1="12" x2="14" y2="12" />
         </svg>
       );
     default:
@@ -171,10 +141,15 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       return false; 
     }
 
-    // A單位已填寫的, B/C單位無法變更 (通用鎖定)
-    const owner = data._owners?.[fieldPath];
-    if (owner && owner !== currentUser.unit) {
-      return true;
+    // A單位已填寫的, B/C單位無法變更 (通用鎖定 - 支援遞迴檢查父路徑擁有權)
+    const parts = fieldPath.split('.');
+    let currentPath = '';
+    for (let i = 0; i < parts.length; i++) {
+      currentPath = currentPath ? `${currentPath}.${parts[i]}` : parts[i];
+      const owner = data._owners?.[currentPath];
+      if (owner && owner !== currentUser.unit) {
+        return true;
+      }
     }
 
     return false;
@@ -494,7 +469,32 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* PCB 板材資訊 */}
-          <div className="form-row-grid-3">
+          <div className="form-row-grid-4">
+            <div className="form-group">
+              <label className="form-label">材質分類</label>
+              <div className="checkbox-flex">
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="materialType"
+                    checked={data.basicInfo.materialType === 'pcb'} 
+                    onChange={() => handleBasicChange('materialType', 'pcb')}
+                    disabled={isFieldDisabled('basicInfo.materialType')}
+                  />
+                  <span>PCB硬板</span>
+                </label>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="materialType"
+                    checked={data.basicInfo.materialType === 'fpc'} 
+                    onChange={() => handleBasicChange('materialType', 'fpc')}
+                    disabled={isFieldDisabled('basicInfo.materialType')}
+                  />
+                  <span>FPC軟板</span>
+                </label>
+              </div>
+            </div>
             <div className="form-group">
               <label className="form-label">PCB 板材</label>
               <input 
@@ -721,16 +721,18 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '12px' }}>
             <label className="form-label">主要加工項目 <span className="req">*</span></label>
-            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px' }}>
+            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px', alignItems: 'center' }}>
               {[
                 ['smt', 'SMT'],
                 ['dip', 'DIP'],
-                ['ict', 'ICT'],
+                ['ict', 'In-Circuit Test'],
                 ['assembly', '組裝'],
                 ['coating', '三防膠塗覆'],
                 ['packing', '包裝'],
-                ['fct', 'FCT'],
-                ['flyingProbe', 'Flying Probe'],
+                ['fct', 'FCT 功能測試'],
+                ['flyingProbe', '飛針測試'],
+                ['underfillGlue', 'Underfill 塗膠'],
+                ['semiFinishedTest', '半成品測試'],
                 ['finalTest', '成品測試']
               ].map(([key, label]) => (
                 <label key={key} className="checkbox-label">
@@ -743,6 +745,37 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   <span>{label}</span>
                 </label>
               ))}
+
+              {/* 其他 (加入空白欄位, 讓使用者填寫) */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label className="checkbox-label" style={{ margin: 0 }}>
+                  <input 
+                    type="checkbox" 
+                    checked={data.basicInfo.processItems?.otherProcess || false} 
+                    onChange={(e) => {
+                      handleProcessItemsChange('otherProcess', e.target.checked);
+                      if (!e.target.checked) {
+                        const updated = { ...data.basicInfo.processItems, otherProcess: false, otherProcessText: '' };
+                        onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
+                      }
+                    }}
+                    disabled={isFieldDisabled('basicInfo.processItems.otherProcess')}
+                  />
+                  <span>其他:</span>
+                </label>
+                <input 
+                  type="text" 
+                  className="form-input edit-active compact" 
+                  placeholder="請說明其他加工項目"
+                  value={data.basicInfo.processItems?.otherProcessText || ''} 
+                  onChange={(e) => {
+                    const updated = { ...data.basicInfo.processItems, otherProcessText: e.target.value };
+                    onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
+                  }}
+                  disabled={!data.basicInfo.processItems?.otherProcess || isFieldDisabled('basicInfo.processItems.otherProcessText')}
+                  style={{ width: '160px', padding: '4px 8px', fontSize: '0.82rem' }}
+                />
+              </div>
             </div>
           </div>
 
@@ -951,7 +984,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       onChange={(e) => handleToolingChange('smtCarrier', 'upper', e.target.checked)}
                       disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.upper')}
                     />
-                    <span style={{ fontSize: '0.8rem' }}>上</span>
+                    <span style={{ fontSize: '0.8rem' }}>上載板</span>
                   </label>
                   <label className="checkbox-label" style={{ margin: 0, padding: 0 }}>
                     <input 
@@ -960,7 +993,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       onChange={(e) => handleToolingChange('smtCarrier', 'lower', e.target.checked)}
                       disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.lower')}
                     />
-                    <span style={{ fontSize: '0.8rem' }}>下</span>
+                    <span style={{ fontSize: '0.8rem' }}>下載板</span>
                   </label>
                 </div>
               )}
@@ -1195,7 +1228,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             <div className={`form-group required-highlight ${getFieldHighlightClass('smtFirstPiece')}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
               <label className="form-label">
                 SMT 首件檢查項目 <span className="req">*</span>
-                {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(不適用)</span>}
+                {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 'bold' }}>(不適用，請至基本資料勾選加工項目 SMT)</span>}
               </label>
               <div className={`checkbox-flex ${!data.basicInfo.processItems?.smt ? 'readonly-flex' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 12px' }}>
@@ -1282,7 +1315,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
               <label className="form-label">
                 DIP 首件檢查項目 <span className="req">*</span>
-                {!data.basicInfo.processItems?.dip && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(不適用)</span>}
+                {!data.basicInfo.processItems?.dip && <span style={{ marginLeft: '8px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 'bold' }}>(不適用，請至基本資料勾選加工項目 DIP)</span>}
               </label>
               <div className={`checkbox-flex ${!data.basicInfo.processItems?.dip ? 'readonly-flex' : ''}`} style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
                 <label className="checkbox-label" style={{ fontSize: '0.85rem' }}>
@@ -1298,15 +1331,14 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 {/* DIP 注意事項 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
                   <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 550 }}>DIP 注意事項 (限 50 字):</span>
-                  <input 
-                    type="text" 
+                  <textarea 
                     className="form-input edit-active compact" 
                     placeholder={data.basicInfo.processItems?.dip ? "請輸入 DIP 注意事項..." : "不適用"}
                     maxLength={50}
                     value={data.processControl?.dipFirstPiece?.memo || ''}
                     onChange={(e) => handleProcessChange('dipFirstPiece', { ...(data.processControl?.dipFirstPiece || {}), memo: e.target.value })}
                     disabled={isFieldDisabled('processControl.dipFirstPiece.memo') || !data.basicInfo.processItems?.dip}
-                    style={{ padding: '4px 8px', fontSize: '0.82rem' }}
+                    style={{ padding: '6px 8px', fontSize: '0.82rem', height: '70px', resize: 'none' }}
                   />
                 </div>
               </div>
@@ -1626,7 +1658,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       {activeSection === 'documents' && (
         <div className="section-form animate-fade-in">
           <h2 className="section-title">工程文件</h2>
-          <p className="section-subtitle">請確認以下 12 項關鍵工程文件之對齊勾選狀態，這將會雙向同步寫入 Excel 報表中。</p>
+          <p className="section-subtitle">請確認以下 8 項關鍵工程文件之對齊勾選狀態，這將會雙向同步寫入 Excel 報表中。</p>
 
           <div className="documents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
             {[
@@ -1635,13 +1667,9 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
               ['coordinate', '元件座標檔', 'SMT 貼片機高速貼裝座標配置圖'],
               ['placement', '零件位置圖 (Placement)', '用以核對零件方向與極性參考圖面'],
               ['materialSpec', '原物料規格書', '特殊零件或連接器等規格說明書'],
-              ['mechDrawing', '機構圖 (2D / 3D)', '包含散熱片、外殼等機構尺寸模型檔'],
-              ['productSpec', '產品規格書 (Product Spec)', '定義本產品主要功能與驗收技術規格指標'],
               ['reflowProfile', 'Reflow 建議曲線圖', '零件耐熱極限與錫膏焊接建議溫度控制曲線'],
-              ['assemblySop', '組裝作業標準書 (SOP)', '指導生產線作業人員進行組裝的標準程序'],
-              ['testSop', '測試作業標準書 (SOP)', '定義測試工位與測試軟硬體的標準操作'],
-              ['smtSpec', 'SMT 工藝規範', '特殊鋼板開孔、點膠或紅膠工藝製程規範'],
-              ['packingSop', '包裝作業標準書 (SOP)', '規範 PCBA 與成品之包材與箱標包裝流程']
+              ['assemblyPackingSop', '組裝(包裝)作業標準書 (SOP)', '指導生產線作業人員進行組裝與包裝的標準程序'],
+              ['testSop', '測試作業標準書 (SOP)', '定義測試工位與測試軟硬體的標準操作']
             ].map(([key, label, desc]) => {
               const checked = data.basicInfo.documents?.[key] || false;
               return (

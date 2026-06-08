@@ -109,7 +109,22 @@ export function parseRequirementExcel(arrayBuffer) {
       double: parseCheckbox(getVal('C11'))
     };
 
+    // 材質分類
+    const e11Checked = parseCheckbox(getVal('E11')) || String(getVal('E11') || '').includes('☑');
+    const f11Checked = parseCheckbox(getVal('F11')) || String(getVal('F11') || '').includes('☑');
+    data.basicInfo.materialType = e11Checked ? 'pcb' : (f11Checked ? 'fpc' : '');
+
     // 加工項目 (Checkbox)
+    const f15Val = String(getVal('F15') || '');
+    const otherProcess = f15Val.includes('☑') || parseCheckbox(getVal('F15'));
+    let otherProcessText = '';
+    if (otherProcess) {
+      const match = f15Val.match(/[☑☐]\s*其他[:：]?\s*(.*)/) || f15Val.match(/其他[:：]?\s*(.*)/);
+      if (match) {
+        otherProcessText = match[1].replace(/_+/g, '').trim();
+      }
+    }
+
     data.basicInfo.processItems = {
       smt: parseCheckbox(getVal('A14')),
       dip: parseCheckbox(getVal('B14')),
@@ -119,7 +134,11 @@ export function parseRequirementExcel(arrayBuffer) {
       packing: parseCheckbox(getVal('F14')),
       fct: parseCheckbox(getVal('A15')),
       flyingProbe: parseCheckbox(getVal('B15')),
-      finalTest: parseCheckbox(getVal('C15'))
+      finalTest: parseCheckbox(getVal('C15')),
+      underfillGlue: parseCheckbox(getVal('D15')),
+      semiFinishedTest: parseCheckbox(getVal('E15')),
+      otherProcess: otherProcess,
+      otherProcessText: otherProcessText
     };
 
     // AOI
@@ -164,13 +183,9 @@ export function parseRequirementExcel(arrayBuffer) {
       coordinate: parseCheckbox(getVal('E27')),
       placement: parseCheckbox(getVal('G27')),
       materialSpec: parseCheckbox(getVal('A28')),
-      mechDrawing: parseCheckbox(getVal('C28')),
-      productSpec: parseCheckbox(getVal('E28')),
       reflowProfile: parseCheckbox(getVal('G28')),
-      assemblySop: parseCheckbox(getVal('A29')),
-      testSop: parseCheckbox(getVal('C29')),
-      smtSpec: parseCheckbox(getVal('E29')),
-      packingSop: parseCheckbox(getVal('G29'))
+      assemblyPackingSop: parseCheckbox(getVal('A29')) || parseCheckbox(getVal('G29')),
+      testSop: parseCheckbox(getVal('C29'))
     };
 
     // 治工具一覽表

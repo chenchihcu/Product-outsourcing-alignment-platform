@@ -96,10 +96,31 @@ export default function Dashboard({ data, onGoToSection }) {
           <div className="info-row">
             <span className="info-label">主要加工項目</span>
             <span className="info-val">
-              {Object.keys(data.basicInfo.processItems || {})
-                .filter(k => data.basicInfo.processItems[k])
-                .map(k => k.toUpperCase())
-                .join(', ') || <span className="placeholder">未勾選</span>}
+              {(() => {
+                const processLabelMap = {
+                  smt: 'SMT',
+                  dip: 'DIP',
+                  ict: 'In-Circuit Test',
+                  assembly: '組裝',
+                  coating: '三防膠塗覆',
+                  packing: '包裝',
+                  fct: 'FCT 功能測試',
+                  flyingProbe: '飛針測試',
+                  underfillGlue: 'Underfill 塗膠',
+                  semiFinishedTest: '半成品測試',
+                  finalTest: '成品測試',
+                  otherProcess: '其他'
+                };
+                const items = Object.keys(data.basicInfo.processItems || {})
+                  .filter(k => data.basicInfo.processItems[k] && processLabelMap[k])
+                  .map(k => {
+                    if (k === 'otherProcess' && data.basicInfo.processItems.otherProcessText) {
+                      return `其他 (${data.basicInfo.processItems.otherProcessText})`;
+                    }
+                    return processLabelMap[k];
+                  });
+                return items.join(', ') || <span className="placeholder">未勾選</span>;
+              })()}
             </span>
           </div>
         </div>
