@@ -1,14 +1,14 @@
 .signoff-container {
-  padding: 2rem;
-  margin-top: 1rem;
+  padding: 1.25rem;
+  margin-top: 0.75rem;
 }
 
 .status-banner {
   background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-color);
   border-radius: 12px;
-  padding: 1.25rem;
-  margin-bottom: 2rem;
+  padding: 1rem;
+  margin-bottom: 1.25rem;
 }
 
 .status-progress-bar-wrapper {
@@ -47,8 +47,8 @@
 .sign-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 2.5rem;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 @media (max-width: 900px) {
@@ -67,8 +67,8 @@
 }
 
 .sign-header {
-  padding: 1rem;
-  font-size: 0.95rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.92rem;
   font-weight: 600;
   color: #1f2937;
   display: flex;
@@ -102,12 +102,12 @@
 }
 
 .sign-body {
-  padding: 1.25rem;
+  padding: 1rem;
   flex: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .sign-terms {
@@ -122,9 +122,9 @@
 .export-warning, .export-success {
   display: flex;
   gap: 1rem;
-  padding: 1.25rem;
+  padding: 1rem;
   border-radius: 12px;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 .export-warning {

@@ -6,23 +6,28 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const performLogin = (uname, pw) => {
     const account = defaultAccounts.find(
-      (a) => a.username === username && a.password === password
+      (a) => a.username === uname && a.password === pw
     );
     if (account) {
       onLogin(account);
       setError('');
-    } else {
-      setError('帳號或密碼錯誤！');
+      return true;
     }
+    setError('帳號或密碼錯誤！');
+    return false;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    performLogin(username, password);
   };
 
   const handleQuickLogin = (acc) => {
     setUsername(acc.username);
     setPassword(acc.password);
-    onLogin(acc);
+    performLogin(acc.username, acc.password);
   };
 
   return (

@@ -286,7 +286,7 @@ export default function Settings({
                             className="table-select-level"
                             value={acc.level}
                             onChange={(e) => onUpdateAccountLevel(acc.username, e.target.value)}
-                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
+                            disabled={currentUser.username === acc.username || acc.role === 'admin'}
                           >
                             <option value="Standard">Standard</option>
                             <option value="Reviewer">Reviewer</option>
@@ -296,12 +296,12 @@ export default function Settings({
                         <td>
                           <button
                             className="btn-delete-account"
-                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
+                            disabled={currentUser.username === acc.username || acc.role === 'admin'}
                             onClick={() => onRemoveAccount(acc.username)}
                             title={
                               currentUser.username === acc.username
                                 ? '無法刪除目前登入的帳號'
-                                : acc.username === 'admin'
+                                : acc.role === 'admin'
                                 ? '系統管理員帳號無法刪除'
                                 : '刪除此帳號'
                             }

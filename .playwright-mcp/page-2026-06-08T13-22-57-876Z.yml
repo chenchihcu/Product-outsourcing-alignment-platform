@@ -1,0 +1,110 @@
+- generic [ref=e36]:
+  - banner [ref=e37]:
+    - generic [ref=e38]:
+      - img "Mitcorp Logo" [ref=e40]
+      - generic [ref=e41]:
+        - heading "產品委外加工資訊系統" [level=1] [ref=e42]
+        - paragraph [ref=e43]: 醫電鼎眾 Mitcorp | 雙向資訊同步與製程防呆管制平台
+    - generic [ref=e44]:
+      - 'generic "網頁負責人: SQE 陳智富" [ref=e45]':
+        - generic [ref=e46]: 🛠️
+        - generic [ref=e47]:
+          - generic [ref=e48]: 網頁負責人
+          - generic [ref=e49]: SQE 陳智富
+      - button "☀️ 淺色" [ref=e50] [cursor=pointer]
+      - generic [ref=e51]:
+        - generic [ref=e52]: 👤
+        - generic [ref=e53]:
+          - generic [ref=e54]: 系統管理員
+          - generic [ref=e55]: 管理處 (Administrator)
+        - button "🚪 登出" [ref=e56] [cursor=pointer]
+      - generic [ref=e115]:
+        - generic [ref=e116]:
+          - generic [ref=e117]: 📄
+          - generic "新機種製作需求一覽表2026 v2.xlsx (預設範本)" [ref=e118]
+        - button "📁 回列表" [ref=e119] [cursor=pointer]
+  - main [ref=e57]:
+    - generic [ref=e120]:
+      - navigation [ref=e121]:
+        - button "📈 儀表板 6%" [ref=e122] [cursor=pointer]:
+          - generic [ref=e123]: 📈
+          - generic [ref=e124]: 儀表板
+          - generic [ref=e125]: 6%
+        - button "📋 基本資料" [ref=e127] [cursor=pointer]:
+          - generic [ref=e128]: 📋
+          - generic [ref=e129]: 基本資料
+        - button "🔰 製程管制" [ref=e130] [cursor=pointer]:
+          - generic [ref=e131]: 🔰
+          - generic [ref=e132]: 製程管制
+        - button "🎯 試產要求" [ref=e133] [cursor=pointer]:
+          - generic [ref=e134]: 🎯
+          - generic [ref=e135]: 試產要求
+        - button "📂 工程文件" [ref=e136] [cursor=pointer]:
+          - generic [ref=e137]: 📂
+          - generic [ref=e138]: 工程文件
+        - button "✍️ 簽章匯出" [active] [ref=e139] [cursor=pointer]:
+          - generic [ref=e140]: ✍️
+          - generic [ref=e141]: 簽章匯出
+        - button "⚙️ 系統設定" [ref=e143] [cursor=pointer]:
+          - generic [ref=e144]: ⚙️
+          - generic [ref=e145]: 系統設定
+      - generic [ref=e536]:
+        - heading "D. 雙向線上簽核與 Excel 匯出" [level=2] [ref=e537]
+        - paragraph [ref=e538]: 兩端資訊對齊無誤後，請於下方進行線上簽章並下載匯出檔案。
+        - generic [ref=e541]:
+          - generic [ref=e542]: 當前對齊率
+          - generic [ref=e543]: 6%
+        - generic [ref=e546]:
+          - generic [ref=e547]:
+            - generic [ref=e548]:
+              - generic [ref=e549]: 研發確認簽章
+              - generic [ref=e550]: 研發 (RD)
+            - generic [ref=e551]:
+              - generic [ref=e552]:
+                - generic [ref=e553]: 簽名人姓名
+                - textbox "請輸入研發姓名" [ref=e554]
+              - generic [ref=e555]:
+                - generic [ref=e556]: 電子簽章
+                - generic [ref=e558]: 尚未設定電子簽章
+                - button "📤 上傳簽章" [ref=e560] [cursor=pointer]
+              - paragraph [ref=e561]: 本簽章確認：產品基本資料與風險零件已填寫完整，並經研發部門確認。
+          - generic [ref=e562]:
+            - generic [ref=e563]:
+              - generic [ref=e564]: 工程審核簽章
+              - generic [ref=e565]: 工程 (PE)
+            - generic [ref=e566]:
+              - generic [ref=e567]:
+                - generic [ref=e568]: 簽名人姓名
+                - textbox "請輸入工程姓名" [ref=e569]
+              - generic [ref=e570]:
+                - generic [ref=e571]: 電子簽章
+                - generic [ref=e573]: 尚未設定電子簽章
+                - button "📤 上傳簽章" [ref=e575] [cursor=pointer]
+              - paragraph [ref=e576]: 本簽章確認：生產治工具規格、鋼板開口以及製程工程參數已審查通過。
+          - generic [ref=e577]:
+            - generic [ref=e578]:
+              - generic [ref=e579]: 品保處最後審核
+              - generic [ref=e580]: 品保處 (QA)
+            - generic [ref=e581]:
+              - generic [ref=e582]:
+                - generic [ref=e583]: 簽名人姓名
+                - textbox "待研發與工程完成簽核" [disabled] [ref=e584]
+              - generic [ref=e585]:
+                - generic [ref=e586]: 電子簽章
+                - generic [ref=e588]: 尚未設定電子簽章
+              - paragraph [ref=e589]: ⚠️ 需等研發與工程確認人皆完成簽章後，方可由品保處進行最後審核。
+        - generic [ref=e590]:
+          - generic [ref=e591]: ⚠️
+          - generic [ref=e592]:
+            - paragraph [ref=e593]: 注意：尚有必填的防呆檢查未完成！
+            - paragraph [ref=e594]: 為了避免委外加工廠遺漏正確訊息，建議先前往前述分頁完成對齊。如果您仍要強行簽章並匯出文件，請點擊下方按鈕。
+        - generic [ref=e595]:
+          - button "匯出並下載 PDF 報告 (A4直式)" [ref=e596] [cursor=pointer]:
+            - img [ref=e597]
+            - generic [ref=e599]: 匯出並下載 PDF 報告 (A4直式)
+          - button "匯出並下載 Excel 文件" [ref=e600] [cursor=pointer]:
+            - img [ref=e601]
+            - generic [ref=e603]: 匯出並下載 Excel 文件
+  - contentinfo [ref=e112]:
+    - paragraph [ref=e113]: "© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富"
+    - paragraph [ref=e114]: Vite + React Premium 製程管制平台
