@@ -468,8 +468,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           </div>
 
-          {/* PCB 板材資訊 */}
-          <div className="form-row-grid-4">
+          {/* 材質分類 */}
+          <div className="form-row-grid">
             <div className="form-group">
               <label className="form-label">材質分類</label>
               <div className="checkbox-flex">
@@ -492,57 +492,6 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                     disabled={isFieldDisabled('basicInfo.materialType')}
                   />
                   <span>FPC軟板</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">PCB 板材</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: FR-4"
-                value={data.basicInfo.pcbMaterial || ''} 
-                onChange={(e) => handleBasicChange('pcbMaterial', e.target.value)}
-                disabled={isFieldDisabled('basicInfo.pcbMaterial')}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">PCB 層數</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="例如: 4"
-                value={data.basicInfo.pcbLayers || ''} 
-                onChange={(e) => handleBasicChange('pcbLayers', e.target.value)}
-                disabled={isFieldDisabled('basicInfo.pcbLayers')}
-              />
-            </div>
-            <div className="form-group">
-              <label className="form-label">PCB 表面處理</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.pcbSurface?.enig || false} 
-                    onChange={(e) => {
-                      const pcbSurface = { ...(data.basicInfo.pcbSurface || {}), enig: e.target.checked };
-                      handleBasicChange('pcbSurface', pcbSurface);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.pcbSurface.enig')}
-                  />
-                  <span>ENIG</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.pcbSurface?.osp || false} 
-                    onChange={(e) => {
-                      const pcbSurface = { ...(data.basicInfo.pcbSurface || {}), osp: e.target.checked };
-                      handleBasicChange('pcbSurface', pcbSurface);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.pcbSurface.osp')}
-                  />
-                  <span>OSP</span>
                 </label>
               </div>
             </div>

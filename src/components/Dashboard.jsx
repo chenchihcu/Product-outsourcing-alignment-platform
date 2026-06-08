@@ -4,14 +4,7 @@ import './Dashboard.css';
 
 export default function Dashboard({ data, onGoToSection }) {
   const report = validateAlignment(data);
-  const { alignmentRate, passedChecks, totalChecks, warnings } = report;
-
-  // 取得對齊進度條的顏色
-  const getProgressColor = (rate) => {
-    if (rate >= 95) return 'var(--success-color)';
-    if (rate >= 60) return 'var(--warning-color)';
-    return 'var(--accent-color)';
-  };
+  const { warnings } = report;
 
   const errors = warnings.filter(w => w.type === 'error');
   const warns = warnings.filter(w => w.type === 'warning');
@@ -31,101 +24,6 @@ export default function Dashboard({ data, onGoToSection }) {
 
   return (
     <div className="dashboard-grid">
-      {/* 資訊對齊進度卡 */}
-      <div className="dashboard-card glass-card progress-card">
-        <h3 className="card-title">兩端資訊對齊率</h3>
-        <div className="progress-circle-wrapper">
-          <svg className="progress-svg" viewBox="0 0 120 120">
-            <circle className="circle-bg" cx="60" cy="60" r="50" />
-            <circle 
-              className="circle-fg" 
-              cx="60" 
-              cy="60" 
-              r="50" 
-              style={{
-                strokeDasharray: 314,
-                strokeDashoffset: 314 - (314 * alignmentRate) / 100,
-                stroke: getProgressColor(alignmentRate)
-              }}
-            />
-          </svg>
-          <div className="progress-text-wrapper">
-            <span className="progress-rate">{alignmentRate}%</span>
-            <span className="progress-label">資訊已同步</span>
-          </div>
-        </div>
-        
-        <div className="progress-stats">
-          <div className="stat-item">
-            <span className="stat-val">{passedChecks}</span>
-            <span className="stat-label">已確認欄位</span>
-          </div>
-          <div className="stat-divider"></div>
-          <div className="stat-item">
-            <span className="stat-val">{totalChecks}</span>
-            <span className="stat-label">總需檢核項</span>
-          </div>
-        </div>
-      </div>
-
-      {/* 產品概覽卡 */}
-      <div className="dashboard-card glass-card summary-card">
-        <h3 className="card-title">機種資訊概覽</h3>
-        <div className="info-list">
-          <div className="info-row">
-            <span className="info-label">產品料號</span>
-            <span className="info-val">{data.basicInfo.productNo || <span className="placeholder">未填寫</span>}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">產品描述</span>
-            <span className="info-val">{data.basicInfo.productDesc || <span className="placeholder">未填寫</span>}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">委外加工廠</span>
-            <span className="info-val">{data.basicInfo.factory || <span className="placeholder">未填寫</span>}</span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">製程階段</span>
-            <span className="info-val">
-              {Object.keys(data.basicInfo.stage || {})
-                .filter(k => data.basicInfo.stage[k])
-                .map(k => k.toUpperCase())
-                .join(', ') || <span className="placeholder">未勾選</span>}
-            </span>
-          </div>
-          <div className="info-row">
-            <span className="info-label">主要加工項目</span>
-            <span className="info-val">
-              {(() => {
-                const processLabelMap = {
-                  smt: 'SMT',
-                  dip: 'DIP',
-                  ict: 'In-Circuit Test',
-                  assembly: '組裝',
-                  coating: '三防膠塗覆',
-                  packing: '包裝',
-                  fct: 'FCT 功能測試',
-                  flyingProbe: '飛針測試',
-                  underfillGlue: 'Underfill 塗膠',
-                  semiFinishedTest: '半成品測試',
-                  finalTest: '成品測試',
-                  otherProcess: '其他'
-                };
-                const items = Object.keys(data.basicInfo.processItems || {})
-                  .filter(k => data.basicInfo.processItems[k] && processLabelMap[k])
-                  .map(k => {
-                    if (k === 'otherProcess' && data.basicInfo.processItems.otherProcessText) {
-                      return `其他 (${data.basicInfo.processItems.otherProcessText})`;
-                    }
-                    return processLabelMap[k];
-                  });
-                return items.join(', ') || <span className="placeholder">未勾選</span>;
-              })()}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* 防呆警告面板 */}
       <div className="dashboard-card glass-card warning-panel">
         <h3 className="card-title flex-title">

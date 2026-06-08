@@ -179,12 +179,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCell(sheet1, 'B7', bi.productNo || '');
     writeCell(sheet1, 'B8', bi.productDesc || '');
 
-    // PCB 板材
-    writeCell(sheet1, 'B9', bi.pcbMaterial || '');
-    writeCell(sheet1, 'D9', bi.pcbLayers || '');
-    const pcbSurf = bi.pcbSurface || {};
-    writeCheckbox(sheet1, 'F9', 'ENIG', pcbSurf.enig);
-    writeCheckbox(sheet1, 'G9', 'OSP', pcbSurf.osp);
+    // PCB 板材 (已移除，強制寫空值防殘留)
+    writeCell(sheet1, 'B9', '');
+    writeCell(sheet1, 'D9', '');
+    writeCheckbox(sheet1, 'F9', 'ENIG', false);
+    writeCheckbox(sheet1, 'G9', 'OSP', false);
 
     // 品質水準
     const ql = bi.qualityLevel || {};

@@ -85,14 +85,6 @@ export function parseRequirementExcel(arrayBuffer) {
     data.basicInfo.productNo = getVal('B7') || '';
     data.basicInfo.productDesc = getVal('B8') || '';
 
-    // PCB 板材
-    data.basicInfo.pcbMaterial = getVal('B9') || '';
-    data.basicInfo.pcbLayers = getVal('D9') || '';
-    data.basicInfo.pcbSurface = {
-      enig: parseCheckbox(getVal('F9')),
-      osp: parseCheckbox(getVal('G9'))
-    };
-
     // 品質水準
     data.basicInfo.qualityLevel = {
       class2: parseCheckbox(getVal('B10')),
