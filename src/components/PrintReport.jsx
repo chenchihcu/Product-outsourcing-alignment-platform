@@ -350,11 +350,14 @@ export default function PrintReport({ data }) {
           </tr>
           {tr.photoRecords?.map((rec) => {
             let displayName = rec.name;
-            if (rec.isXray && rec.parts) {
-              const partsStr = rec.parts.filter(Boolean).join(', ');
-              const baseName = String(rec.name).split(/指定零件/)[0] + '指定零件:';
-              displayName = partsStr ? `${baseName} ${partsStr}` : baseName;
-            }
+          if (rec.isXray && rec.parts) {
+            const partsStr = rec.parts.filter(Boolean).join(', ');
+            const hasKeyword = String(rec.name).includes('指定零件');
+            const baseName = hasKeyword
+              ? String(rec.name).split(/指定零件/)[0] + '指定零件:'
+              : String(rec.name) + '指定零件:';
+            displayName = partsStr ? `${baseName} ${partsStr}` : baseName;
+          }
             return (
               <tr key={rec.id}>
                 <td style={{ paddingLeft: '20px' }}>{displayName}</td>

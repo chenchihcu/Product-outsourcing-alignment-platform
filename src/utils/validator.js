@@ -143,10 +143,7 @@ export function validateAlignment(data) {
   const sign = bi.signOff || {};
   check(!!sign.rdSignature, '「研發」電子簽章未上傳', 'error');
   check(!!sign.engineeringReviewSignature, '「工程」電子簽章未上傳', 'warning');
-  // QA 簽章檢查：僅當 RD 和 PE 均已簽署後才計入檢查，避免 QA 因前置簽署未完成而無法達到 100%
-  if (sign.rdSignature && sign.engineeringReviewSignature) {
-    check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
-  }
+  check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
 
   // 計算對齊率
   const alignmentRate = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) : 0;

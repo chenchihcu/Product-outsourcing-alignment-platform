@@ -21,7 +21,6 @@ export default function Settings({
   // 帳號清單密碼遮罩：預設隱藏，可逐列切換顯示
   const [revealedPasswords, setRevealedPasswords] = useState({});
   const [newUnit, setNewUnit] = useState('研發單位');
-  const [newRole, setNewRole] = useState('rd');
   const [newLevel, setNewLevel] = useState('Standard');
 
   const handleAddFactorySubmit = (e) => {
@@ -47,7 +46,7 @@ export default function Settings({
       username: newUsername.trim(),
       password: newPassword.trim(),
       unit: newUnit,
-      role: newRole,
+      role: newUnit === '研發單位' ? 'rd' : newUnit === '工程單位' ? 'eng' : newUnit === '審核單位(品保處)' ? 'qa' : 'admin',
       level: newLevel
     };
 
@@ -59,11 +58,6 @@ export default function Settings({
 
   const handleUnitChange = (val) => {
     setNewUnit(val);
-    // 自動對應角色代碼以防呆
-    if (val === '研發單位') setNewRole('rd');
-    else if (val === '工程單位') setNewRole('eng');
-    else if (val === '審核單位(品保處)') setNewRole('qa');
-    else setNewRole('admin');
   };
 
   return (
@@ -286,7 +280,7 @@ export default function Settings({
                             className="table-select-level"
                             value={acc.level}
                             onChange={(e) => onUpdateAccountLevel(acc.username, e.target.value)}
-                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
+                            disabled={currentUser.username === acc.username || acc.role === 'admin'}
                           >
                             <option value="Standard">Standard</option>
                             <option value="Reviewer">Reviewer</option>
@@ -296,12 +290,12 @@ export default function Settings({
                         <td>
                           <button
                             className="btn-delete-account"
-                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
+                            disabled={currentUser.username === acc.username || acc.role === 'admin'}
                             onClick={() => onRemoveAccount(acc.username)}
                             title={
                               currentUser.username === acc.username
                                 ? '無法刪除目前登入的帳號'
-                                : acc.username === 'admin'
+                                : acc.role === 'admin'
                                 ? '系統管理員帳號無法刪除'
                                 : '刪除此帳號'
                             }

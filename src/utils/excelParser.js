@@ -28,9 +28,9 @@ function cleanQty(val) {
 function cleanPlaceholder(val) {
   if (val === null || val === undefined) return '';
   const str = String(val).trim();
-  if (/__+/.test(str)) return '';
-  if (/^厚度\s*_+/i.test(str) || str.includes('厚度 ____ mm')) return '';
-  if (/^開口比\s*_+/i.test(str) || str.includes('開口比 ____ %')) return '';
+  if (/[_]{2,}/.test(str)) return '';
+  if (/^厚度\s*_+/i.test(str) || String(str).includes('厚度 ____ mm')) return '';
+  if (/^開口比\s*_+/i.test(str) || String(str).includes('開口比 ____ %')) return '';
   if (str === '數量' || str === '數量:' || str === 'qty' || str === '______') return '';
   if (str === '委外加工廠' || str === '加工廠' || str === '公司名稱') return '';
   return str;
@@ -98,7 +98,7 @@ export function parseRequirementExcel(arrayBuffer) {
 
     // 加工項目 (Checkbox)
     const f15Val = String(getVal('F15') || '');
-    const otherProcess = f15Val.includes('☑') || parseCheckbox(getVal('F15'));
+    const otherProcess = parseCheckbox(getVal('F15'));
     let otherProcessText = '';
     if (otherProcess) {
       const match = f15Val.match(/[☑☐]\s*其他[:：]?\s*(.*)/) || f15Val.match(/其他[:：]?\s*(.*)/);
@@ -184,7 +184,7 @@ export function parseRequirementExcel(arrayBuffer) {
     const a38Val = String(getVal('A38') || '');
     const smtCarrier = {
       need: a38Val.includes('☑ SMT刷錫載具'),
-      noNeed: a38Val.includes('☐ SMT刷錫載具') || (a38Val !== '' && !a38Val.includes('☑ SMT刷錫載具')),
+      noNeed: a38Val.includes('☐ SMT刷錫載具'),
       upper: a38Val.includes('☑ 上載板'),
       lower: a38Val.includes('☑ 下載板')
     };
@@ -197,7 +197,7 @@ export function parseRequirementExcel(arrayBuffer) {
     const b38Val = String(getVal('B38') || '');
     const otherFixture = {
       need: b38Val.includes('☑ 其他治具'),
-      noNeed: b38Val.includes('☐ 其他治具') || (b38Val !== '' && !b38Val.includes('☑ 其他治具')),
+      noNeed: b38Val.includes('☐ 其他治具'),
       name: '',
       qty: ''
     };
@@ -389,8 +389,8 @@ export function parseRequirementExcel(arrayBuffer) {
       memo: String(getVal('D15') || '').trim()
     });
 
-    const rawPos = String(getVal('B16') || '').split(/[,，\s\n]+/);
-    const rawDesc = String(getVal('C16') || '').split(/[,痕，\s\n]+/);
+    const rawPos = String(getVal('B16') || '').split(/[,，]+/);
+    const rawDesc = String(getVal('C16') || '').split(/[,，\s\n]+/);
     const rawMemo = String(getVal('D16') || '').split(/[,，\s\n]+/);
 
     for (let i = 0; i < 5; i++) {

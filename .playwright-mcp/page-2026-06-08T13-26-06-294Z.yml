@@ -1,0 +1,118 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "Mitcorp Logo" [ref=e7]
+      - heading "產品委外加工資訊系統" [level=1] [ref=e9]
+    - generic [ref=e11]:
+      - 'generic "網頁負責人: SQE 陳智富" [ref=e12]':
+        - generic [ref=e13]: 🛠️
+        - generic [ref=e14]:
+          - generic [ref=e15]: 網頁負責人
+          - generic [ref=e16]: SQE 陳智富
+      - button "☀️ 淺色" [ref=e17] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: 👤
+        - generic [ref=e20]:
+          - generic [ref=e21]: 系統管理員
+          - generic [ref=e22]: 管理處 (Administrator)
+        - button "🚪 登出" [ref=e23] [cursor=pointer]
+      - generic [ref=e216]:
+        - generic [ref=e217]:
+          - generic [ref=e218]: 📄
+          - generic "新機種製作需求一覽表2026 v2.xlsx (預設範本)" [ref=e219]
+        - button "📁 回列表" [ref=e220] [cursor=pointer]
+  - main [ref=e29]:
+    - generic [ref=e221]:
+      - navigation [ref=e222]:
+        - button "📈 儀表板 5%" [ref=e223] [cursor=pointer]:
+          - generic [ref=e224]: 📈
+          - generic [ref=e225]: 儀表板
+          - generic [ref=e226]: 5%
+        - button "📋 基本資料" [ref=e227] [cursor=pointer]:
+          - generic [ref=e228]: 📋
+          - generic [ref=e229]: 基本資料
+        - button "🔰 製程管制" [ref=e230] [cursor=pointer]:
+          - generic [ref=e231]: 🔰
+          - generic [ref=e232]: 製程管制
+        - button "🎯 試產要求" [ref=e233] [cursor=pointer]:
+          - generic [ref=e234]: 🎯
+          - generic [ref=e235]: 試產要求
+        - button "📂 工程文件" [ref=e236] [cursor=pointer]:
+          - generic [ref=e237]: 📂
+          - generic [ref=e238]: 工程文件
+        - button "✍️ 簽章匯出" [ref=e239] [cursor=pointer]:
+          - generic [ref=e240]: ✍️
+          - generic [ref=e241]: 簽章匯出
+        - button "⚙️ 系統設定" [ref=e242] [cursor=pointer]:
+          - generic [ref=e243]: ⚙️
+          - generic [ref=e244]: 系統設定
+      - generic [ref=e247]:
+        - heading "防呆與漏失提醒 15 異常 3 警告" [level=3] [ref=e248]:
+          - generic [ref=e249]: 防呆與漏失提醒
+          - generic [ref=e250]:
+            - generic [ref=e251]: 15 異常
+            - generic [ref=e252]: 3 警告
+        - generic [ref=e253]:
+          - generic [ref=e254]:
+            - heading "🛑 異常項目 (15)" [level=4] [ref=e255]
+            - generic [ref=e256]:
+              - generic "點擊前往該填寫區塊" [ref=e257] [cursor=pointer]:
+                - generic [ref=e258]: 發包方未填寫「產品料號」
+                - generic [ref=e259]: →
+              - generic "點擊前往該填寫區塊" [ref=e260] [cursor=pointer]:
+                - generic [ref=e261]: 發包方未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）
+                - generic [ref=e262]: →
+              - generic "點擊前往該填寫區塊" [ref=e263] [cursor=pointer]:
+                - generic [ref=e264]: 加工廠未填寫「委外加工廠」名稱
+                - generic [ref=e265]: →
+              - generic "點擊前往該填寫區塊" [ref=e266] [cursor=pointer]:
+                - generic [ref=e267]: 加工廠未確認是否需要「PCB / FPCA 烘烤」
+                - generic [ref=e268]: →
+              - generic "點擊前往該填寫區塊" [ref=e269] [cursor=pointer]:
+                - generic [ref=e270]: 加工廠未確認「Routing 治具」是否需要或提供
+                - generic [ref=e271]: →
+              - generic "點擊前往該填寫區塊" [ref=e272] [cursor=pointer]:
+                - generic [ref=e273]: 加工廠未確認「塗膠治具」是否需要或提供
+                - generic [ref=e274]: →
+              - generic "點擊前往該填寫區塊" [ref=e275] [cursor=pointer]:
+                - generic [ref=e276]: 加工廠未確認「測試治具」是否需要或提供
+                - generic [ref=e277]: →
+              - generic "點擊前往該填寫區塊" [ref=e278] [cursor=pointer]:
+                - generic [ref=e279]: 加工廠未確認「組裝治具」是否需要或提供
+                - generic [ref=e280]: →
+              - generic "點擊前往該填寫區塊" [ref=e281] [cursor=pointer]:
+                - generic [ref=e282]: 加工廠未確認「SMT 刷錫載具」是否需要
+                - generic [ref=e283]: →
+              - generic "點擊前往該填寫區塊" [ref=e284] [cursor=pointer]:
+                - generic [ref=e285]: 加工廠未確認「其他治具」是否需要
+                - generic [ref=e286]: →
+              - generic "點擊前往該填寫區塊" [ref=e287] [cursor=pointer]:
+                - generic [ref=e288]: 加工廠未確認「SMT 焊接順序」（先焊底面 / 先焊頂面）
+                - generic [ref=e289]: →
+              - generic "點擊前往該填寫區塊" [ref=e290] [cursor=pointer]:
+                - generic [ref=e291]: 已勾選有關鍵零件，但「測溫點配置」未填滿至少 6 點位置
+                - generic [ref=e292]: →
+              - generic "點擊前往該填寫區塊" [ref=e293] [cursor=pointer]:
+                - generic [ref=e294]: 加工廠未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）
+                - generic [ref=e295]: →
+              - generic "點擊前往該填寫區塊" [ref=e296] [cursor=pointer]:
+                - generic [ref=e297]: 「研發」簽章未填寫
+                - generic [ref=e298]: →
+              - generic "點擊前往該填寫區塊" [ref=e299] [cursor=pointer]:
+                - generic [ref=e300]: 「品保處」簽章未填寫
+                - generic [ref=e301]: →
+          - generic [ref=e302]:
+            - heading "⚠️ 警告項目 (3)" [level=4] [ref=e303]
+            - generic [ref=e304]:
+              - generic "點擊前往該填寫區塊" [ref=e305] [cursor=pointer]:
+                - generic [ref=e306]: 發包方未填寫「產品名稱 / 描述」
+                - generic [ref=e307]: →
+              - generic "點擊前往該填寫區塊" [ref=e308] [cursor=pointer]:
+                - generic [ref=e309]: 加工廠未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）
+                - generic [ref=e310]: →
+              - generic "點擊前往該填寫區塊" [ref=e311] [cursor=pointer]:
+                - generic [ref=e312]: 「工程」簽章未填寫
+                - generic [ref=e313]: →
+  - contentinfo [ref=e142]:
+    - paragraph [ref=e143]: "© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富"
+    - paragraph [ref=e144]: Vite + React Premium 製程管制平台

@@ -1,0 +1,88 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "Mitcorp Logo" [ref=e7]
+      - generic [ref=e8]:
+        - heading "產品委外加工資訊系統" [level=1] [ref=e9]
+        - paragraph [ref=e10]: 醫電鼎眾 Mitcorp | 雙向資訊同步與製程防呆管制平台
+    - generic [ref=e11]:
+      - 'generic "網頁負責人: SQE 陳智富" [ref=e12]':
+        - generic [ref=e13]: 🛠️
+        - generic [ref=e14]:
+          - generic [ref=e15]: 網頁負責人
+          - generic [ref=e16]: SQE 陳智富
+      - button "☀️ 淺色" [ref=e17] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: 👤
+        - generic [ref=e20]:
+          - generic [ref=e21]: 系統管理員
+          - generic [ref=e22]: 管理處 (Administrator)
+        - button "🚪 登出" [ref=e23] [cursor=pointer]
+  - main [ref=e29]:
+    - generic [ref=e145]:
+      - generic [ref=e146]:
+        - generic [ref=e147]:
+          - heading "機種管理中心" [level=2] [ref=e148]
+          - paragraph [ref=e149]: 線上直接管理多個機種對齊進度，免除每次上傳 Excel 檔案的繁瑣流程。
+        - generic [ref=e150]:
+          - button "➕ 新增機種" [ref=e151] [cursor=pointer]
+          - button "📥 匯入 Excel 機種" [ref=e152] [cursor=pointer]
+      - generic [ref=e153]:
+        - generic [ref=e154]: 🔍
+        - textbox "搜尋機種名稱..." [ref=e155]
+      - generic [ref=e156]:
+        - generic [ref=e157]:
+          - button "⏳ 進行中 (1)" [ref=e158] [cursor=pointer]
+          - button "✅ 已完成 (0)" [ref=e159] [cursor=pointer]
+          - button "📁 全部 (1)" [ref=e160] [cursor=pointer]
+        - generic [ref=e161]:
+          - generic [ref=e162]:
+            - generic [ref=e163]: "字體大小:"
+            - generic [ref=e164]:
+              - button "小" [ref=e165] [cursor=pointer]
+              - button "中" [ref=e166] [cursor=pointer]
+              - button "大" [ref=e167] [cursor=pointer]
+          - generic [ref=e168]:
+            - generic [ref=e169]: "表格間距:"
+            - generic [ref=e170]:
+              - button "緊湊" [ref=e171] [cursor=pointer]
+              - button "標準" [ref=e172] [cursor=pointer]
+              - button "寬鬆" [ref=e173] [cursor=pointer]
+      - table [ref=e175]:
+        - rowgroup [ref=e176]:
+          - row "📁 機種與一覽表名稱 📊 雙向資訊對齊率 🏷️ 對齊狀態 🕒 更新時間 ⚙️ 動作" [ref=e177]:
+            - columnheader "📁 機種與一覽表名稱" [ref=e178]
+            - columnheader "📊 雙向資訊對齊率" [ref=e179]
+            - columnheader "🏷️ 對齊狀態" [ref=e180]
+            - columnheader "🕒 更新時間" [ref=e181]
+            - columnheader "⚙️ 動作" [ref=e182]
+        - rowgroup [ref=e183]:
+          - row "📂 新機種製作需求一覽表2026 v2.xlsx (預設範本) 5% 進行中 ⏳ 2026/06/08 下午09:25 ✏️ 進入編輯 🗑️ 刪除" [ref=e184]:
+            - cell "📂 新機種製作需求一覽表2026 v2.xlsx (預設範本)" [ref=e185]:
+              - generic [ref=e186]: 📂
+              - generic "新機種製作需求一覽表2026 v2.xlsx (預設範本)" [ref=e187]
+            - cell "5%" [ref=e188]:
+              - generic [ref=e192]: 5%
+            - cell "進行中 ⏳" [ref=e193]:
+              - generic [ref=e194]: 進行中 ⏳
+            - cell "2026/06/08 下午09:25" [ref=e195]
+            - cell "✏️ 進入編輯 🗑️ 刪除" [ref=e196]:
+              - generic [ref=e197]:
+                - button "✏️ 進入編輯" [ref=e198] [cursor=pointer]
+                - button "🗑️ 刪除" [ref=e199] [cursor=pointer]
+      - generic [ref=e201]:
+        - generic [ref=e202]:
+          - heading "建立新機種" [level=3] [ref=e203]
+          - button "×" [ref=e204] [cursor=pointer]
+        - generic [ref=e205]:
+          - generic [ref=e207]:
+            - generic [ref=e208]: 機種與一覽表名稱
+            - textbox "機種與一覽表名稱" [active] [ref=e209]:
+              - /placeholder: 例如：新機種製作需求一覽表2026_機種A
+            - paragraph [ref=e210]: 系統將自動以此名稱複製預設範本，建立包含基本與防呆管制的全新機種表單。
+          - generic [ref=e211]:
+            - button "取消" [ref=e212] [cursor=pointer]
+            - button "建立機種" [ref=e213] [cursor=pointer]
+  - contentinfo [ref=e142]:
+    - paragraph [ref=e143]: "© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富"
+    - paragraph [ref=e144]: Vite + React Premium 製程管制平台

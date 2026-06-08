@@ -1,22 +1,22 @@
 .sections-container {
-  padding: 2rem;
-  margin-top: 1rem;
+  padding: 1.25rem;
+  margin-top: 0.75rem;
 }
 
 .section-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.3rem;
   color: #000000;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
   border-bottom: 2px solid var(--accent-color);
-  padding-bottom: 0.5rem;
+  padding-bottom: 0.35rem;
   display: inline-block;
 }
 
 .section-subtitle {
   font-size: 0.88rem;
   color: #111111;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
 }
 
 /* Card Design System */
@@ -26,36 +26,49 @@
   -webkit-backdrop-filter: blur(12px);
   border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
+  padding: 0;
+  margin-bottom: 1rem;
   box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
+  overflow: hidden;
 }
 
 .form-section-card:hover {
-  border-color: rgba(79, 70, 229, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(79, 70, 229, 0.06);
+  border-color: rgba(79, 70, 229, 0.2);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+  transform: translateY(-2px);
 }
 
-.form-section-card .card-title {
+.card-header {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   font-weight: 600;
-  color: #000000;
-  margin-bottom: 1.25rem;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  color: #ffffff;
+  padding: 0.85rem 1.25rem;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 0;
+}
+
+.card-header .card-icon-circle {
+  background: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+
+.card-header[data-accent="indigo"] { background: linear-gradient(135deg, #4f46e5, #6366f1); }
+.card-header[data-accent="emerald"] { background: linear-gradient(135deg, #059669, #10b981); }
+.card-header[data-accent="amber"] { background: linear-gradient(135deg, #d97706, #f59e0b); }
+.card-header[data-accent="slate"] { background: linear-gradient(135deg, #475569, #64748b); }
+
+.card-body {
+  padding: 1.25rem;
 }
 
 .sub-section-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.1rem;
+  font-size: 1.05rem;
   color: #000000;
-  margin: 1.5rem 0 1rem;
+  margin: 1rem 0 0.75rem;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -64,34 +77,34 @@
 .description-text {
   font-size: 0.85rem;
   color: #111111;
-  margin-bottom: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .form-row-grid, .form-row-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .form-row-grid-3 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1.5rem;
-  margin-bottom: 1.25rem;
+  gap: 1rem;
+  margin-bottom: 0.75rem;
 }
 
 .form-row-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .tooling-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
+  gap: 0.75rem;
+  margin-bottom: 0.75rem;
 }
 
 .records-grid {
@@ -119,15 +132,19 @@
     grid-template-columns: 1fr !important;
   }
   
-  .form-section-card {
+  .card-body {
     padding: 1rem;
+  }
+  
+  .card-header {
+    padding: 0.7rem 1rem;
   }
 }
 
 .divider {
   height: 1px;
   background: var(--border-color);
-  margin: 2rem 0;
+  margin: 1rem 0;
 }
 
 /* Checkbox & Radio flex layout */
@@ -252,12 +269,12 @@ input:checked + .slider:before {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.85rem 1rem;
+  padding: 0.7rem 0.85rem;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  margin-bottom: 0.75rem;
-  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+  gap: 1rem;
 }
 
 .tool-name {
@@ -379,27 +396,37 @@ input:checked + .slider:before {
 
 /* Records List */
 .record-list-section {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .list-group-title {
-  font-size: 0.9rem;
-  color: #9ca3af;
+  font-size: 0.95rem;
+  color: #1f2937;
+  font-weight: 600;
   margin-bottom: 0.75rem;
   border-left: 3px solid var(--accent-color);
-  padding-left: 8px;
+  padding: 0.35rem 0.75rem;
+  background: rgba(0, 0, 0, 0.02);
+  border-radius: 0 6px 6px 0;
 }
 
 .record-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.6rem 1rem;
+  padding: 0.5rem 0.85rem;
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  margin-bottom: 0.5rem;
-  gap: 1.5rem;
+  margin-bottom: 0.4rem;
+  gap: 1rem;
+  transition: all 0.2s ease;
+}
+
+.record-row:hover {
+  border-color: var(--border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transform: translateY(-1px);
 }
 
 .record-name {
@@ -417,7 +444,15 @@ input:checked + .slider:before {
 .action-row {
   display: flex;
   justify-content: flex-end;
-  margin-top: 2rem;
+  margin-top: 1.25rem;
+  gap: 0.75rem;
+}
+
+.action-row .btn-primary {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 14px rgba(99, 102, 241, 0.35);
 }
 
 /* Anim */
@@ -592,42 +627,9 @@ input:checked + .slider:before {
   height: 14px;
 }
 
-/* ===== 卡片色條強調 ===== */
+/* ===== 卡片 hover 強化 ===== */
 .form-section-card {
-  border-left: 4px solid transparent;
-  transition: all 0.3s ease;
-}
-
-.form-section-card[data-accent="indigo"] {
-  border-left-color: #4f46e5;
-}
-.form-section-card[data-accent="indigo"] .card-icon-circle {
-  color: #4f46e5;
-  background: rgba(79, 70, 229, 0.1);
-}
-
-.form-section-card[data-accent="emerald"] {
-  border-left-color: #059669;
-}
-.form-section-card[data-accent="emerald"] .card-icon-circle {
-  color: #059669;
-  background: rgba(5, 150, 105, 0.1);
-}
-
-.form-section-card[data-accent="amber"] {
-  border-left-color: #d97706;
-}
-.form-section-card[data-accent="amber"] .card-icon-circle {
-  color: #d97706;
-  background: rgba(217, 119, 6, 0.1);
-}
-
-.form-section-card[data-accent="slate"] {
-  border-left-color: #64748b;
-}
-.form-section-card[data-accent="slate"] .card-icon-circle {
-  color: #64748b;
-  background: rgba(100, 116, 139, 0.1);
+  border-left: none;
 }
 
 /* ===== 製程管制區塊色條 ===== */
@@ -647,26 +649,26 @@ input:checked + .slider:before {
 }
 
 .form-row-grid[data-accent="cyan"] {
-  border-left: 4px solid #0891b2;
-  padding-left: 12px;
+  border-left: 3px solid #0891b2;
+  padding-left: 10px;
   background: rgba(8, 145, 178, 0.02);
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
 }
 
 .form-row-grid[data-accent="indigo"] {
-  border-left: 4px solid #4f46e5;
-  padding-left: 12px;
+  border-left: 3px solid #4f46e5;
+  padding-left: 10px;
   background: rgba(79, 70, 229, 0.02);
-  border-radius: 8px;
-  margin-bottom: 1.25rem;
+  border-radius: 6px;
+  margin-bottom: 0.75rem;
 }
 
 .form-group[data-accent="violet"] {
-  border-left: 4px solid #7c3aed;
-  padding-left: 12px;
+  border-left: 3px solid #7c3aed;
+  padding-left: 10px;
   background: rgba(124, 58, 237, 0.02);
-  border-radius: 8px;
+  border-radius: 6px;
 }
 
 /* ===== 清單群組標題圖示 ===== */
@@ -696,11 +698,11 @@ input:checked + .slider:before {
   background: rgba(219, 39, 119, 0.1);
 }
 
-/* ===== 卡片懸浮增強 ===== */
-.form-section-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-}
+/* ===== Utility Classes ===== */
+.m-0 { margin: 0 !important; }
+.p-0 { padding: 0 !important; }
+.radio-group-compact { padding: 4px 0; }
+.tool-name-sm { min-width: 90px !important; }
 
 /* ===== 樣品/烘烤區塊 label 插入間距 ===== */
 .form-row-grid .form-label {
@@ -744,7 +746,7 @@ input:checked + .slider:before {
     font-size: 0.88rem !important;
   }
   .sections-container {
-    padding: 1rem 0.5rem !important;
+    padding: 0.75rem 0.5rem !important;
   }
 }
 

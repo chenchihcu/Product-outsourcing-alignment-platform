@@ -9,6 +9,7 @@ import Settings from './components/Settings';
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
 import { parseRequirementExcel } from './utils/excelParser';
+import { getJSON, setJSON, removeKey } from './utils/storage';
 import * as XLSX from 'xlsx';
 import './App.css';
 
@@ -71,16 +72,11 @@ export default function App() {
 
   // 登入狀態與使用者管理
   const [currentUser, setCurrentUser] = useState(() => {
-    const saved = localStorage.getItem('ag_current_user');
-    if (!saved) return null;
-    const parsed = JSON.parse(saved);
-    // 保留所有欄位 (含 name) 以供向後相容
-    return parsed;
+    return getJSON('current_user', null);
   });
 
   const [factories, setFactories] = useState(() => {
-    const saved = localStorage.getItem('ag_factories');
-    return saved ? JSON.parse(saved) : ['富士康', '捷普', '醫電鼎眾'];
+    return getJSON('factories', ['富士康', '捷普', '醫電鼎眾']);
   });
 
   const defaultAccounts = [
@@ -91,10 +87,7 @@ export default function App() {
   ];
 
   const [accounts, setAccounts] = useState(() => {
-    const saved = localStorage.getItem('ag_accounts');
-    const parsed = saved ? JSON.parse(saved) : defaultAccounts;
-    // 保留所有欄位以向後相容
-    return parsed;
+    return getJSON('accounts', defaultAccounts);
   });
 
   const currentAlignmentRate = useMemo(
@@ -102,19 +95,28 @@ export default function App() {
     [data]
   );
 
+  const sectionStatus = useMemo(() => {
+    if (!data) return {};
+    const bi = data.basicInfo || {};
+    const pc = data.processControl || {};
+    const tr = data.trialReport || {};
+    const sign = bi.signOff || {};
+    return {
+      basicInfo: !!(bi.factory && bi.productNo && Object.values(bi.stage || {}).some(v => v)),
+      processControl: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
+        (pc.bakeRequired?.need || pc.bakeRequired?.noNeed) &&
+        (pc.smtOrder?.bToT || pc.smtOrder?.tToB)),
+      trialReport: !!(tr.printRecords?.some(r => r.checked) || tr.inspectRecords?.some(r => r.checked) || tr.photoRecords?.some(r => r.checked)),
+      documents: !!Object.values(bi.documents || {}).some(v => v),
+      signOff: !!(sign.rdSignature || sign.engineeringReviewSignature || sign.qaSignature)
+    };
+  }, [data]);
+
   // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
   useEffect(() => {
     const loadDefaultTemplate = async () => {
       const key = getProjectsKey(currentUser);
-      const saved = localStorage.getItem(key);
-      let list = [];
-      if (saved) {
-        try {
-          list = JSON.parse(saved);
-        } catch (e) {
-          console.error(e);
-        }
-      }
+      const list = getJSON(key.replace('ag_', ''), []);
 
       if (list.length === 0) {
         try {
@@ -123,7 +125,6 @@ export default function App() {
           const ab = await response.arrayBuffer();
           const parsedData = parseRequirementExcel(ab);
           
-          // 轉為 Base64 以供後續匯出回寫
           const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
           const base64 = btoa(binaryString);
 
@@ -138,7 +139,7 @@ export default function App() {
           };
 
           const newList = [defaultProj];
-          localStorage.setItem(key, JSON.stringify(newList));
+          setJSON(key.replace('ag_', ''), newList);
           setProjects(newList);
         } catch (err) {
           console.error('載入預設範本失敗:', err);
@@ -206,26 +207,49 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    localStorage.setItem('ag_factories', JSON.stringify(factories));
+    setJSON('factories', factories);
   }, [factories]);
 
   useEffect(() => {
-    localStorage.setItem('ag_accounts', JSON.stringify(accounts));
+    setJSON('accounts', accounts);
   }, [accounts]);
 
   useEffect(() => {
     if (currentUser) {
-      localStorage.setItem('ag_current_user', JSON.stringify(currentUser));
+      setJSON('current_user', currentUser);
     } else {
-      localStorage.removeItem('ag_current_user');
+      removeKey('current_user');
     }
   }, [currentUser]);
 
   useEffect(() => {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
-    localStorage.setItem(key, JSON.stringify(projects));
+    setJSON(key.replace('ag_', ''), projects);
   }, [projects, currentUser]);
+
+  // 自動恢復上次編輯的機種
+  const lastIdRef = useRef(null);
+  useEffect(() => {
+    if (!currentUser || currentProjectId || projects.length === 0) return;
+    const lastId = getJSON('last_project_id', null);
+    if (lastId && lastId !== lastIdRef.current && projects.some(p => p.id === lastId)) {
+      lastIdRef.current = lastId;
+      const project = projects.find(p => p.id === lastId);
+      if (project) {
+        setData(project.data);
+        setFileName(project.name);
+        if (project.originalWbBase64) {
+          const binaryString = atob(project.originalWbBase64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+          setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+        }
+        setCurrentProjectId(lastId);
+        setActiveTab('dashboard');
+      }
+    }
+  }, [currentUser, projects, currentProjectId]);
 
   const handleAddFactory = (fac) => {
     if (!factories.includes(fac)) {
@@ -269,6 +293,7 @@ export default function App() {
       
       setCurrentProjectId(id);
       setActiveTab('dashboard');
+      setJSON('last_project_id', id);
     } else {
       alert('找不到該機種資料。');
     }
@@ -315,11 +340,9 @@ export default function App() {
       };
 
       const newList = [...projects, newProj];
-      const key = getProjectsKey(currentUser);
-      localStorage.setItem(key, JSON.stringify(newList));
+      setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
       
-      // 直接載入新機種編輯
       handleSelectProject(newProj.id, newList);
     } catch (err) {
       console.error(err);
@@ -361,11 +384,9 @@ export default function App() {
       };
 
       const newList = [...projects, newProj];
-      const key = getProjectsKey(currentUser);
-      localStorage.setItem(key, JSON.stringify(newList));
+      setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
       
-      // 直接載入新機種編輯
       handleSelectProject(newProj.id, newList);
     } catch (err) {
       console.error(err);
@@ -376,8 +397,7 @@ export default function App() {
   // 6. 刪除機種
   const handleDeleteProject = (id) => {
     const newList = projects.filter(p => p.id !== id);
-    const key = getProjectsKey(currentUser);
-    localStorage.setItem(key, JSON.stringify(newList));
+    setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
     setProjects(newList);
 
     if (currentProjectId === id) {
@@ -610,45 +630,22 @@ export default function App() {
               </button>
               <div className="tab-nav-divider"></div>
               
-              <button 
-                className={`tab-btn ${activeTab === 'basicInfo' ? 'active' : ''}`}
-                onClick={() => setActiveTab('basicInfo')}
-              >
-                <span className="tab-icon">📋</span>
-                <span className="tab-label">基本資料</span>
-              </button>
-              
-              <button 
-                className={`tab-btn ${activeTab === 'processControl' ? 'active' : ''}`}
-                onClick={() => setActiveTab('processControl')}
-              >
-                <span className="tab-icon">🔰</span>
-                <span className="tab-label">製程管制</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'trialReport' ? 'active' : ''}`}
-                onClick={() => setActiveTab('trialReport')}
-              >
-                <span className="tab-icon">🎯</span>
-                <span className="tab-label">試產要求</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`}
-                onClick={() => setActiveTab('documents')}
-              >
-                <span className="tab-icon">📂</span>
-                <span className="tab-label">工程文件</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'signOff' ? 'active' : ''}`}
-                onClick={() => setActiveTab('signOff')}
-              >
-                <span className="tab-icon">✍️</span>
-                <span className="tab-label">簽章匯出</span>
-              </button>
+              {['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'].map(tab => {
+                const labels = { basicInfo: '基本資料', processControl: '製程管制', trialReport: '試產要求', documents: '工程文件', signOff: '簽章匯出' };
+                const icons = { basicInfo: '📋', processControl: '🔰', trialReport: '🎯', documents: '📂', signOff: '✍️' };
+                const done = sectionStatus[tab];
+                return (
+                  <button key={tab}
+                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab)}
+                    title={`${done ? '✓ 已完成' : '○ 進行中'} — 點擊直接跳轉`}
+                  >
+                    <span className="tab-icon">{done ? '✅' : icons[tab]}</span>
+                    <span className="tab-label">{labels[tab]}</span>
+                    {done && <span className="tab-check">✓</span>}
+                  </button>
+                );
+              })}
 
               <div className="tab-nav-divider"></div>
               

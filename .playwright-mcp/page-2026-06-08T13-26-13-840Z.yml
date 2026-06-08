@@ -1,0 +1,244 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - generic [ref=e5]:
+      - img "Mitcorp Logo" [ref=e7]
+      - heading "產品委外加工資訊系統" [level=1] [ref=e9]
+    - generic [ref=e11]:
+      - 'generic "網頁負責人: SQE 陳智富" [ref=e12]':
+        - generic [ref=e13]: 🛠️
+        - generic [ref=e14]:
+          - generic [ref=e15]: 網頁負責人
+          - generic [ref=e16]: SQE 陳智富
+      - button "☀️ 淺色" [ref=e17] [cursor=pointer]
+      - generic [ref=e18]:
+        - generic [ref=e19]: 👤
+        - generic [ref=e20]:
+          - generic [ref=e21]: 系統管理員
+          - generic [ref=e22]: 管理處 (Administrator)
+        - button "🚪 登出" [ref=e23] [cursor=pointer]
+      - generic [ref=e216]:
+        - generic [ref=e217]:
+          - generic [ref=e218]: 📄
+          - generic "新機種製作需求一覽表2026 v2.xlsx (預設範本)" [ref=e219]
+        - button "📁 回列表" [ref=e220] [cursor=pointer]
+  - main [ref=e29]:
+    - generic [ref=e221]:
+      - navigation [ref=e222]:
+        - button "📈 儀表板 5%" [ref=e223] [cursor=pointer]:
+          - generic [ref=e224]: 📈
+          - generic [ref=e225]: 儀表板
+          - generic [ref=e226]: 5%
+        - button "📋 基本資料" [active] [ref=e227] [cursor=pointer]:
+          - generic [ref=e228]: 📋
+          - generic [ref=e229]: 基本資料
+        - button "🔰 製程管制" [ref=e230] [cursor=pointer]:
+          - generic [ref=e231]: 🔰
+          - generic [ref=e232]: 製程管制
+        - button "🎯 試產要求" [ref=e233] [cursor=pointer]:
+          - generic [ref=e234]: 🎯
+          - generic [ref=e235]: 試產要求
+        - button "📂 工程文件" [ref=e236] [cursor=pointer]:
+          - generic [ref=e237]: 📂
+          - generic [ref=e238]: 工程文件
+        - button "✍️ 簽章匯出" [ref=e239] [cursor=pointer]:
+          - generic [ref=e240]: ✍️
+          - generic [ref=e241]: 簽章匯出
+        - button "⚙️ 系統設定" [ref=e242] [cursor=pointer]:
+          - generic [ref=e243]: ⚙️
+          - generic [ref=e244]: 系統設定
+      - generic [ref=e315]:
+        - heading "基本資料" [level=2] [ref=e316]
+        - paragraph [ref=e317]: 請核對發包方資訊，並由加工廠確實填寫廠區及治工具資訊。
+        - generic [ref=e318]:
+          - heading "📄 機種基本資訊" [level=3] [ref=e319]
+          - generic [ref=e320]:
+            - generic [ref=e321]:
+              - generic [ref=e322]: 委外加工廠 *
+              - combobox [ref=e323] [cursor=pointer]:
+                - option "-- 請選擇委外加工廠 --" [selected]
+                - option "富士康"
+                - option "捷普"
+                - option "醫電鼎眾"
+            - generic [ref=e324]:
+              - generic [ref=e325]: 產品料號 *
+              - textbox "請輸入產品料號" [ref=e326]
+            - generic [ref=e327]:
+              - generic [ref=e328]: 產品名稱 / 描述
+              - textbox "請輸入產品名稱 / 描述" [ref=e329]
+          - generic [ref=e331]:
+            - generic [ref=e332]: 產品階段 *
+            - generic [ref=e333]:
+              - generic [ref=e334] [cursor=pointer]:
+                - checkbox "EVT" [ref=e335]
+                - generic [ref=e336]: EVT
+              - generic [ref=e337] [cursor=pointer]:
+                - checkbox "DVT" [ref=e338]
+                - generic [ref=e339]: DVT
+              - generic [ref=e340] [cursor=pointer]:
+                - checkbox "PVT" [ref=e341]
+                - generic [ref=e342]: PVT
+              - generic [ref=e343] [cursor=pointer]:
+                - checkbox "Pilot-run" [ref=e344]
+                - generic [ref=e345]: Pilot-run
+              - generic [ref=e346] [cursor=pointer]:
+                - checkbox "ECN" [ref=e347]
+                - generic [ref=e348]: ECN
+        - generic [ref=e349]:
+          - heading "🏅 品質與驗收標準" [level=3] [ref=e350]
+          - generic [ref=e351]:
+            - generic [ref=e352]:
+              - generic [ref=e353]: 品質水準要求
+              - generic [ref=e354]:
+                - generic [ref=e355] [cursor=pointer]:
+                  - checkbox "Class 2" [ref=e356]
+                  - generic [ref=e357]: Class 2
+                - generic [ref=e358] [cursor=pointer]:
+                  - checkbox "Class 3" [ref=e359]
+                  - generic [ref=e360]: Class 3
+            - generic [ref=e361]:
+              - generic [ref=e362]: IPC 驗收標準
+              - generic [ref=e363]:
+                - generic [ref=e364] [cursor=pointer]:
+                  - checkbox "IPC-A-610" [ref=e365]
+                  - generic [ref=e366]: IPC-A-610
+                - generic [ref=e367] [cursor=pointer]:
+                  - checkbox "J-STD-001" [ref=e368]
+                  - generic [ref=e369]: J-STD-001
+        - generic [ref=e370]:
+          - heading "⚙️ 加工製程與管制需求" [level=3] [ref=e371]
+          - generic [ref=e372]:
+            - generic [ref=e373]:
+              - generic [ref=e374]: 點膠工藝
+              - generic [ref=e376] [cursor=pointer]:
+                - checkbox "需要點膠" [ref=e377]
+                - generic [ref=e378]: 需要點膠
+            - generic [ref=e379]:
+              - generic [ref=e380]: QR Code 掃描需求
+              - generic [ref=e381]:
+                - generic [ref=e382] [cursor=pointer]:
+                  - radio "需要" [ref=e383]
+                  - generic [ref=e384]: 需要
+                - generic [ref=e385] [cursor=pointer]:
+                  - radio "不需要" [ref=e386]
+                  - generic [ref=e387]: 不需要
+            - generic [ref=e388]:
+              - generic [ref=e389]: 序號管控需求
+              - generic [ref=e390]:
+                - generic [ref=e391] [cursor=pointer]:
+                  - radio "需要" [ref=e392]
+                  - generic [ref=e393]: 需要
+                - generic [ref=e394] [cursor=pointer]:
+                  - radio "不需要" [ref=e395]
+                  - generic [ref=e396]: 不需要
+            - generic [ref=e397]:
+              - generic [ref=e398]: AOI 檢驗面
+              - generic [ref=e399]:
+                - generic [ref=e400] [cursor=pointer]:
+                  - checkbox "Top (頂面)" [ref=e401]
+                  - generic [ref=e402]: Top (頂面)
+                - generic [ref=e403] [cursor=pointer]:
+                  - checkbox "Bottom (底面)" [ref=e404]
+                  - generic [ref=e405]: Bottom (底面)
+          - generic [ref=e406]:
+            - generic [ref=e407]: 主要加工項目 *
+            - generic [ref=e408]:
+              - generic [ref=e409] [cursor=pointer]:
+                - checkbox "SMT" [ref=e410]
+                - generic [ref=e411]: SMT
+              - generic [ref=e412] [cursor=pointer]:
+                - checkbox "DIP" [ref=e413]
+                - generic [ref=e414]: DIP
+              - generic [ref=e415] [cursor=pointer]:
+                - checkbox "In-Circuit Test" [ref=e416]
+                - generic [ref=e417]: In-Circuit Test
+              - generic [ref=e418] [cursor=pointer]:
+                - checkbox "組裝" [ref=e419]
+                - generic [ref=e420]: 組裝
+              - generic [ref=e421] [cursor=pointer]:
+                - checkbox "三防膠塗覆" [ref=e422]
+                - generic [ref=e423]: 三防膠塗覆
+              - generic [ref=e424] [cursor=pointer]:
+                - checkbox "包裝" [ref=e425]
+                - generic [ref=e426]: 包裝
+              - generic [ref=e427] [cursor=pointer]:
+                - checkbox "FCT 功能測試" [ref=e428]
+                - generic [ref=e429]: FCT 功能測試
+              - generic [ref=e430] [cursor=pointer]:
+                - checkbox "飛針測試" [ref=e431]
+                - generic [ref=e432]: 飛針測試
+              - generic [ref=e433] [cursor=pointer]:
+                - checkbox "Underfill 塗膠" [ref=e434]
+                - generic [ref=e435]: Underfill 塗膠
+              - generic [ref=e436] [cursor=pointer]:
+                - checkbox "半成品測試" [ref=e437]
+                - generic [ref=e438]: 半成品測試
+              - generic [ref=e439] [cursor=pointer]:
+                - checkbox "成品測試" [ref=e440]
+                - generic [ref=e441]: 成品測試
+              - generic [ref=e442]:
+                - generic [ref=e443] [cursor=pointer]:
+                  - checkbox "其他:" [ref=e444]
+                  - generic [ref=e445]: "其他:"
+                - textbox "請說明其他加工項目" [disabled] [ref=e446]
+        - generic [ref=e447]:
+          - heading "🔧 鋼板與治工具一覽表" [level=3] [ref=e448]
+          - generic [ref=e449]:
+            - generic [ref=e450]:
+              - generic [ref=e451]: Routing 治具
+              - generic [ref=e452]:
+                - generic [ref=e453] [cursor=pointer]:
+                  - radio "Offset / 需要" [ref=e454]
+                  - generic [ref=e455]: Offset / 需要
+                - generic [ref=e456] [cursor=pointer]:
+                  - radio "不需要" [ref=e457]
+                  - generic [ref=e458]: 不需要
+            - generic [ref=e459]:
+              - generic [ref=e460]: 塗膠治具
+              - generic [ref=e461]:
+                - generic [ref=e462] [cursor=pointer]:
+                  - radio "Offset / 需要" [ref=e463]
+                  - generic [ref=e464]: Offset / 需要
+                - generic [ref=e465] [cursor=pointer]:
+                  - radio "不需要" [ref=e466]
+                  - generic [ref=e467]: 不需要
+            - generic [ref=e468]:
+              - generic [ref=e469]: 測試治具
+              - generic [ref=e470]:
+                - generic [ref=e471] [cursor=pointer]:
+                  - radio "Offset / 需要" [ref=e472]
+                  - generic [ref=e473]: Offset / 需要
+                - generic [ref=e474] [cursor=pointer]:
+                  - radio "不需要" [ref=e475]
+                  - generic [ref=e476]: 不需要
+            - generic [ref=e477]:
+              - generic [ref=e478]: 組裝治具
+              - generic [ref=e479]:
+                - generic [ref=e480] [cursor=pointer]:
+                  - radio "Offset / 需要" [ref=e481]
+                  - generic [ref=e482]: Offset / 需要
+                - generic [ref=e483] [cursor=pointer]:
+                  - radio "不需要" [ref=e484]
+                  - generic [ref=e485]: 不需要
+          - generic [ref=e486]:
+            - generic [ref=e487]:
+              - generic [ref=e488]: SMT刷錫載具
+              - generic [ref=e489]:
+                - generic [ref=e490] [cursor=pointer]:
+                  - radio "需要" [ref=e491]
+                  - generic [ref=e492]: 需要
+                - generic [ref=e493] [cursor=pointer]:
+                  - radio "不需要" [ref=e494]
+                  - generic [ref=e495]: 不需要
+            - generic [ref=e496]:
+              - generic [ref=e497]: 其他治具
+              - generic [ref=e498]:
+                - generic [ref=e499] [cursor=pointer]:
+                  - radio "需要" [ref=e500]
+                  - generic [ref=e501]: 需要
+                - generic [ref=e502] [cursor=pointer]:
+                  - radio "不需要" [ref=e503]
+                  - generic [ref=e504]: 不需要
+        - button "下一步：製程管制與前置作業" [ref=e506] [cursor=pointer]
+  - contentinfo [ref=e142]:
+    - paragraph [ref=e143]: "© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富"
+    - paragraph [ref=e144]: Vite + React Premium 製程管制平台
