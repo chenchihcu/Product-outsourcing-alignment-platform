@@ -158,7 +158,7 @@ export default function PrintReport({ data }) {
               {renderCheck(pc.bakeRequired?.need)} 需要烘烤
               <span style={{ marginLeft: '20px' }}>{renderCheck(pc.bakeRequired?.noNeed)} 不需要</span>
               {pc.bakeRequired?.need && (
-                <div style={{ marginTop: '6px', fontSize: '0.9rem', color: '#333' }}>
+                <div style={{ marginTop: '6px', fontSize: '0.9rem', color: '#111', fontWeight: 550 }}>
                   PCB 烘烤條件: {pc.bakeRequired?.pcbBakeCond || '—'} <br />
                   FPCA 烘烤條件: {pc.bakeRequired?.fpcaBakeCond || '—'}
                 </div>
@@ -167,10 +167,15 @@ export default function PrintReport({ data }) {
           </tr>
           <tr>
             <td className="cell-label">SMT 首件檢查項目</td>
-            <td className="cell-value" style={{ width: '35%' }}>
+            <td className="cell-value" style={{ width: '45%' }}>
               <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.polarity)} 極性方向檢查</span> <br />
               <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.measureLcr)} 量測 LCR (電容/電阻/電感)</span> <br />
-              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.spi)} SPI 錫膏厚度測試</span>
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.spi)} SPI 錫膏厚度測試</span> <br />
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.steelTension)} 鋼板張力量測</span> <br />
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.ledTest === 'yes')} LED點亮測試: 有</span> 
+              <span className="print-checkbox" style={{ marginLeft: '10px' }}>{renderCheck(pc.smtFirstPiece?.ledTest === 'no')} 無 (不適用)</span> <br />
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.pcbReflow)} PCB外觀檢查(reflow)</span> <br />
+              <span className="print-checkbox">{renderCheck(pc.smtFirstPiece?.solderability)} 濕潤性檢查 (試錫板)</span>
             </td>
             <td className="cell-label" style={{ width: '15%' }}>SMT 焊接順序</td>
             <td className="cell-value" style={{ width: '25%' }}>

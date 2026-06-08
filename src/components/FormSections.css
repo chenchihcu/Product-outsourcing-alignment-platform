@@ -356,3 +356,76 @@ input:checked + .slider:before {
     transform: translateY(0);
   }
 }
+
+/* Inline Bake Inputs */
+.inline-bake-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  color: #cbd5e1;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  gap: 6px;
+}
+
+.inline-num-input {
+  width: 58px;
+  text-align: center;
+  border: none;
+  border-bottom: 2px solid var(--accent-color);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  outline: none;
+  border-radius: 4px;
+  padding: 2px 4px;
+  transition: all 0.2s ease;
+}
+
+.inline-num-input:focus {
+  background: rgba(99, 102, 241, 0.15);
+  border-bottom-color: var(--success-color);
+  box-shadow: 0 2px 4px rgba(99, 102, 241, 0.1);
+}
+
+.inline-num-input.inline-num-small {
+  width: 44px;
+}
+
+/* 欄位跳轉定位閃爍定位與即時警告樣式 */
+.highlight-pulse {
+  border-radius: 8px;
+  animation: pulse-border-red 1.5s infinite alternate;
+  padding: 8px;
+  margin: -8px;
+  transition: all 0.3s ease;
+}
+
+@keyframes pulse-border-red {
+  0% {
+    box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.5);
+  }
+  100% {
+    box-shadow: 0 0 16px rgba(239, 68, 68, 0.8);
+    border-color: #ef4444;
+    background-color: rgba(239, 68, 68, 0.03);
+  }
+}
+
+.inline-input-warning {
+  font-size: 0.8rem;
+  color: #fbbf24;
+  margin-top: 6px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-weight: 500;
+}
+

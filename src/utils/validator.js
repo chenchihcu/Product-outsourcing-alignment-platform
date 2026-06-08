@@ -40,8 +40,10 @@ export function validateAlignment(data) {
   check(hasBakeSelect, '加工廠未確認是否需要「PCB / FPC 烘烤」', 'error');
   
   if (bake.need) {
-    check(!!bake.pcbBakeCond && !bake.pcbBakeCond.includes('_____'), '已勾選需要烘烤，但未填寫「PCB 烘烤條件」', 'error');
-    check(!!bake.fpcaBakeCond && !bake.fpcaBakeCond.includes('_____'), '已勾選需要烘烤，但未填寫「FPCA 烘烤條件」', 'error');
+    const pcbValid = !!bake.pcbBakeTemp && !!bake.pcbBakeTol && !!bake.pcbBakeHr;
+    check(pcbValid, '已勾選需要烘烤，但未填妥「PCB 烘烤條件」數值（溫度 / 容差 / 時間）', 'error');
+    const fpcaValid = !!bake.fpcaBakeTemp && !!bake.fpcaBakeHr;
+    check(fpcaValid, '已勾選需要烘烤，但未填妥「FPCA 烘烤條件」數值（溫度 / 時間）', 'error');
   }
 
   // 治工具對齊檢核
@@ -92,8 +94,13 @@ export function validateAlignment(data) {
   check(hasSample, '加工廠未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
 
   const smtFirst = pc.smtFirstPiece || {};
-  const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi;
-  check(hasSmtFirst, '加工廠未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI）', 'error');
+  if (pi.smt) {
+    const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi || smtFirst.steelTension || (smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no') || smtFirst.pcbReflow || smtFirst.solderability;
+    check(hasSmtFirst, '加工廠未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI / 鋼板張力量測 / LED點亮測試 / PCB外觀檢查 / 濕潤性檢查）', 'error');
+
+    const hasLedTest = smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no';
+    check(hasLedTest, '加工廠未確認 SMT「LED點亮測試」為「有」或「無 (不適用)」', 'error');
+  }
 
   // 新增: DIP 首件校驗 (如果加工項目包含 DIP)
   if (pi.dip) {

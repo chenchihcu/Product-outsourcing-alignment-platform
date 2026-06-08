@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import ProjectList from './components/ProjectList';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
@@ -11,14 +11,37 @@ import * as XLSX from 'xlsx';
 import './App.css';
 
 export default function App() {
-  const [projects, setProjects] = useState([]);
+  const [projects, setProjects] = useState(() => {
+    const saved = localStorage.getItem('ag_projects');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed.length > 0) {
+          return parsed;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    return [];
+  });
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [data, setData] = useState(null);
   const [originalWb, setOriginalWb] = useState(null);
   const [fileName, setFileName] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
-  const [alignmentRate, setAlignmentRate] = useState(0);
+  const [highlightField, setHighlightField] = useState('');
+
+  const handleGoToSection = (tab, msg) => {
+    setActiveTab(tab);
+    if (msg) {
+      setHighlightField(msg);
+      setTimeout(() => {
+        setHighlightField('');
+      }, 3000);
+    }
+  };
 
   // 登入狀態與使用者管理
   const [currentUser, setCurrentUser] = useState(() => {
@@ -43,82 +66,72 @@ export default function App() {
     return saved ? JSON.parse(saved) : defaultAccounts;
   });
 
-  // 1. 初始化與讀取本地機種清單
-  const initLocalProjects = async () => {
-    const saved = localStorage.getItem('ag_projects');
-    if (saved) {
-      try {
-        const parsed = JSON.parse(saved);
-        if (parsed.length > 0) {
-          setProjects(parsed);
-          return parsed;
+  // 動態計算對齊率，取代原本的 React state
+  const currentAlignmentRate = data ? validateAlignment(data).alignmentRate : 0;
+
+  // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
+  useEffect(() => {
+    const loadDefaultTemplate = async () => {
+      if (projects.length === 0) {
+        try {
+          const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
+          if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
+          const ab = await response.arrayBuffer();
+          const parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
+          
+          // 轉為 Base64 以供後續匯出回寫
+          const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
+          const base64 = btoa(binaryString);
+
+          const defaultProj = {
+            id: 'default-template',
+            name: '新機種製作需求一覽表2026 v2.xlsx (預設範本)',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            alignmentRate: 0,
+            data: parsedData,
+            originalWbBase64: base64
+          };
+
+          const newList = [defaultProj];
+          localStorage.setItem('ag_projects', JSON.stringify(newList));
+          setProjects(newList);
+        } catch (err) {
+          console.error('載入預設範本失敗:', err);
         }
-      } catch (e) {
-        console.error(e);
       }
+    };
+
+    if (currentUser) {
+      loadDefaultTemplate();
     }
+  }, [currentUser, projects.length]);
 
-    // 載入預設範本
-    try {
-      const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
-      if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
-      const ab = await response.arrayBuffer();
-      const parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
-      
-      // 轉為 Base64 以供後續匯出回寫
-      const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
-      const base64 = btoa(binaryString);
-
-      const defaultProj = {
-        id: 'default-template',
-        name: '新機種製作需求一覽表2026 v2.xlsx (預設範本)',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        alignmentRate: 0,
-        data: parsedData,
-        originalWbBase64: base64
-      };
-
-      const newList = [defaultProj];
-      localStorage.setItem('ag_projects', JSON.stringify(newList));
-      setProjects(newList);
-      return newList;
-    } catch (err) {
-      console.error('載入預設範本失敗:', err);
-      localStorage.setItem('ag_projects', JSON.stringify([]));
-      setProjects([]);
-      return [];
-    }
+  // 2. 自動存檔功能 (提供即時與 Debounce 800ms 機制)
+  const saveProjectData = (projId, name, projData) => {
+    if (!projId || !projData) return;
+    const report = validateAlignment(projData);
+    setProjects(prev => {
+      const updated = prev.map(p => 
+        p.id === projId 
+          ? { 
+              ...p, 
+              name: name, 
+              data: projData, 
+              alignmentRate: report.alignmentRate, 
+              updatedAt: new Date().toISOString() 
+            } 
+          : p
+      );
+      localStorage.setItem('ag_projects', JSON.stringify(updated));
+      return updated;
+    });
   };
 
   useEffect(() => {
-    if (currentUser) {
-      initLocalProjects();
-    }
-  }, [currentUser]);
-
-  // 2. 自動存檔與更新對齊率 (Debounce 800ms)
-  useEffect(() => {
     if (currentProjectId && data) {
-      const report = validateAlignment(data);
-      setAlignmentRate(report.alignmentRate);
-
       const saveTimeout = setTimeout(() => {
-        setProjects(prev => {
-          const updated = prev.map(p => 
-            p.id === currentProjectId 
-              ? { 
-                  ...p, 
-                  name: fileName, 
-                  data: data, 
-                  alignmentRate: report.alignmentRate, 
-                  updatedAt: new Date().toISOString() 
-                } 
-              : p
-          );
-          localStorage.setItem('ag_projects', JSON.stringify(updated));
-          return updated;
-        });
+        saveProjectData(currentProjectId, fileName, data);
       }, 800);
 
       return () => clearTimeout(saveTimeout);
@@ -188,6 +201,16 @@ export default function App() {
 
   // 4. 線上直接新增機種 (複製預設範本)
   const handleCreateProject = async (name) => {
+    if (!name || !name.trim()) return;
+    const trimmedName = name.trim();
+    
+    // 防呆設計：防範重複機種名稱
+    const isDuplicate = projects.some(p => p.name.toLowerCase() === trimmedName.toLowerCase());
+    if (isDuplicate) {
+      alert(`已存在名稱為「${trimmedName}」的機種，請使用其他名稱！`);
+      return;
+    }
+
     try {
       // 嘗試複製列表中的預設範本，如果沒有則重新拉取 Excel 檔
       let base64 = '';
@@ -208,7 +231,7 @@ export default function App() {
 
       const newProj = {
         id: 'proj_' + Math.random().toString(36).substr(2, 9),
-        name: name || `未命名機種_${new Date().toLocaleDateString()}`,
+        name: trimmedName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         alignmentRate: 0,
@@ -230,6 +253,16 @@ export default function App() {
 
   // 5. 匯入 Excel 機種
   const handleImportExcel = async (name, fileBase64) => {
+    if (!name || !name.trim()) return;
+    const trimmedName = name.trim();
+
+    // 防呆設計：防範重複機種名稱
+    const isDuplicate = projects.some(p => p.name.toLowerCase() === trimmedName.toLowerCase());
+    if (isDuplicate) {
+      alert(`已存在名稱為「${trimmedName}」的機種，請更換檔案名稱後重新上傳！`);
+      return;
+    }
+
     try {
       // 在前端解析 base64 檔案
       const binaryString = atob(fileBase64);
@@ -276,13 +309,16 @@ export default function App() {
   };
 
   const handleBackToList = () => {
+    // 強制立即同步儲存最新的變更，防止 Debounce 尚未觸發
+    if (currentProjectId && data) {
+      saveProjectData(currentProjectId, fileName, data);
+    }
     setData(null);
     setOriginalWb(null);
     setFileName('');
     setCurrentProjectId(null);
     setActiveTab('dashboard');
     setShowSuccessOverlay(false);
-    fetchProjects();
   };
 
   const handleExportComplete = () => {
@@ -295,7 +331,7 @@ export default function App() {
     
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard data={data} onGoToSection={(sec) => setActiveTab(sec)} />;
+        return <Dashboard data={data} onGoToSection={handleGoToSection} />;
       case 'basicInfo':
         return (
           <FormSections 
@@ -305,6 +341,7 @@ export default function App() {
             onNext={() => setActiveTab('processControl')} 
             currentUser={currentUser}
             factories={factories}
+            highlightField={highlightField}
           />
         );
       case 'processControl':
@@ -316,6 +353,7 @@ export default function App() {
             onNext={() => setActiveTab('trialReport')} 
             currentUser={currentUser}
             factories={factories}
+            highlightField={highlightField}
           />
         );
       case 'trialReport':
@@ -327,6 +365,7 @@ export default function App() {
             onNext={() => setActiveTab('signOff')} 
             currentUser={currentUser}
             factories={factories}
+            highlightField={highlightField}
           />
         );
       case 'signOff':
@@ -423,8 +462,8 @@ export default function App() {
               >
                 <span className="tab-icon">📈</span>
                 <span className="tab-label">儀表板</span>
-                <span className={`tab-indicator ${alignmentRate === 100 ? 'aligned' : ''}`}>
-                  {alignmentRate}%
+                <span className={`tab-indicator ${currentAlignmentRate === 100 ? 'aligned' : ''}`}>
+                  {currentAlignmentRate}%
                 </span>
               </button>
               <div className="tab-nav-divider"></div>

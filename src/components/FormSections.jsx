@@ -1,8 +1,45 @@
 import React from 'react';
 import './FormSections.css';
 
-export default function FormSections({ data, activeSection, onChange, onNext, currentUser, factories }) {
+export default function FormSections({ data, activeSection, onChange, onNext, currentUser, factories, highlightField }) {
   
+  // 取得欄位跳轉定位閃爍之 class
+  const getFieldHighlightClass = (fieldName) => {
+    if (!highlightField) return '';
+    
+    // 將警示訊息中的關鍵字對應到對應表單欄位上
+    const mapping = {
+      factory: ['加工廠'],
+      productNo: ['產品料號', '料號'],
+      productDesc: ['產品描述', '說明', '描述'],
+      stage: ['產品階段', '階段'],
+      processItems: ['加工項目'],
+      stencil: ['鋼板'],
+      routingFixture: ['Routing 治具'],
+      glueFixture: ['塗膠治具'],
+      testFixture: ['測試治具'],
+      assemblyFixture: ['組裝治具'],
+      smtCarrier: ['SMT 刷錫載具'],
+      otherFixture: ['其他治具'],
+      sampleProvided: ['樣品種類'],
+      bakeRequired: ['烘烤'],
+      smtFirstPiece: ['SMT 首件檢查', 'SMT首件'],
+      ledTest: ['LED點亮測試', 'LED'],
+      dipFirstPiece: ['DIP 首件檢查', 'DIP首件', '剪腳前置作業'],
+      smtOrder: ['SMT 焊接順序'],
+      dipOrder: ['DIP 焊接順序'],
+      tempPoints: ['測溫點'],
+      pcbaPackaging: ['PCBA 包材種類', 'PCBA包材'],
+      fpcaPackaging: ['FPCA 包材種類', 'FPCA包材']
+    };
+
+    const keywords = mapping[fieldName];
+    if (keywords && keywords.some(k => highlightField.includes(k))) {
+      return 'highlight-pulse';
+    }
+    return '';
+  };
+
   // 防呆唯讀管控邏輯
   const isFieldDisabled = (fieldPath) => {
     if (!currentUser) return true;
@@ -115,7 +152,37 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
   };
 
   const handleBakeChange = (field, val) => {
-    const updatedBake = { ...data.processControl.bakeRequired, [field]: val };
+    // 數字欄位防呆過濾：僅允許輸入數字
+    if (['pcbBakeTemp', 'pcbBakeTol', 'pcbBakeHr', 'fpcaBakeTemp', 'fpcaBakeHr'].includes(field)) {
+      val = val.replace(/[^\d]/g, '');
+    }
+
+    let updatedBake = { ...data.processControl.bakeRequired, [field]: val };
+
+    if (field === 'need' && val === true) {
+      updatedBake.noNeed = false;
+      // 預設填寫 FPCA 預設值 (80°C × 4hr)
+      if (!updatedBake.fpcaBakeTemp) updatedBake.fpcaBakeTemp = '80';
+      if (!updatedBake.fpcaBakeHr) updatedBake.fpcaBakeHr = '4';
+    } else if (field === 'noNeed' && val === true) {
+      updatedBake.need = false;
+    }
+
+    // 重組 PCB 烘烤字串
+    if (['pcbBakeTemp', 'pcbBakeTol', 'pcbBakeHr'].includes(field) || (field === 'need' && val === true)) {
+      const tempStr = updatedBake.pcbBakeTemp || '_____';
+      const tolStr = updatedBake.pcbBakeTol || '___';
+      const hrStr = updatedBake.pcbBakeHr || '___';
+      updatedBake.pcbBakeCond = `PCB 烘烤: ${tempStr}  °C ± ${tolStr} °C × ${hrStr} hr（依 PCB 廠建議）`;
+    }
+
+    // 重組 FPCA 烘烤字串
+    if (['fpcaBakeTemp', 'fpcaBakeHr'].includes(field) || (field === 'need' && val === true)) {
+      const tempStr = updatedBake.fpcaBakeTemp || '80';
+      const hrStr = updatedBake.fpcaBakeHr || '4';
+      updatedBake.fpcaBakeCond = `FPCA 烘烤: 依原物料規格書，若無規格則 _${tempStr}__ °C × _${hrStr}__ hr`;
+    }
+
     const updated = { ...data.processControl, bakeRequired: updatedBake };
     const path = `processControl.bakeRequired.${field}`;
     const owners = { ...(data._owners || {}) };
@@ -195,7 +262,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <h2 className="section-title">A. 產品基本資料</h2>
           <p className="section-subtitle">請核對發包方資訊，並請加工廠確實填寫工廠區及治工具資訊。</p>
 
-          <div className="form-group required-highlight">
+          <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
             <label className="form-label">委外加工廠 <span className="req">*</span></label>
             <select 
               className="form-input edit-active" 
@@ -214,7 +281,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* 產品料號與規格 */}
           <div className="form-row-grid">
-            <div className="form-group">
+            <div className={`form-group ${getFieldHighlightClass('productNo')}`}>
               <label className="form-label">產品料號</label>
               <input 
                 type="text" 
@@ -225,7 +292,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 disabled={isFieldDisabled('basicInfo.productNo')}
               />
             </div>
-            <div className="form-group">
+            <div className={`form-group ${getFieldHighlightClass('productDesc')}`}>
               <label className="form-label">產品名稱 / 描述</label>
               <input 
                 type="text" 
@@ -239,7 +306,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* 產品階段 */}
-          <div className="form-group">
+          <div className={`form-group ${getFieldHighlightClass('stage')}`}>
             <label className="form-label">產品階段</label>
             <div className="checkbox-flex">
               {Object.keys(data.basicInfo.stage || {}).map(k => (
@@ -256,7 +323,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           </div>
 
-          <div className="form-group required-highlight" style={{ marginTop: '12px' }}>
+          <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '12px' }}>
             <label className="form-label">主要加工項目 <span className="req">*</span></label>
             <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
               {[['smt', 'SMT'], ['dip', 'DIP']].map(([key, label]) => (
@@ -280,7 +347,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           
           {/* SMT 鋼板規格 */}
           {data.basicInfo.processItems.smt && (
-            <div className="tooling-box">
+            <div className={`tooling-box ${getFieldHighlightClass('stencil')}`}>
               <span className="tooling-badge">SMT 鋼板</span>
               
               <div className="tooling-row-align" style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.05)' }}>
@@ -371,7 +438,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             };
             const item = data.basicInfo.tooling[key] || {};
             return (
-              <div key={key} className="tooling-row-align required-highlight">
+              <div key={key} className={`tooling-row-align required-highlight ${getFieldHighlightClass(key)}`}>
                 <span className="tool-name">{labelMap[key]}</span>
                 <div className="radio-group">
                   <label className="radio-label">
@@ -423,7 +490,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           })}
 
           {/* SMT刷錫載具 */}
-          <div className="tooling-row-align required-highlight">
+          <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('smtCarrier')}`}>
             <span className="tool-name">SMT刷錫載具</span>
             <div className="radio-group">
               <label className="radio-label">
@@ -480,7 +547,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* 其他治具 */}
-          <div className="tooling-row-align required-highlight">
+          <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('otherFixture')}`}>
             <span className="tool-name">其他治具</span>
             <div className="radio-group">
               <label className="radio-label">
@@ -553,7 +620,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* 樣品提供與烘烤 */}
           <div className="form-row-grid">
-            <div className="form-group required-highlight">
+            <div className={`form-group required-highlight ${getFieldHighlightClass('sampleProvided')}`}>
               <label className="form-label">樣品提供確認 <span className="req">*</span></label>
               <div className="checkbox-flex">
                 <label className="checkbox-label">
@@ -586,7 +653,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
               </div>
             </div>
 
-            <div className="form-group required-highlight">
+            <div className={`form-group required-highlight ${getFieldHighlightClass('bakeRequired')}`}>
               <label className="form-label">PCB / FPC 烘烤需求 <span className="req">*</span></label>
               <div className="radio-group">
                 <label className="radio-label">
@@ -615,28 +682,77 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {data.processControl?.bakeRequired?.need && (
             <div className="bake-cond-box animate-fade-in">
-              <div className="form-row-grid">
-                <div className="form-group required-highlight">
+              <div className="form-row-grid" style={{ gridTemplateColumns: '1fr' }}>
+                <div className={`form-group required-highlight ${getFieldHighlightClass('bakeRequired')}`}>
                   <label className="form-label">PCB 烘烤條件 <span className="req">*</span></label>
-                  <input 
-                    type="text" 
-                    className="form-input edit-active" 
-                    placeholder="例如: 120°C × 2hr"
-                    value={data.processControl?.bakeRequired?.pcbBakeCond || ''}
-                    onChange={(e) => handleBakeChange('pcbBakeCond', e.target.value)}
-                    disabled={isFieldDisabled('processControl.bakeRequired.pcbBakeCond')}
-                  />
+                  <div className="inline-bake-inputs edit-active">
+                    <span>PCB 烘烤: </span>
+                    <input 
+                      type="text" 
+                      className="inline-num-input"
+                      placeholder="120"
+                      value={data.processControl?.bakeRequired?.pcbBakeTemp || ''}
+                      onChange={(e) => handleBakeChange('pcbBakeTemp', e.target.value)}
+                      disabled={isFieldDisabled('processControl.bakeRequired.pcbBakeTemp')}
+                    />
+                    <span> °C ± </span>
+                    <input 
+                      type="text" 
+                      className="inline-num-input inline-num-small"
+                      placeholder="5"
+                      value={data.processControl?.bakeRequired?.pcbBakeTol || ''}
+                      onChange={(e) => handleBakeChange('pcbBakeTol', e.target.value)}
+                      disabled={isFieldDisabled('processControl.bakeRequired.pcbBakeTol')}
+                    />
+                    <span> °C × </span>
+                    <input 
+                      type="text" 
+                      className="inline-num-input inline-num-small"
+                      placeholder="2"
+                      value={data.processControl?.bakeRequired?.pcbBakeHr || ''}
+                      onChange={(e) => handleBakeChange('pcbBakeHr', e.target.value)}
+                      disabled={isFieldDisabled('processControl.bakeRequired.pcbBakeHr')}
+                    />
+                    <span> hr（依 PCB 廠建議）</span>
+                  </div>
+                  {/* PCB 烘烤合理值警告 */}
+                  {((data.processControl?.bakeRequired?.pcbBakeTemp && (parseInt(data.processControl.bakeRequired.pcbBakeTemp) < 90 || parseInt(data.processControl.bakeRequired.pcbBakeTemp) > 150)) ||
+                    (data.processControl?.bakeRequired?.pcbBakeHr && (parseInt(data.processControl.bakeRequired.pcbBakeHr) < 1 || parseInt(data.processControl.bakeRequired.pcbBakeHr) > 12))) && (
+                    <div className="inline-input-warning animate-fade-in">
+                      ⚠️ 警告：PCB 烘烤建議溫度為 100°C~140°C，時間為 2~6 hr。請確認填寫數值是否正確。
+                    </div>
+                  )}
                 </div>
-                <div className="form-group required-highlight">
+                <div className={`form-group required-highlight ${getFieldHighlightClass('bakeRequired')}`}>
                   <label className="form-label">FPCA 烘烤條件 <span className="req">*</span></label>
-                  <input 
-                    type="text" 
-                    className="form-input edit-active" 
-                    placeholder="例如: 80°C × 4hr"
-                    value={data.processControl?.bakeRequired?.fpcaBakeCond || ''}
-                    onChange={(e) => handleBakeChange('fpcaBakeCond', e.target.value)}
-                    disabled={isFieldDisabled('processControl.bakeRequired.fpcaBakeCond')}
-                  />
+                  <div className="inline-bake-inputs edit-active">
+                    <span>FPCA 烘烤: 依原物料規格書，若無規格則 </span>
+                    <input 
+                      type="text" 
+                      className="inline-num-input"
+                      placeholder="80"
+                      value={data.processControl?.bakeRequired?.fpcaBakeTemp || ''}
+                      onChange={(e) => handleBakeChange('fpcaBakeTemp', e.target.value)}
+                      disabled={isFieldDisabled('processControl.bakeRequired.fpcaBakeTemp')}
+                    />
+                    <span> °C × </span>
+                    <input 
+                      type="text" 
+                      className="inline-num-input inline-num-small"
+                      placeholder="4"
+                      value={data.processControl?.bakeRequired?.fpcaBakeHr || ''}
+                      onChange={(e) => handleBakeChange('fpcaBakeHr', e.target.value)}
+                      disabled={isFieldDisabled('processControl.bakeRequired.fpcaBakeHr')}
+                    />
+                    <span> hr</span>
+                  </div>
+                  {/* FPCA 烘烤合理值警告 */}
+                  {((data.processControl?.bakeRequired?.fpcaBakeTemp && (parseInt(data.processControl.fpcaBakeTemp) < 50 || parseInt(data.processControl.fpcaBakeTemp) > 110)) ||
+                    (data.processControl?.bakeRequired?.fpcaBakeHr && (parseInt(data.processControl.fpcaBakeHr) < 1 || parseInt(data.processControl.fpcaBakeHr) > 12))) && (
+                    <div className="inline-input-warning animate-fade-in">
+                      ⚠️ 警告：FPCA 烘烤建議溫度為 60°C~100°C，時間為 2~8 hr。請確認填寫數值是否正確。
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
@@ -646,40 +762,99 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* SMT 首件與焊接順序 */}
           <div className="form-row-grid">
-            <div className="form-group required-highlight">
-              <label className="form-label">SMT 首件檢查項目 <span className="req">*</span></label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.processControl?.smtFirstPiece?.polarity || false}
-                    onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, polarity: e.target.checked })}
-                    disabled={isFieldDisabled('processControl.smtFirstPiece.polarity')}
-                  />
-                  <span>極性方向檢查</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.processControl?.smtFirstPiece?.measureLcr || false}
-                    onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, measureLcr: e.target.checked })}
-                    disabled={isFieldDisabled('processControl.smtFirstPiece.measureLcr')}
-                  />
-                  <span>量測 LCR (電容/電阻/電感)</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.processControl?.smtFirstPiece?.spi || false}
-                    onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, spi: e.target.checked })}
-                    disabled={isFieldDisabled('processControl.smtFirstPiece.spi')}
-                  />
-                  <span>SPI 錫膏厚度測試</span>
-                </label>
+            <div className={`form-group required-highlight ${getFieldHighlightClass('smtFirstPiece')}`}>
+              <label className="form-label">
+                SMT 首件檢查項目 <span className="req">*</span>
+                {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(此機種無 SMT 加工，不適用)</span>}
+              </label>
+              <div className={`checkbox-flex ${!data.basicInfo.processItems?.smt ? 'readonly-flex' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 18px' }}>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.polarity || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, polarity: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.polarity') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>極性方向檢查</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.measureLcr || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, measureLcr: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.measureLcr') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>量測 LCR (電容/電阻/電感)</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.spi || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, spi: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.spi') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>SPI 錫膏厚度測試</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.steelTension || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, steelTension: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.steelTension') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>鋼板張力量測</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.pcbReflow || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, pcbReflow: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.pcbReflow') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>PCB外觀檢查(reflow)</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.processControl?.smtFirstPiece?.solderability || false}
+                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, solderability: e.target.checked })}
+                      disabled={isFieldDisabled('processControl.smtFirstPiece.solderability') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>濕潤性檢查 (試錫板)</span>
+                  </label>
+                </div>
+                
+                {/* LED 點亮測試，排在下方 */}
+                <div className={getFieldHighlightClass('ledTest')} style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '4px', padding: '4px 8px' }}>
+                  <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 550 }}>LED 點亮測試 <span className="req">*</span>:</span>
+                  <div className="radio-group" style={{ display: 'inline-flex', gap: '16px' }}>
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name="ledTest"
+                        checked={data.processControl?.smtFirstPiece?.ledTest === 'yes'}
+                        onChange={() => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, ledTest: 'yes' })}
+                        disabled={isFieldDisabled('processControl.smtFirstPiece.ledTest') || !data.basicInfo.processItems?.smt}
+                      />
+                      <span>有</span>
+                    </label>
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name="ledTest"
+                        checked={data.processControl?.smtFirstPiece?.ledTest === 'no'}
+                        onChange={() => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, ledTest: 'no' })}
+                        disabled={isFieldDisabled('processControl.smtFirstPiece.ledTest') || !data.basicInfo.processItems?.smt}
+                      />
+                      <span>無 (不適用)</span>
+                    </label>
+                  </div>
+                </div>
               </div>
             </div>
 
-            <div className="form-group required-highlight">
+            <div className={`form-group required-highlight ${getFieldHighlightClass('smtOrder')}`}>
               <label className="form-label">SMT 焊接順序 <span className="req">*</span></label>
               <div className="radio-group">
                 <label className="radio-label">
@@ -710,7 +885,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           {data.basicInfo.processItems.dip && (
             <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <div className="form-row-grid">
-                <div className="form-group required-highlight">
+                <div className={`form-group required-highlight ${getFieldHighlightClass('dipFirstPiece')}`}>
                   <label className="form-label">DIP 首件檢查項目 <span className="req">*</span></label>
                   <div className="checkbox-flex">
                     <label className="checkbox-label">
@@ -725,7 +900,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   </div>
                 </div>
 
-                <div className="form-group required-highlight">
+                <div className={`form-group required-highlight ${getFieldHighlightClass('dipOrder')}`}>
                   <label className="form-label">DIP 焊接順序 <span className="req">*</span></label>
                   <div className="radio-group">
                     <label className="radio-label">
@@ -772,7 +947,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           {/* 測溫點配置 (關鍵防呆) */}
           <h3 className="sub-section-title">🌡️ 測溫點配置與 Reflow 參數 (關鍵零件要求)</h3>
           
-          <div className="form-group">
+          <div className={`form-group ${getFieldHighlightClass('tempPoints')}`}>
             <label className="form-label">關鍵零件狀態</label>
             <div className="radio-group">
               <label className="radio-label">
@@ -799,7 +974,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {data.processControl?.keyParts?.has && (
-            <div className="temp-points-table-wrapper animate-fade-in">
+            <div className={`temp-points-table-wrapper animate-fade-in ${getFieldHighlightClass('tempPoints')}`}>
               <table className="form-table">
                 <thead>
                   <tr>
@@ -896,7 +1071,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* PCBA 包材種類 */}
-          <div className="form-group required-highlight">
+          <div className={`form-group required-highlight ${getFieldHighlightClass('pcbaPackaging')}`}>
             <label className="form-label">PCBA 包材種類 <span className="req">*</span></label>
             <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
               {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
@@ -914,7 +1089,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* FPCA 包材種類 */}
-          <div className="form-group required-highlight" style={{ marginTop: '12px' }}>
+          <div className={`form-group required-highlight ${getFieldHighlightClass('fpcaPackaging')}`} style={{ marginTop: '12px' }}>
             <label className="form-label">FPCA 包材種類 <span className="req">*</span></label>
             <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
               {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
@@ -953,7 +1128,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
       {/* 分頁 3: 試產報告要求 */}
       {activeSection === 'trialReport' && (
-        <div className="section-form animate-fade-in">
+        <div className={`section-form animate-fade-in ${getFieldHighlightClass('trialReport')}`}>
           <h2 className="section-title">C. 試產報告與對齊確認</h2>
 
           {/* 報告清單與完成日期確認 */}

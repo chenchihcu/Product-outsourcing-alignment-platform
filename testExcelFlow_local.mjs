@@ -56,6 +56,27 @@ function runTest() {
     stencilType: '奈米鋼板'
   };
 
+  // 烘烤與首件設定
+  data.processControl.bakeRequired = {
+    need: true,
+    noNeed: false,
+    pcbBakeTemp: '120',
+    pcbBakeTol: '5',
+    pcbBakeHr: '2',
+    fpcaBakeTemp: '100',
+    fpcaBakeHr: '6'
+  };
+
+  data.processControl.smtFirstPiece = {
+    polarity: true,
+    measureLcr: false,
+    spi: true,
+    steelTension: true,
+    ledTest: 'yes',
+    pcbReflow: true,
+    solderability: false
+  };
+
   // 新治具設定
   data.basicInfo.tooling.smtCarrier = {
     need: true,
@@ -129,6 +150,22 @@ function runTest() {
   assert(reParsedData.basicInfo.tooling.otherFixture.need, true, '其他治具 Need 還原');
   assert(reParsedData.basicInfo.tooling.otherFixture.name, '特製防焊測試載板-A型', '其他治具名稱還原');
   assert(reParsedData.basicInfo.tooling.otherFixture.qty, '3 SETs', '其他治具數量還原');
+
+  // 驗證新增的烘烤與 SMT 首件欄位
+  assert(reParsedData.processControl.bakeRequired.need, true, '烘烤需求 Need 還原');
+  assert(reParsedData.processControl.bakeRequired.pcbBakeTemp, '120', 'PCB 烘烤溫度還原');
+  assert(reParsedData.processControl.bakeRequired.pcbBakeTol, '5', 'PCB 烘烤容差還原');
+  assert(reParsedData.processControl.bakeRequired.pcbBakeHr, '2', 'PCB 烘烤時間還原');
+  assert(reParsedData.processControl.bakeRequired.fpcaBakeTemp, '100', 'FPCA 烘烤溫度還原');
+  assert(reParsedData.processControl.bakeRequired.fpcaBakeHr, '6', 'FPCA 烘烤時間還原');
+
+  assert(reParsedData.processControl.smtFirstPiece.polarity, true, 'SMT首件檢查 極性方向還原');
+  assert(reParsedData.processControl.smtFirstPiece.measureLcr, false, 'SMT首件檢查 量測LCR還原');
+  assert(reParsedData.processControl.smtFirstPiece.spi, true, 'SMT首件檢查 SPI還原');
+  assert(reParsedData.processControl.smtFirstPiece.steelTension, true, 'SMT首件檢查 鋼板張力量測還原');
+  assert(reParsedData.processControl.smtFirstPiece.ledTest, 'yes', 'SMT首件檢查 LED點亮測試還原');
+  assert(reParsedData.processControl.smtFirstPiece.pcbReflow, true, 'SMT首件檢查 PCB外觀檢查還原');
+  assert(reParsedData.processControl.smtFirstPiece.solderability, false, 'SMT首件檢查 濕潤性檢查還原');
 
   assert(reParsedData.basicInfo.signOff.rdConfirm, 'RD張三', '研發確認簽章還原');
   assert(reParsedData.basicInfo.signOff.engineeringReview, 'PE李四', '工程審核簽章還原');

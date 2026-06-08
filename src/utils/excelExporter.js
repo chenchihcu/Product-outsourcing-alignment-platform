@@ -328,14 +328,36 @@ export function exportRequirementExcel(originalWorkbook, data) {
     const bake = pc.bakeRequired || {};
     writeCheckbox(sheet2, 'B6', '需要', bake.need);
     writeCheckbox(sheet2, 'C6', '不需要', bake.noNeed);
-    writeCell(sheet2, 'D6', bake.pcbBakeCond || '');
-    writeCell(sheet2, 'D7', bake.fpcaBakeCond || '');
+    
+    // 重構烘烤條件字串
+    let pcbBakeCond = bake.pcbBakeCond || '';
+    if (bake.pcbBakeTemp !== undefined || bake.pcbBakeTol !== undefined || bake.pcbBakeHr !== undefined) {
+      const tempStr = bake.pcbBakeTemp || '_____';
+      const tolStr = bake.pcbBakeTol || '___';
+      const hrStr = bake.pcbBakeHr || '___';
+      pcbBakeCond = `PCB 烘烤: ${tempStr}  °C ± ${tolStr} °C × ${hrStr} hr（依 PCB 廠建議）`;
+    }
+
+    let fpcaBakeCond = bake.fpcaBakeCond || '';
+    if (bake.fpcaBakeTemp !== undefined || bake.fpcaBakeHr !== undefined) {
+      const tempStr = bake.fpcaBakeTemp || '80';
+      const hrStr = bake.fpcaBakeHr || '4';
+      fpcaBakeCond = `FPCA 烘烤: 依原物料規格書，若無規格則 _${tempStr}__ °C × _${hrStr}__ hr`;
+    }
+    
+    writeCell(sheet2, 'D6', pcbBakeCond);
+    writeCell(sheet2, 'D7', fpcaBakeCond);
 
     // 首件
     const smtFirst = pc.smtFirstPiece || {};
     writeCheckbox(sheet2, 'B8', '極性方向', smtFirst.polarity);
     writeCheckbox(sheet2, 'D8', '量測電容、電阻、電感', smtFirst.measureLcr);
     writeCheckbox(sheet2, 'C8', 'SPI錫膏厚度測試', smtFirst.spi);
+    writeCheckbox(sheet2, 'E8', '鋼板張力量測', smtFirst.steelTension);
+    writeCheckbox(sheet2, 'F8', 'LED點亮測試:有', smtFirst.ledTest === 'yes');
+    writeCheckbox(sheet2, 'G8', 'LED點亮測試:無(不適用)', smtFirst.ledTest === 'no');
+    writeCheckbox(sheet2, 'H8', 'PCB外觀檢查(reflow)', smtFirst.pcbReflow);
+    writeCheckbox(sheet2, 'I8', '濕潤性檢查 (試錫板)', smtFirst.solderability);
 
     // 新增: DIP 首件
     const dipFirst = pc.dipFirstPiece || {};

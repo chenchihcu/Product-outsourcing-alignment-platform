@@ -4,7 +4,7 @@
   padding: 24px 16px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
 }
 
 .project-list-header {
@@ -37,160 +37,386 @@
   gap: 12px;
 }
 
-.project-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 24px;
-}
-
-.no-projects {
-  grid-column: 1 / -1;
-  padding: 64px 32px;
+/* 搜尋區塊 */
+.project-search-container {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 12px;
+  padding: 12px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(30, 41, 59, 0.4);
+  transition: border-color 0.2s, box-shadow 0.2s;
+  border-radius: 12px;
 }
 
-.no-projects-icon {
-  font-size: 48px;
-  background: rgba(148, 163, 184, 0.1);
-  padding: 16px;
-  border-radius: 50%;
+.project-search-container:focus-within {
+  border-color: rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.15);
+}
+
+.search-icon {
+  font-size: 18px;
+  color: #94a3b8;
+}
+
+.search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #f1f5f9;
+  font-size: 15px;
+  outline: none;
+}
+
+.search-input::placeholder {
   color: #64748b;
 }
 
-.no-projects h3 {
-  font-size: 20px;
-  margin: 0;
-  color: #e2e8f0;
+.search-clear-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  cursor: pointer;
+  font-size: 18px;
+  padding: 0 4px;
+  transition: color 0.2s;
 }
 
-.no-projects p {
-  color: #94a3b8;
-  margin: 0;
-  max-width: 400px;
-  line-height: 1.6;
+.search-clear-btn:hover {
+  color: #cbd5e1;
 }
 
-/* 專案卡片 */
-.project-card {
-  padding: 20px;
+/* 工具列與檢視模式設定 */
+.project-list-toolbar {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 20px;
+  flex-wrap: wrap;
   gap: 16px;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  position: relative;
-  overflow: hidden;
+  background: rgba(30, 41, 59, 0.2);
+}
+
+.toolbar-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.tab-filter-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.tab-filter-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.tab-filter-btn.active {
+  color: #fff;
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.25);
+}
+
+.toolbar-settings {
+  display: flex;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.control-label {
+  font-size: 12px;
+  color: #64748b;
+  font-weight: 550;
+}
+
+.btn-toggle-group {
+  display: flex;
+  background: rgba(0, 0, 0, 0.2);
+  padding: 2px;
+  border-radius: 6px;
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-.project-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
+.toggle-btn {
+  background: transparent;
+  border: none;
+  color: #64748b;
+  padding: 4px 10px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 550;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.toggle-btn:hover {
+  color: #cbd5e1;
+}
+
+.toggle-btn.active {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+
+/* 一覽表 (表格視圖) */
+.project-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(26, 28, 36, 0.75);
+}
+
+.project-table {
   width: 100%;
-  height: 4px;
-  background: linear-gradient(90deg, #6366f1, #a855f7);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  border-collapse: collapse;
+  text-align: left;
 }
 
-.project-card:hover {
-  transform: translateY(-4px);
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 12px 20px -10px rgba(99, 102, 241, 0.25);
-}
-
-.project-card:hover::before {
-  opacity: 1;
-}
-
-.project-card-header {
-  display: flex;
-  gap: 12px;
-  align-items: flex-start;
-}
-
-.project-icon {
-  font-size: 24px;
-  background: rgba(99, 102, 241, 0.1);
-  padding: 10px;
-  border-radius: 8px;
-}
-
-.project-meta {
-  flex: 1;
-  min-width: 0; /* 讓 text-overflow 生效 */
-}
-
-.project-title {
-  font-size: 16px;
+.project-table th {
+  background: rgba(255, 255, 255, 0.02);
+  color: #64748b;
   font-weight: 600;
-  margin: 0 0 4px 0;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.project-table td {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  color: #cbd5e1;
+  transition: background-color 0.2s;
+}
+
+.project-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.01);
+}
+
+.project-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* 表格內置元件 */
+.proj-name-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 550;
   color: #f1f5f9;
+}
+
+.proj-folder-icon {
+  font-size: 16px;
+  color: #a5b4fc;
+}
+
+.proj-name-text {
+  max-width: 480px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-.project-date {
-  font-size: 12px;
-  color: #64748b;
-}
-
-/* 進度條 */
-.progress-section {
+.table-progress-wrapper {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  align-items: center;
+  gap: 12px;
+  max-width: 280px;
 }
 
-.progress-label {
-  display: flex;
-  justify-content: space-between;
-  font-size: 13px;
-  color: #94a3b8;
-}
-
-.progress-percentage {
-  font-weight: 600;
-  color: #f59e0b;
-}
-
-.progress-percentage.aligned {
-  color: #10b981;
-}
-
-.progress-bar-bg {
-  height: 8px;
+.table-progress-bar-bg {
+  flex: 1;
+  height: 6px;
   background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
+  border-radius: 3px;
   overflow: hidden;
 }
 
-.progress-bar-fill {
+.table-progress-bar-fg {
   height: 100%;
   background: linear-gradient(90deg, #f59e0b, #eab308);
-  border-radius: 4px;
-  transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 3px;
+  transition: width 0.4s ease;
 }
 
-.progress-bar-fill.completed {
+.table-progress-bar-fg.completed {
   background: linear-gradient(90deg, #10b981, #059669);
-  box-shadow: 0 0 8px rgba(16, 185, 129, 0.5);
+  box-shadow: 0 0 6px rgba(16, 185, 129, 0.4);
 }
 
-.project-card-footer {
+.table-progress-rate {
+  font-size: 13px;
+  font-weight: 600;
+  color: #f59e0b;
+  width: 36px;
+  text-align: right;
+}
+
+.table-progress-rate.aligned {
+  color: #10b981;
+}
+
+.table-date-cell {
+  font-size: 13px;
+  color: #64748b;
+}
+
+.table-actions-cell {
   display: flex;
-  gap: 12px;
-  margin-top: auto;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  padding-top: 16px;
+  gap: 8px;
+  justify-content: flex-end;
 }
 
-/* Modal 彈出視窗 */
+.table-action-btn {
+  padding: 6px 12px !important;
+  font-size: 12px !important;
+  flex: none !important;
+}
+
+.btn-edit {
+  background: rgba(99, 102, 241, 0.1);
+  color: #a5b4fc;
+  border: 1px solid rgba(99, 102, 241, 0.2);
+}
+
+.btn-edit:hover {
+  background: var(--accent-color);
+  color: #fff;
+  border-color: var(--accent-color);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+}
+
+/* 空白狀態 */
+.table-empty-state {
+  text-align: center;
+  padding: 48px 24px !important;
+}
+
+.empty-icon {
+  font-size: 36px;
+  display: block;
+  margin-bottom: 12px;
+  opacity: 0.5;
+}
+
+.table-empty-state h4 {
+  font-size: 16px;
+  color: #cbd5e1;
+  margin: 0 0 4px 0;
+}
+
+.table-empty-state p {
+  font-size: 13px;
+  color: #64748b;
+  margin: 0;
+}
+
+/* 尺寸與行距動態控制 */
+/* 1. 字體大小 */
+.size-small .project-table th { font-size: 11px; }
+.size-small .project-table td { font-size: 12px; }
+.size-small .proj-folder-icon { font-size: 14px; }
+.size-small .table-progress-rate { font-size: 11px; }
+.size-small .table-date-cell { font-size: 11px; }
+.size-small .table-action-btn { padding: 4px 8px !important; font-size: 11px !important; }
+
+.size-medium .project-table th { font-size: 13px; }
+.size-medium .project-table td { font-size: 14px; }
+.size-medium .proj-folder-icon { font-size: 16px; }
+.size-medium .table-progress-rate { font-size: 13px; }
+.size-medium .table-date-cell { font-size: 13px; }
+.size-medium .table-action-btn { padding: 6px 12px !important; font-size: 12px !important; }
+
+.size-large .project-table th { font-size: 15px; }
+.size-large .project-table td { font-size: 16px; }
+.size-large .proj-folder-icon { font-size: 18px; }
+.size-large .table-progress-rate { font-size: 15px; }
+.size-large .table-date-cell { font-size: 15px; }
+.size-large .table-action-btn { padding: 8px 16px !important; font-size: 13px !important; }
+
+/* 2. 行距間距 */
+.spacing-compact th, .spacing-compact td { padding: 6px 12px; }
+.spacing-normal th, .spacing-normal td { padding: 12px 18px; }
+.spacing-relaxed th, .spacing-relaxed td { padding: 18px 24px; }
+
+/* 分頁控制元件 */
+.table-pagination {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 24px;
+  background: rgba(30, 41, 59, 0.2);
+}
+
+.pagination-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  color: #cbd5e1;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff;
+}
+
+.pagination-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.pagination-numbers {
+  display: flex;
+  gap: 6px;
+}
+
+.pagination-number-btn {
+  background: transparent;
+  border: none;
+  color: #94a3b8;
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.pagination-number-btn:hover {
+  color: #f1f5f9;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.pagination-number-btn.active {
+  color: #fff;
+  background: var(--accent-gradient);
+  box-shadow: 0 2px 8px rgba(99, 102, 241, 0.3);
+}
+
+/* Modal backdrop & scale anim */
 .modal-backdrop {
   position: fixed;
   top: 0;
@@ -291,48 +517,43 @@
   background: rgba(255, 255, 255, 0.01);
 }
 
-/* 按鈕微調與載入中狀態 */
-.compact-btn {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 13px;
-  justify-content: center;
+/* Animations */
+.animate-scale-in {
+  animation: scaleIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.btn-danger {
-  background: rgba(239, 68, 68, 0.1);
-  color: #f87171;
-  border: 1px solid rgba(239, 68, 68, 0.2);
+@keyframes scaleIn {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
-.btn-danger:hover {
-  background: #ef4444;
-  color: #fff;
-  border-color: #ef4444;
-  box-shadow: 0 0 12px rgba(239, 68, 68, 0.4);
+/* 狀態標籤樣式 */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.6rem;
+  border-radius: 9999px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-shadow: none;
+  white-space: nowrap;
 }
 
-.btn.loading {
-  position: relative;
-  color: transparent !important;
-  pointer-events: none;
+.status-badge.aligned {
+  background-color: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+  border: 1px solid rgba(16, 185, 129, 0.3);
 }
 
-.btn.loading::after {
-  content: '';
-  position: absolute;
-  width: 16px;
-  height: 16px;
-  top: 50%;
-  left: 50%;
-  margin-top: -8px;
-  margin-left: -8px;
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  border-radius: 50%;
-  border-top-color: #fff;
-  animation: spin 0.8s linear infinite;
+.status-badge.in-progress {
+  background-color: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-@keyframes spin {
-  to { transform: rotate(360deg); }
-}

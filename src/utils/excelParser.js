@@ -286,17 +286,59 @@ export function parseRequirementExcel(arrayBuffer) {
       standardPart: parseCheckbox(getVal('D5'))
     };
 
+    const pcbCondVal = getVal('D6') || '';
+    const fpcaCondVal = getVal('D7') || '';
+    
+    // 解析 PCB 烘烤條件
+    const pcbMatch = String(pcbCondVal).match(/PCB 烘烤:\s*([_\d]+)\s*°C\s*±\s*([_\d]+)\s*°C\s*×\s*([_\d]+)\s*hr[（(]依 PCB 廠建議[）)]/);
+    let pcbBakeTemp = '', pcbBakeTol = '', pcbBakeHr = '';
+    if (pcbMatch) {
+      pcbBakeTemp = pcbMatch[1].replace(/_/g, '').trim();
+      pcbBakeTol = pcbMatch[2].replace(/_/g, '').trim();
+      pcbBakeHr = pcbMatch[3].replace(/_/g, '').trim();
+    } else {
+      const numbers = String(pcbCondVal).match(/\d+/g);
+      if (numbers && numbers.length >= 3) {
+        pcbBakeTemp = numbers[0];
+        pcbBakeTol = numbers[1];
+        pcbBakeHr = numbers[2];
+      }
+    }
+
+    // 解析 FPCA 烘烤條件
+    const fpcaMatch = String(fpcaCondVal).match(/FPCA 烘烤:\s*依原物料規格書，若無規格則\s*_*([_\d]+)_*\s*°C\s*×\s*_*([_\d]+)_*\s*hr/);
+    let fpcaBakeTemp = '', fpcaBakeHr = '';
+    if (fpcaMatch) {
+      fpcaBakeTemp = fpcaMatch[1].replace(/_/g, '').trim();
+      fpcaBakeHr = fpcaMatch[2].replace(/_/g, '').trim();
+    } else {
+      const numbers = String(fpcaCondVal).match(/\d+/g);
+      if (numbers && numbers.length >= 2) {
+        fpcaBakeTemp = numbers[0];
+        fpcaBakeHr = numbers[1];
+      }
+    }
+
     data.processControl.bakeRequired = {
       need: parseCheckbox(getVal('B6')),
       noNeed: parseCheckbox(getVal('C6')),
-      pcbBakeCond: getVal('D6') || '',
-      fpcaBakeCond: getVal('D7') || ''
+      pcbBakeCond: pcbCondVal,
+      fpcaBakeCond: fpcaCondVal,
+      pcbBakeTemp,
+      pcbBakeTol,
+      pcbBakeHr,
+      fpcaBakeTemp,
+      fpcaBakeHr
     };
 
     data.processControl.smtFirstPiece = {
       polarity: parseCheckbox(getVal('B8')),
       measureLcr: parseCheckbox(getVal('D8')),
-      spi: parseCheckbox(getVal('C8'))
+      spi: parseCheckbox(getVal('C8')),
+      steelTension: parseCheckbox(getVal('E8')),
+      ledTest: parseCheckbox(getVal('F8')) ? 'yes' : (parseCheckbox(getVal('G8')) ? 'no' : null),
+      pcbReflow: parseCheckbox(getVal('H8')),
+      solderability: parseCheckbox(getVal('I8'))
     };
 
     const cleanDipMemo = (val) => {

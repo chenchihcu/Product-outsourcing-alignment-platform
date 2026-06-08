@@ -123,7 +123,8 @@
 
 /* Summary Card */
 .summary-card {
-  grid-column: 1; /* Place under progress card on desktop */
+  grid-column: 2;
+  grid-row: 1;
 }
 
 .info-list {
@@ -164,17 +165,26 @@
   font-size: 0.82rem;
 }
 
-/* Warning Panel (Span across rows on desktop) */
+/* Warning Panel */
 .warning-panel {
-  grid-column: 2;
-  grid-row: 1 / span 2;
-  max-height: 520px;
+  grid-column: 1 / span 2;
+  grid-row: 2;
 }
 
 @media (max-width: 900px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr !important;
+  }
+  .summary-card {
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
   .warning-panel {
-    grid-column: 1;
-    grid-row: auto;
+    grid-column: 1 !important;
+    grid-row: auto !important;
+  }
+  .warning-lists-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -208,20 +218,70 @@
   border: 1px solid rgba(16, 185, 129, 0.25);
 }
 
-.warning-list {
-  flex: 1;
-  overflow-y: auto;
+/* Double-column warning layout */
+.warning-lists-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+}
+
+.warning-column {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  padding-right: 4px;
+}
+
+.column-subtitle {
+  font-size: 0.95rem;
+  font-weight: 600;
+  padding-bottom: 0.5rem;
+  border-bottom: 1.5px solid rgba(255, 255, 255, 0.05);
+  margin-bottom: 0.25rem;
+}
+
+.column-subtitle.error-title {
+  color: #fca5a5;
+  border-bottom-color: rgba(239, 68, 68, 0.2);
+}
+
+.column-subtitle.warning-title {
+  color: #fde047;
+  border-bottom-color: rgba(245, 158, 11, 0.2);
+}
+
+.column-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.column-empty {
+  padding: 1.25rem;
+  text-align: center;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 555;
+  border: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.column-empty.success {
+  background: rgba(16, 185, 129, 0.02);
+  color: #a7f3d0;
+  border-color: rgba(16, 185, 129, 0.12);
+}
+
+.column-empty.warning {
+  background: rgba(245, 158, 11, 0.02);
+  color: #fde047;
+  border-color: rgba(245, 158, 11, 0.12);
 }
 
 .warning-item {
   display: flex;
   align-items: center;
-  padding: 0.85rem 1rem;
-  border-radius: 10px;
+  padding: 0.65rem 0.85rem;
+  border-radius: 8px;
   background: rgba(0, 0, 0, 0.15);
   border: 1px solid var(--border-color);
   cursor: pointer;
@@ -247,7 +307,7 @@
 }
 
 .warning-text {
-  font-size: 0.88rem;
+  font-size: 0.82rem;
   color: #e5e7eb;
   flex: 1;
   line-height: 1.4;
