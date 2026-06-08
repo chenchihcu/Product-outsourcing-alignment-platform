@@ -191,3 +191,58 @@
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .status-banner {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .status-percentage {
+  color: #1f2937;
+}
+
+[data-theme="light"] .status-bar-bg {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .sign-box {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .sign-header {
+  color: #1f2937;
+}
+
+[data-theme="light"] .badge-role {
+  color: #4b5563;
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .sign-terms {
+  color: #6b7280;
+  border-top-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .export-warning {
+  background: rgba(217, 119, 6, 0.03);
+  border-color: rgba(217, 119, 6, 0.15);
+}
+
+[data-theme="light"] .export-success {
+  background: rgba(5, 150, 105, 0.03);
+  border-color: rgba(5, 150, 105, 0.15);
+}
+
+[data-theme="light"] .warning-detail,
+[data-theme="light"] .success-detail {
+  color: #4b5563;
+}
+
+[data-theme="light"] .spinner {
+  border-color: rgba(0, 0, 0, 0.1);
+  border-top-color: var(--accent-color);
+}
+

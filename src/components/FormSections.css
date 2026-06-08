@@ -429,3 +429,86 @@ input:checked + .slider:before {
   font-weight: 500;
 }
 
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .section-title,
+[data-theme="light"] .sub-section-title,
+[data-theme="light"] .tool-name,
+[data-theme="light"] .doc-label {
+  color: #1f2937;
+}
+
+[data-theme="light"] .section-title {
+  border-bottom-color: var(--accent-color);
+}
+
+[data-theme="light"] .section-subtitle,
+[data-theme="light"] .description-text,
+[data-theme="light"] .doc-desc {
+  color: #4b5563;
+}
+
+[data-theme="light"] .checkbox-flex,
+[data-theme="light"] .tooling-row-align,
+[data-theme="light"] .record-row,
+[data-theme="light"] .inline-bake-inputs {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .readonly-flex {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .checkbox-label,
+[data-theme="light"] .radio-label,
+[data-theme="light"] .record-name {
+  color: #374151;
+}
+
+[data-theme="light"] .checkbox-label:hover:not([disabled]),
+[data-theme="light"] .radio-label:hover:not([disabled]) {
+  background: rgba(0, 0, 0, 0.04);
+  color: #1f2937;
+}
+
+[data-theme="light"] .form-textarea,
+[data-theme="light"] .table-input,
+[data-theme="light"] .inline-num-input {
+  background: rgba(255, 255, 255, 0.85);
+  color: #1f2937;
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="light"] .form-textarea:focus,
+[data-theme="light"] .table-input:focus,
+[data-theme="light"] .inline-num-input:focus {
+  border-color: var(--accent-color);
+  background: #fff;
+}
+
+[data-theme="light"] .tooling-box {
+  background: rgba(79, 70, 229, 0.02);
+  border-color: rgba(79, 70, 229, 0.15);
+}
+
+[data-theme="light"] .tooling-badge {
+  background: #f3f4f6;
+  color: #4f46e5;
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="light"] .bake-cond-box {
+  background: rgba(217, 119, 6, 0.02);
+  border-color: rgba(217, 119, 6, 0.15);
+}
+
+[data-theme="light"] .form-table th {
+  color: #4b5563;
+  background: rgba(0, 0, 0, 0.02);
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .form-table td {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+

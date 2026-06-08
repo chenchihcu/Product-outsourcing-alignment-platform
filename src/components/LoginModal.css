@@ -130,3 +130,46 @@
   border-color: rgba(139, 92, 246, 0.4);
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
 }
+
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .login-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+[data-theme="light"] .login-header h2 {
+  color: #1f2937;
+}
+
+[data-theme="light"] .login-header p {
+  color: #4b5563;
+}
+
+[data-theme="light"] .quick-login-section {
+  border-top-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .quick-login-title {
+  color: #4b5563;
+}
+
+[data-theme="light"] .quick-login-btn {
+  background: rgba(243, 244, 246, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #374151;
+}
+
+[data-theme="light"] .quick-login-btn:hover {
+  background: rgba(229, 231, 235, 0.9);
+  border-color: rgba(0, 0, 0, 0.15);
+}
+
+[data-theme="light"] .quick-login-btn strong {
+  color: #1f2937;
+}
+
+[data-theme="light"] .quick-login-btn span {
+  color: #6b7280;
+}
+

@@ -199,3 +199,98 @@
   padding: 24px;
   font-size: 0.85rem;
 }
+
+.table-select-level {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #cbd5e1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-family: inherit;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+[data-theme="light"] .table-select-level {
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: #1f2937;
+}
+
+.table-select-level:focus {
+  border-color: var(--accent-color);
+}
+
+.table-select-level:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  border-color: transparent;
+  background: transparent;
+  padding-left: 0;
+  color: #94a3b8;
+}
+
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .settings-section-card h3 {
+  color: #1f2937;
+}
+
+[data-theme="light"] .card-desc {
+  color: #4b5563;
+}
+
+[data-theme="light"] .factory-list-wrapper {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .settings-list-item {
+  color: #374151;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .add-account-form {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .add-account-form h4,
+[data-theme="light"] .accounts-list-wrapper h4 {
+  color: #1f2937;
+}
+
+[data-theme="light"] .accounts-table-container {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .settings-table th {
+  background: rgba(0, 0, 0, 0.02);
+  color: #4b5563;
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .settings-table td {
+  color: #374151;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .current-user-row {
+  background: rgba(79, 70, 229, 0.05);
+}
+
+[data-theme="light"] .current-user-row td {
+  color: #4f46e5;
+}
+
+[data-theme="light"] .btn-delete-account:disabled {
+  color: #9ca3af;
+  border-color: rgba(0, 0, 0, 0.08);
+  background: transparent;
+}
+
+[data-theme="light"] .no-data-text {
+  color: #6b7280;
+}
+

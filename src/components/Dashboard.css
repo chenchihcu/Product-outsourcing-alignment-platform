@@ -358,3 +358,53 @@
   max-width: 280px;
   line-height: 1.5;
 }
+
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .circle-bg {
+  stroke: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .progress-rate,
+[data-theme="light"] .stat-val,
+[data-theme="light"] .info-val,
+[data-theme="light"] .clear-title {
+  color: #1f2937;
+}
+
+[data-theme="light"] .progress-label,
+[data-theme="light"] .card-title,
+[data-theme="light"] .info-label,
+[data-theme="light"] .clear-desc {
+  color: #4b5563;
+}
+
+[data-theme="light"] .stat-label {
+  color: #6b7280;
+}
+
+[data-theme="light"] .info-row {
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .column-subtitle {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .column-empty {
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #4b5563;
+}
+
+[data-theme="light"] .warning-item {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .warning-text {
+  color: #374151;
+}
+
+[data-theme="light"] .go-fill-arrow {
+  color: #9ca3af;
+}
+

@@ -32,6 +32,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [highlightField, setHighlightField] = useState('');
+  const [theme, setTheme] = useState(() => localStorage.getItem('ag_theme') || 'dark');
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('ag_theme', theme);
+  }, [theme]);
 
   const handleGoToSection = (tab, msg) => {
     setActiveTab(tab);
@@ -325,6 +331,16 @@ export default function App() {
     setShowSuccessOverlay(true);
   };
 
+  const handleUpdateAccountLevel = (uname, newLevel) => {
+    setAccounts(prev => {
+      const updated = prev.map(a => 
+        a.username === uname ? { ...a, level: newLevel } : a
+      );
+      localStorage.setItem('ag_accounts', JSON.stringify(updated));
+      return updated;
+    });
+  };
+
   // 渲染分頁
   const renderTabContent = () => {
     if (!data) return null;
@@ -362,6 +378,18 @@ export default function App() {
             data={data} 
             activeSection="trialReport" 
             onChange={setData} 
+            onNext={() => setActiveTab('documents')} 
+            currentUser={currentUser}
+            factories={factories}
+            highlightField={highlightField}
+          />
+        );
+      case 'documents':
+        return (
+          <FormSections 
+            data={data} 
+            activeSection="documents" 
+            onChange={setData} 
             onNext={() => setActiveTab('signOff')} 
             currentUser={currentUser}
             factories={factories}
@@ -387,6 +415,7 @@ export default function App() {
             accounts={accounts}
             onAddAccount={handleAddAccount}
             onRemoveAccount={handleRemoveAccount}
+            onUpdateAccountLevel={handleUpdateAccountLevel}
             currentUser={currentUser}
           />
         );
@@ -416,6 +445,30 @@ export default function App() {
         </div>
 
         <div className="header-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          {/* 主題切換按鈕 */}
+          <button 
+            className="theme-toggle-btn"
+            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
+            title={`切換至 ${theme === 'dark' ? '淺色' : '深色'} 主題`}
+            style={{ 
+              background: 'rgba(255, 255, 255, 0.08)', 
+              border: '1px solid var(--border-color)', 
+              color: 'var(--text-color)', 
+              padding: '6px 12px', 
+              borderRadius: '8px', 
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '6px',
+              fontSize: '0.85rem',
+              fontWeight: '600',
+              transition: 'all 0.25s ease'
+            }}
+          >
+            {theme === 'dark' ? '☀️ 淺色模式' : '🌙 深色模式'}
+          </button>
+
           {/* 使用者資訊 */}
           <div className="user-profile-badge">
             <span className="user-avatar">👤</span>
@@ -490,6 +543,14 @@ export default function App() {
               >
                 <span className="tab-icon">🎯</span>
                 <span className="tab-label">C. 試產報告要求</span>
+              </button>
+
+              <button 
+                className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`}
+                onClick={() => setActiveTab('documents')}
+              >
+                <span className="tab-icon">📂</span>
+                <span className="tab-label">E. 工程文件</span>
               </button>
 
               <button 

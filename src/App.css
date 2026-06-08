@@ -324,3 +324,37 @@
   border-color: rgba(239, 68, 68, 0.4);
 }
 
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .logo-title,
+[data-theme="light"] .welcome-intro h2,
+[data-theme="light"] .success-card h2,
+[data-theme="light"] .user-name {
+  color: #1f2937;
+}
+
+[data-theme="light"] .logo-subtitle,
+[data-theme="light"] .welcome-intro p,
+[data-theme="light"] .user-role-desc,
+[data-theme="light"] .success-card p {
+  color: #4b5563;
+}
+
+[data-theme="light"] .tab-btn {
+  color: #4b5563;
+}
+
+[data-theme="light"] .tab-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .tab-btn.active {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.08);
+}
+
+[data-theme="light"] .user-profile-badge {
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+

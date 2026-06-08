@@ -557,3 +557,159 @@
   border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
+/* Light 模式主題覆蓋 */
+[data-theme="light"] .project-list-header h2 {
+  background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .project-list-header p {
+  color: #4b5563;
+}
+
+[data-theme="light"] .project-search-container {
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .search-input {
+  color: #1f2937;
+}
+
+[data-theme="light"] .search-input::placeholder {
+  color: #9ca3af;
+}
+
+[data-theme="light"] .project-list-toolbar {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .tab-filter-btn {
+  color: #4b5563;
+}
+
+[data-theme="light"] .tab-filter-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .tab-filter-btn.active {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.08);
+  border-color: rgba(79, 70, 229, 0.2);
+}
+
+[data-theme="light"] .btn-toggle-group {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .toggle-btn {
+  color: #4b5563;
+}
+
+[data-theme="light"] .toggle-btn.active {
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.9);
+}
+
+[data-theme="light"] .project-table-wrapper {
+  background: var(--bg-secondary);
+  border-color: var(--border-color);
+}
+
+[data-theme="light"] .project-table th {
+  background: rgba(0, 0, 0, 0.02);
+  color: #4b5563;
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .project-table td {
+  color: #374151;
+  border-bottom-color: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .project-table tbody tr:hover td {
+  background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .proj-name-cell {
+  color: #1f2937;
+}
+
+[data-theme="light"] .table-progress-bar-bg {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+[data-theme="light"] .table-date-cell {
+  color: #6b7280;
+}
+
+[data-theme="light"] .table-empty-state h4 {
+  color: #374151;
+}
+
+[data-theme="light"] .table-empty-state p {
+  color: #6b7280;
+}
+
+[data-theme="light"] .table-pagination {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+[data-theme="light"] .pagination-btn {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: #374151;
+}
+
+[data-theme="light"] .pagination-btn:hover:not(:disabled) {
+  background: #fff;
+  color: #1f2937;
+}
+
+[data-theme="light"] .pagination-number-btn {
+  color: #4b5563;
+}
+
+[data-theme="light"] .pagination-number-btn:hover {
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .modal-content {
+  border-color: rgba(0, 0, 0, 0.08);
+  background: var(--bg-secondary);
+}
+
+[data-theme="light"] .modal-header {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .modal-header h3 {
+  color: #1f2937;
+}
+
+[data-theme="light"] .modal-footer {
+  border-top-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.01);
+}
+
+[data-theme="light"] .form-group label {
+  color: #374151;
+}
+
+[data-theme="light"] .form-group input {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: #1f2937;
+}
+
+[data-theme="light"] .form-group input:focus {
+  border-color: var(--accent-color);
+  background: #fff;
+}
+
+

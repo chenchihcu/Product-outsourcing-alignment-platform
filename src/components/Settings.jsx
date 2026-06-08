@@ -8,6 +8,7 @@ export default function Settings({
   accounts,
   onAddAccount,
   onRemoveAccount,
+  onUpdateAccountLevel,
   currentUser
 }) {
   const [newFactory, setNewFactory] = useState('');
@@ -168,6 +169,7 @@ export default function Settings({
                     onChange={(e) => setNewLevel(e.target.value)}
                   >
                     <option value="Standard">Standard (一般編輯)</option>
+                    <option value="Reviewer">Reviewer (審核權限)</option>
                     <option value="Administrator">Administrator (最高權限)</option>
                   </select>
                 </div>
@@ -213,17 +215,28 @@ export default function Settings({
                         <td>{acc.unit}</td>
                         <td><code>{acc.username}</code></td>
                         <td><code>{acc.password}</code></td>
-                        <td><span className={`badge-level ${acc.level}`}>{acc.level}</span></td>
+                        <td>
+                          <select
+                            className="table-select-level"
+                            value={acc.level}
+                            onChange={(e) => onUpdateAccountLevel(acc.username, e.target.value)}
+                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
+                          >
+                            <option value="Standard">Standard</option>
+                            <option value="Reviewer">Reviewer</option>
+                            <option value="Administrator">Administrator</option>
+                          </select>
+                        </td>
                         <td>
                           <button
                             className="btn-delete-account"
-                            disabled={currentUser.username === acc.username || ['rd', 'eng', 'qa', 'admin'].includes(acc.username)}
+                            disabled={currentUser.username === acc.username || acc.username === 'admin'}
                             onClick={() => onRemoveAccount(acc.username)}
                             title={
                               currentUser.username === acc.username
                                 ? '無法刪除目前登入的帳號'
-                                : ['rd', 'eng', 'qa', 'admin'].includes(acc.username)
-                                ? '系統預設帳號無法刪除'
+                                : acc.username === 'admin'
+                                ? '系統管理員帳號無法刪除'
                                 : '刪除此帳號'
                             }
                           >
