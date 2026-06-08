@@ -712,4 +712,126 @@
   background: #fff;
 }
 
+/* 響應式優化：機種管理中心手機版排版幾何衝突修正 */
+@media (max-width: 768px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+  
+  .project-list-container {
+    padding: 12px 8px;
+    gap: 12px;
+  }
+
+  .project-list-header {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 16px;
+    gap: 12px;
+    text-align: center;
+  }
+
+  .project-list-header h2 {
+    font-size: 20px;
+  }
+
+  .header-actions {
+    flex-direction: column;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .header-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .project-search-container {
+    padding: 10px 14px;
+  }
+
+  .project-list-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .toolbar-tabs {
+    flex-direction: column;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .tab-filter-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 8px 12px;
+  }
+
+  .toolbar-settings {
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    padding-top: 10px;
+  }
+
+  [data-theme="light"] .toolbar-settings {
+    border-top-color: rgba(0, 0, 0, 0.08);
+  }
+
+  .control-group {
+    justify-content: space-between;
+    width: 100%;
+  }
+
+  .proj-name-text {
+    max-width: 140px;
+  }
+
+  .table-progress-wrapper {
+    max-width: 120px;
+    gap: 6px;
+  }
+
+  .table-progress-rate {
+    font-size: 11px;
+    width: 28px;
+  }
+
+  .table-actions-cell {
+    flex-direction: column;
+    gap: 4px;
+    align-items: stretch;
+  }
+
+  .table-action-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 4px 6px !important;
+    font-size: 11px !important;
+  }
+
+  .table-pagination {
+    gap: 8px;
+    padding: 8px 12px;
+  }
+}
+
+@media (max-width: 480px) {
+  .proj-name-text {
+    max-width: 90px;
+  }
+  
+  .table-progress-wrapper {
+    max-width: 80px;
+  }
+
+  .project-table th, .project-table td {
+    padding: 8px 6px;
+  }
+}
+
+
 

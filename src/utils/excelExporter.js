@@ -267,15 +267,17 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 治工具
     const tool = bi.tooling || {};
-    writeCheckbox(sheet1, 'A33', '鋼板規格', tool.stencil?.need);
-    writeCell(sheet1, 'B33', tool.stencil?.need ? (tool.stencil?.thickness || '') : '');
-    writeCell(sheet1, 'C33', tool.stencil?.need ? (tool.stencil?.apertureRatio || '') : '');
+    writeCheckbox(sheet1, 'A33', '鋼板規格', true); // 強制勾選需要，因為 SMT 鋼板需求為 100%
+    writeCell(sheet1, 'B33', tool.stencil?.thickness || '');
+    writeCell(sheet1, 'C33', tool.stencil?.apertureRatio || '');
     
-    // 鋼板類型三選一
-    const st = tool.stencil?.need ? (tool.stencil?.stencilType || '') : '';
-    const markGeneral = st === '一般鋼板' ? '☑' : '☐';
-    const markNano = st === '奈米鋼板' ? '☑' : '☐';
-    const markStep = st === '階梯鋼板' ? '☑' : '☐';
+    // 鋼板樣式與奈米塗層雙向對齊回寫 D33
+    const isGeneral = (tool.stencil?.style || 'general') === 'general';
+    const isStep = tool.stencil?.style === 'step';
+    const isNano = !!tool.stencil?.nanoCoating;
+    const markGeneral = isGeneral ? '☑' : '☐';
+    const markStep = isStep ? '☑' : '☐';
+    const markNano = isNano ? '☑' : '☐';
     writeCell(sheet1, 'D33', `${markGeneral} 一般鋼板  ${markNano} 奈米鋼板  ${markStep} 階梯鋼板`);
     writeCell(sheet1, 'E33', ''); // 移除數量
 
@@ -314,10 +316,16 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCell(sheet1, 'D40', sign.engineeringReview || '');
     writeCell(sheet1, 'G40', sign.qaConfirm || '');
 
-    // 儲存防呆鎖定狀態 owners 到 G1 (可跨檔案、重整後還原鎖定)
-    if (data._owners) {
-      writeCell(sheet1, 'G1', JSON.stringify(data._owners));
-    }
+    // 儲存防呆鎖定狀態 owners 與 電子簽章圖片 到 G1 (可跨檔案、重整後還原)
+    const exportMetadata = {
+      owners: data._owners || {},
+      signatures: {
+        rdSignature: sign.rdSignature || '',
+        engineeringReviewSignature: sign.engineeringReviewSignature || '',
+        qaSignature: sign.qaSignature || ''
+      }
+    };
+    writeCell(sheet1, 'G1', JSON.stringify(exportMetadata));
   }
 
   // 2. 更新【製程管制與前置作業】

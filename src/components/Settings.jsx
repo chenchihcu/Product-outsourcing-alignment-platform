@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import './Settings.css';
+import { compressImage } from '../utils/imageCompressor';
 
 export default function Settings({
   factories,
@@ -9,6 +10,7 @@ export default function Settings({
   onAddAccount,
   onRemoveAccount,
   onUpdateAccountLevel,
+  onUpdateAccountSignature,
   currentUser
 }) {
   const [newFactory, setNewFactory] = useState('');
@@ -73,6 +75,74 @@ export default function Settings({
       </p>
 
       <div className="settings-grid">
+        {/* 0. 個人電子簽章設定 */}
+        <div className="settings-section-card glass-card" style={{ gridColumn: '1 / -1' }}>
+          <h3>🖋️ 個人電子簽章設定</h3>
+          <p className="card-desc">
+            在此上傳您的個人電子簽章圖片（建議使用透明背景的 PNG 圖檔，比例約 3:1）。設定後，您在「簽章匯出」進行線上簽名時，系統將直接以簽章圖檔取代打字姓名，使報告更顯正式與專業。
+          </p>
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
+            <div 
+              style={{ 
+                width: '180px', 
+                height: '70px', 
+                border: '2px dashed rgba(255, 255, 255, 0.15)', 
+                borderRadius: '8px', 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                background: 'rgba(0,0,0,0.2)',
+                overflow: 'hidden'
+              }}
+            >
+              {currentUser.signature ? (
+                <img src={currentUser.signature} alt="我的簽章" style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
+              ) : (
+                <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>尚未設定電子簽章</span>
+              )}
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <input 
+                type="file" 
+                accept="image/*" 
+                id="signature-upload-input" 
+                style={{ display: 'none' }} 
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    const reader = new FileReader();
+                    reader.onload = async (event) => {
+                      const compressed = await compressImage(event.target.result);
+                      onUpdateAccountSignature(currentUser.username, compressed);
+                    };
+                    reader.readAsDataURL(file);
+                  }
+                }}
+              />
+              <div style={{ display: 'flex', gap: '8px' }}>
+                <button 
+                  type="button" 
+                  className="btn btn-primary"
+                  onClick={() => document.getElementById('signature-upload-input').click()}
+                >
+                  📤 上傳簽章圖檔
+                </button>
+                {currentUser.signature && (
+                  <button 
+                    type="button" 
+                    className="btn btn-secondary" 
+                    onClick={() => onUpdateAccountSignature(currentUser.username, '')}
+                    style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)' }}
+                  >
+                    🗑️ 清除簽章
+                  </button>
+                )}
+              </div>
+              <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>僅支援 JPG/PNG 格式，檔案大小建議小於 500KB</span>
+            </div>
+          </div>
+        </div>
+
         {/* 1. 委外加工廠基本資料管理 */}
         <div className="settings-section-card glass-card">
           <h3>🏭 委外加工廠基本資料管理</h3>

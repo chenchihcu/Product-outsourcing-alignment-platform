@@ -167,6 +167,17 @@
     margin-bottom: 8px;
     border-bottom: 1px dashed #777;
     padding-bottom: 4px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 36px;
+  }
+
+  .print-sign-name img {
+    height: 32px;
+    max-height: 32px;
+    display: inline-block;
+    vertical-align: middle;
   }
 
   .sign-text {

@@ -352,6 +352,23 @@ export default function App() {
     });
   };
 
+  const handleUpdateAccountSignature = (uname, signature) => {
+    setAccounts(prev => {
+      const updated = prev.map(a => 
+        a.username === uname ? { ...a, signature } : a
+      );
+      localStorage.setItem('ag_accounts', JSON.stringify(updated));
+      return updated;
+    });
+    if (currentUser && currentUser.username === uname) {
+      setCurrentUser(prev => {
+        const updated = { ...prev, signature };
+        localStorage.setItem('ag_current_user', JSON.stringify(updated));
+        return updated;
+      });
+    }
+  };
+
   // 渲染分頁
   const renderTabContent = () => {
     if (!data) return null;
@@ -415,6 +432,7 @@ export default function App() {
             onChange={setData} 
             onExportComplete={handleExportComplete} 
             currentUser={currentUser}
+            onUpdateAccountSignature={handleUpdateAccountSignature}
           />
         );
       case 'settings':
@@ -427,6 +445,7 @@ export default function App() {
             onAddAccount={handleAddAccount}
             onRemoveAccount={handleRemoveAccount}
             onUpdateAccountLevel={handleUpdateAccountLevel}
+            onUpdateAccountSignature={handleUpdateAccountSignature}
             currentUser={currentUser}
           />
         );

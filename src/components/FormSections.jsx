@@ -123,6 +123,9 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
     if (currentUser.role === 'qa') return true; // QA 品保處僅有審核權，無填寫/修改權
     if (currentUser.role === 'admin') return false; // 管理員不受限
 
+    // 委外加工廠欄位為全域公共資料，不應被鎖定
+    if (fieldPath === 'basicInfo.factory') return false;
+
     // 研發負責 EVT/DVT，工程負責 PVT/Pilot-run
     if (fieldPath === 'stage.evt' || fieldPath === 'stage.dvt') {
       return currentUser.role !== 'rd';
@@ -148,6 +151,11 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       currentPath = currentPath ? `${currentPath}.${parts[i]}` : parts[i];
       const owner = data._owners?.[currentPath];
       if (owner && owner !== currentUser.unit) {
+        // 發包方內部（研發單位 與 工程單位）共享編輯基本資料與治工具，不互相鎖定
+        const isInternalUnit = (u) => u === '研發單位' || u === '工程單位';
+        if (isInternalUnit(owner) && isInternalUnit(currentUser.unit)) {
+          continue;
+        }
         return true;
       }
     }
@@ -751,91 +759,68 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             <div className={`tooling-box ${getFieldHighlightClass('stencil')}`} style={{ marginBottom: '16px' }}>
               <span className="tooling-badge">SMT 鋼板</span>
               
-              <div className="tooling-row-align" style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.05)' }}>
-                <span className="tool-name" style={{ minWidth: '80px' }}>是否需要</span>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="stencilNeed" 
-                      checked={data.basicInfo.tooling?.stencil?.need || false}
-                      onChange={() => {
-                        const tool = data.basicInfo.tooling?.stencil || {};
-                        const updatedTool = { ...tool, need: true, noNeed: false };
-                        const updatedTooling = { ...data.basicInfo.tooling, stencil: updatedTool };
-                        const owners = { ...(data._owners || {}) };
-                        owners['basicInfo.tooling.stencil.need'] = currentUser.unit;
-                        delete owners['basicInfo.tooling.stencil.noNeed'];
-                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                      }} 
-                      disabled={isFieldDisabled('basicInfo.tooling.stencil.need')}
-                    />
-                    <span>需要</span>
-                  </label>
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="stencilNeed" 
-                      checked={data.basicInfo.tooling?.stencil?.noNeed || false}
-                      onChange={() => {
-                        const tool = data.basicInfo.tooling?.stencil || {};
-                        const updatedTool = { ...tool, need: false, noNeed: true, thickness: '', apertureRatio: '', stencilType: '' };
-                        const updatedTooling = { ...data.basicInfo.tooling, stencil: updatedTool };
-                        const owners = { ...(data._owners || {}) };
-                        owners['basicInfo.tooling.stencil.noNeed'] = currentUser.unit;
-                        delete owners['basicInfo.tooling.stencil.need'];
-                        delete owners['basicInfo.tooling.stencil.thickness'];
-                        delete owners['basicInfo.tooling.stencil.apertureRatio'];
-                        delete owners['basicInfo.tooling.stencil.stencilType'];
-                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                      }} 
-                      disabled={isFieldDisabled('basicInfo.tooling.stencil.noNeed')}
-                    />
-                    <span>不需要</span>
-                  </label>
+              <div className="form-row-grid-3 animate-fade-in" style={{ marginTop: '8px' }}>
+                <div className={`form-group required-highlight ${getFieldHighlightClass('stencil.thickness')}`}>
+                  <label className="form-label">鋼板厚度 (mm) <span className="req">*</span></label>
+                  <input 
+                    type="text" 
+                    className="form-input edit-active" 
+                    placeholder="例如: 0.12" 
+                    value={data.basicInfo.tooling?.stencil?.thickness || ''}
+                    onChange={(e) => handleToolingChange('stencil', 'thickness', e.target.value)}
+                    disabled={isFieldDisabled('basicInfo.tooling.stencil.thickness')}
+                  />
+                </div>
+                <div className={`form-group required-highlight ${getFieldHighlightClass('stencil.apertureRatio')}`}>
+                  <label className="form-label">開口比例 (%) <span className="req">*</span></label>
+                  <input 
+                    type="text" 
+                    className="form-input edit-active" 
+                    placeholder="例如: 100" 
+                    value={data.basicInfo.tooling?.stencil?.apertureRatio || ''}
+                    onChange={(e) => handleToolingChange('stencil', 'apertureRatio', e.target.value)}
+                    disabled={isFieldDisabled('basicInfo.tooling.stencil.apertureRatio')}
+                  />
+                </div>
+                <div className="form-group required-highlight">
+                  <label className="form-label">鋼板樣式選擇 <span className="req">*</span></label>
+                  <div className="checkbox-flex" style={{ padding: '6px 10px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+                    <div style={{ display: 'flex', gap: '12px' }}>
+                      <label className="radio-label" style={{ padding: 0 }}>
+                        <input 
+                          type="radio" 
+                          name="stencilStyle"
+                          checked={(data.basicInfo.tooling?.stencil?.style || 'general') === 'general'} 
+                          onChange={() => handleToolingChange('stencil', 'style', 'general')}
+                          disabled={isFieldDisabled('basicInfo.tooling.stencil.style')}
+                        />
+                        <span>一般鋼板</span>
+                      </label>
+                      <label className="radio-label" style={{ padding: 0 }}>
+                        <input 
+                          type="radio" 
+                          name="stencilStyle"
+                          checked={data.basicInfo.tooling?.stencil?.style === 'step'} 
+                          onChange={() => handleToolingChange('stencil', 'style', 'step')}
+                          disabled={isFieldDisabled('basicInfo.tooling.stencil.style')}
+                        />
+                        <span>階梯鋼板</span>
+                      </label>
+                    </div>
+                    <div style={{ borderTop: '1px dashed rgba(255,255,255,0.1)', paddingTop: '6px', marginTop: '2px' }}>
+                      <label className="checkbox-label" style={{ padding: 0, margin: 0 }}>
+                        <input 
+                          type="checkbox" 
+                          checked={data.basicInfo.tooling?.stencil?.nanoCoating || false} 
+                          onChange={(e) => handleToolingChange('stencil', 'nanoCoating', e.target.checked)}
+                          disabled={isFieldDisabled('basicInfo.tooling.stencil.nanoCoating')}
+                        />
+                        <span style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '600' }}>表面奈米塗層 (可複選)</span>
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
-
-              {data.basicInfo.tooling?.stencil?.need && (
-                <div className="form-row-grid-3 animate-fade-in">
-                  <div className="form-group required-highlight">
-                    <label className="form-label">鋼板厚度 (mm) <span className="req">*</span></label>
-                    <input 
-                      type="text" 
-                      className="form-input edit-active" 
-                      placeholder="例如: 0.12" 
-                      value={data.basicInfo.tooling?.stencil?.thickness || ''}
-                      onChange={(e) => handleToolingChange('stencil', 'thickness', e.target.value)}
-                      disabled={isFieldDisabled('basicInfo.tooling.stencil.thickness')}
-                    />
-                  </div>
-                  <div className="form-group required-highlight">
-                    <label className="form-label">開口比例 (%) <span className="req">*</span></label>
-                    <input 
-                      type="text" 
-                      className="form-input edit-active" 
-                      placeholder="例如: 100" 
-                      value={data.basicInfo.tooling?.stencil?.apertureRatio || ''}
-                      onChange={(e) => handleToolingChange('stencil', 'apertureRatio', e.target.value)}
-                      disabled={isFieldDisabled('basicInfo.tooling.stencil.apertureRatio')}
-                    />
-                  </div>
-                  <div className="form-group required-highlight">
-                    <label className="form-label">鋼板類型 <span className="req">*</span></label>
-                    <select 
-                      className="form-input edit-active" 
-                      value={data.basicInfo.tooling?.stencil?.stencilType || ''}
-                      onChange={(e) => handleToolingChange('stencil', 'stencilType', e.target.value)}
-                      disabled={isFieldDisabled('basicInfo.tooling.stencil.stencilType')}
-                    >
-                      <option value="">-- 請選擇 --</option>
-                      <option value="一般鋼板">一般鋼板</option>
-                      <option value="奈米鋼板">奈米鋼板</option>
-                      <option value="階梯鋼板">階梯鋼板</option>
-                    </select>
-                  </div>
-                </div>
-              )}
             </div>
           )}
 

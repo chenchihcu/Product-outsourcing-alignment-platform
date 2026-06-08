@@ -405,3 +405,61 @@
   color: #000000;
 }
 
+/* 響應式優化：消除平板與手機版下的幾何幾何排版衝突 */
+@media (max-width: 1024px) {
+  .tab-navigation {
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+  }
+  .tab-btn {
+    flex: 1 1 calc(33.333% - 8px);
+    min-width: 120px;
+    justify-content: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .app-header {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    padding: 1rem !important;
+    gap: 12px !important;
+  }
+  .header-logo {
+    flex-direction: column !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 6px !important;
+  }
+  .logo-subtitle {
+    display: none !important;
+  }
+  .logo-title {
+    font-size: 1.15rem !important;
+  }
+  .tab-btn {
+    flex: 1 1 calc(50% - 8px);
+  }
+  .header-right-controls {
+    width: 100% !important;
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .sqe-profile-badge, .user-profile-badge, .header-file-info {
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .tab-btn {
+    flex: 1 1 100%;
+  }
+  .app-container {
+    padding: 0.75rem !important;
+  }
+}
+

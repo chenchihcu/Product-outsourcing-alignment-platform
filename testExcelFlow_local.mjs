@@ -83,7 +83,8 @@ function runTest() {
     noNeed: false,
     thickness: '0.13',
     apertureRatio: '95',
-    stencilType: '奈米鋼板'
+    style: 'general',
+    nanoCoating: true
   };
 
   // 烘烤與首件設定
@@ -125,8 +126,11 @@ function runTest() {
   // 簽章
   data.basicInfo.signOff = {
     rdConfirm: 'RD張三',
+    rdSignature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==',
     engineeringReview: 'PE李四',
-    qaConfirm: 'QA王五'
+    engineeringReviewSignature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==',
+    qaConfirm: 'QA王五',
+    qaSignature: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA=='
   };
 
   // 模擬 owners 鎖定
@@ -171,7 +175,8 @@ function runTest() {
   assert(reParsedData.basicInfo.tooling.stencil.need, true, '鋼板規格 Need 還原');
   assert(reParsedData.basicInfo.tooling.stencil.thickness, '0.13', '鋼板厚度還原');
   assert(reParsedData.basicInfo.tooling.stencil.apertureRatio, '95', '鋼板開口比還原');
-  assert(reParsedData.basicInfo.tooling.stencil.stencilType, '奈米鋼板', '鋼板類型 (三選一) 還原');
+  assert(reParsedData.basicInfo.tooling.stencil.style, 'general', '鋼板樣式 (一般/階梯) 還原');
+  assert(reParsedData.basicInfo.tooling.stencil.nanoCoating, true, '表面奈米塗層還原');
 
   assert(reParsedData.basicInfo.tooling.smtCarrier.need, true, 'SMT刷錫載具 Need 還原');
   assert(reParsedData.basicInfo.tooling.smtCarrier.upper, true, 'SMT刷錫載具 上載板 還原');
@@ -217,8 +222,11 @@ function runTest() {
   assert(reParsedData.basicInfo.documents.productSpec, undefined, '工程文件 移除之產品規格書 為空');
 
   assert(reParsedData.basicInfo.signOff.rdConfirm, 'RD張三', '研發確認簽章還原');
+  assert(reParsedData.basicInfo.signOff.rdSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '研發電子簽章圖檔還原');
   assert(reParsedData.basicInfo.signOff.engineeringReview, 'PE李四', '工程審核簽章還原');
+  assert(reParsedData.basicInfo.signOff.engineeringReviewSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '工程審核電子簽章圖檔還原');
   assert(reParsedData.basicInfo.signOff.qaConfirm, 'QA王五', '品保最後審核簽章還原');
+  assert(reParsedData.basicInfo.signOff.qaSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '品保最後審核電子簽章圖檔還原');
 
   // 驗證 G1 中的 owners 鎖定狀態是否被還原
   assert(reParsedData._owners?.['basicInfo.factory'], '研發單位', '防呆鎖定 factory owner 還原');

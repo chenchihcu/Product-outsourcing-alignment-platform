@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { validateAlignment } from '../utils/validator';
 import { exportRequirementExcel } from '../utils/excelExporter';
+import { compressImage } from '../utils/imageCompressor';
 import './SignOff.css';
 
-export default function SignOff({ data, originalWb, onChange, onExportComplete, currentUser }) {
+export default function SignOff({ data, originalWb, onChange, onExportComplete, currentUser, onUpdateAccountSignature }) {
   const report = validateAlignment(data);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
@@ -86,7 +87,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
             <span>研發確認簽章</span>
             <span className="badge-role">研發 (RD)</span>
           </div>
-          <div className="sign-body">
+          <div className="sign-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div className="form-group">
               <label className="form-label">簽名人姓名</label>
               <input 
@@ -98,6 +99,89 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 disabled={currentUser.role !== 'rd' && currentUser.role !== 'admin'}
               />
             </div>
+
+            {/* 電子簽章預覽及上傳 */}
+            <div className="signature-preview-area" style={{ marginTop: '4px' }}>
+              <label className="form-label">電子簽章</label>
+              <div 
+                style={{ 
+                  height: '60px', 
+                  border: '1px dashed var(--border-color)', 
+                  borderRadius: '6px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: 'rgba(0,0,0,0.15)',
+                  overflow: 'hidden'
+                }}
+              >
+                {data.basicInfo.signOff?.rdSignature ? (
+                  <img src={data.basicInfo.signOff.rdSignature} alt="RD Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                )}
+              </div>
+              
+              {(currentUser.role === 'rd' || currentUser.role === 'admin') && (
+                <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                  {currentUser.signature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn"
+                      onClick={() => {
+                        handleSignChange('rdSignature', currentUser.signature);
+                        if (!data.basicInfo.signOff?.rdConfirm) {
+                          handleSignChange('rdConfirm', currentUser.name);
+                        }
+                      }}
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      🖋️ 套用我的簽章
+                    </button>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    id="rd-sig-upload" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                          const compressed = await compressImage(event.target.result);
+                          handleSignChange('rdSignature', compressed);
+                          if (!data.basicInfo.signOff?.rdConfirm) {
+                            handleSignChange('rdConfirm', currentUser.name);
+                          }
+                          onUpdateAccountSignature(currentUser.username, compressed);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="btn btn-primary compact-btn"
+                    onClick={() => document.getElementById('rd-sig-upload').click()}
+                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                  >
+                    📤 上傳簽章
+                  </button>
+                  {data.basicInfo.signOff?.rdSignature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn" 
+                      onClick={() => handleSignChange('rdSignature', '')}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <p className="sign-terms">本簽章確認：產品基本資料與風險零件已填寫完整，並經研發部門確認。</p>
           </div>
         </div>
@@ -108,7 +192,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
             <span>工程審核簽章</span>
             <span className="badge-role">工程 (PE)</span>
           </div>
-          <div className="sign-body">
+          <div className="sign-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div className="form-group">
               <label className="form-label">簽名人姓名</label>
               <input 
@@ -120,6 +204,89 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 disabled={currentUser.role !== 'eng' && currentUser.role !== 'admin'}
               />
             </div>
+
+            {/* 電子簽章預覽及上傳 */}
+            <div className="signature-preview-area" style={{ marginTop: '4px' }}>
+              <label className="form-label">電子簽章</label>
+              <div 
+                style={{ 
+                  height: '60px', 
+                  border: '1px dashed var(--border-color)', 
+                  borderRadius: '6px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: 'rgba(0,0,0,0.15)',
+                  overflow: 'hidden'
+                }}
+              >
+                {data.basicInfo.signOff?.engineeringReviewSignature ? (
+                  <img src={data.basicInfo.signOff.engineeringReviewSignature} alt="PE Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                )}
+              </div>
+              
+              {(currentUser.role === 'eng' || currentUser.role === 'admin') && (
+                <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                  {currentUser.signature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn"
+                      onClick={() => {
+                        handleSignChange('engineeringReviewSignature', currentUser.signature);
+                        if (!data.basicInfo.signOff?.engineeringReview) {
+                          handleSignChange('engineeringReview', currentUser.name);
+                        }
+                      }}
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      🖋️ 套用我的簽章
+                    </button>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    id="pe-sig-upload" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                          const compressed = await compressImage(event.target.result);
+                          handleSignChange('engineeringReviewSignature', compressed);
+                          if (!data.basicInfo.signOff?.engineeringReview) {
+                            handleSignChange('engineeringReview', currentUser.name);
+                          }
+                          onUpdateAccountSignature(currentUser.username, compressed);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="btn btn-primary compact-btn"
+                    onClick={() => document.getElementById('pe-sig-upload').click()}
+                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                  >
+                    📤 上傳簽章
+                  </button>
+                  {data.basicInfo.signOff?.engineeringReviewSignature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn" 
+                      onClick={() => handleSignChange('engineeringReviewSignature', '')}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             <p className="sign-terms">本簽章確認：生產治工具規格、鋼板開口以及製程工程參數已審查通過。</p>
           </div>
         </div>
@@ -130,7 +297,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
             <span>品保處最後審核</span>
             <span className="badge-role">品保處 (QA)</span>
           </div>
-          <div className="sign-body">
+          <div className="sign-body" style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div className="form-group">
               <label className="form-label">簽名人姓名</label>
               <input 
@@ -148,6 +315,89 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
                 disabled={(currentUser.role !== 'qa' && currentUser.role !== 'admin') || !data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview}
               />
             </div>
+
+            {/* 電子簽章預覽及上傳 */}
+            <div className="signature-preview-area" style={{ marginTop: '4px' }}>
+              <label className="form-label">電子簽章</label>
+              <div 
+                style={{ 
+                  height: '60px', 
+                  border: '1px dashed var(--border-color)', 
+                  borderRadius: '6px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  justifyContent: 'center', 
+                  background: 'rgba(0,0,0,0.15)',
+                  overflow: 'hidden'
+                }}
+              >
+                {data.basicInfo.signOff?.qaSignature ? (
+                  <img src={data.basicInfo.signOff.qaSignature} alt="QA Signature" style={{ maxHeight: '100%', maxWidth: '100%', objectFit: 'contain' }} />
+                ) : (
+                  <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>無電子簽章圖檔</span>
+                )}
+              </div>
+              
+              {(currentUser.role === 'qa' || currentUser.role === 'admin') && data.basicInfo.signOff?.rdConfirm && data.basicInfo.signOff?.engineeringReview && (
+                <div style={{ display: 'flex', gap: '6px', marginTop: '8px' }}>
+                  {currentUser.signature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn"
+                      onClick={() => {
+                        handleSignChange('qaSignature', currentUser.signature);
+                        if (!data.basicInfo.signOff?.qaConfirm) {
+                          handleSignChange('qaConfirm', currentUser.name);
+                        }
+                      }}
+                      style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      🖋️ 套用我的簽章
+                    </button>
+                  )}
+                  <input 
+                    type="file" 
+                    accept="image/*" 
+                    id="qa-sig-upload" 
+                    style={{ display: 'none' }}
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onload = async (event) => {
+                          const compressed = await compressImage(event.target.result);
+                          handleSignChange('qaSignature', compressed);
+                          if (!data.basicInfo.signOff?.qaConfirm) {
+                            handleSignChange('qaConfirm', currentUser.name);
+                          }
+                          onUpdateAccountSignature(currentUser.username, compressed);
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                  />
+                  <button 
+                    type="button" 
+                    className="btn btn-primary compact-btn"
+                    onClick={() => document.getElementById('qa-sig-upload').click()}
+                    style={{ fontSize: '0.72rem', padding: '4px 8px' }}
+                  >
+                    📤 上傳簽章
+                  </button>
+                  {data.basicInfo.signOff?.qaSignature && (
+                    <button 
+                      type="button" 
+                      className="btn btn-secondary compact-btn" 
+                      onClick={() => handleSignChange('qaSignature', '')}
+                      style={{ background: 'rgba(239, 68, 68, 0.15)', color: '#f87171', border: '1px solid rgba(239, 68, 68, 0.3)', fontSize: '0.72rem', padding: '4px 8px' }}
+                    >
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+
             {(!data.basicInfo.signOff?.rdConfirm || !data.basicInfo.signOff?.engineeringReview) ? (
               <p className="sign-terms" style={{ color: '#ef4444', fontWeight: 'bold' }}>
                 ⚠️ 需等研發與工程確認人皆完成簽章後，方可由品保處進行最後審核。

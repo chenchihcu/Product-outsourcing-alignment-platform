@@ -182,13 +182,13 @@ export function parseRequirementExcel(arrayBuffer) {
 
     // 治工具一覽表
     const d33Val = String(getVal('D33') || '');
-    let stencilType = '';
-    if (d33Val.includes('☑ 一般鋼板')) stencilType = '一般鋼板';
-    else if (d33Val.includes('☑ 奈米鋼板')) stencilType = '奈米鋼板';
-    else if (d33Val.includes('☑ 階梯鋼板')) stencilType = '階梯鋼板';
-    else if (d33Val.trim() === '一般鋼板') stencilType = '一般鋼板';
-    else if (d33Val.trim() === '奈米鋼板') stencilType = '奈米鋼板';
-    else if (d33Val.trim() === '階梯鋼板') stencilType = '階梯鋼板';
+    let stencilStyle = 'general';
+    if (d33Val.includes('☑ 階梯鋼板')) {
+      stencilStyle = 'step';
+    } else if (d33Val.includes('☑ 一般鋼板')) {
+      stencilStyle = 'general';
+    }
+    const nanoCoating = d33Val.includes('☑ 奈米鋼板');
 
     // 解析 A38 SMT刷錫載具
     const a38Val = String(getVal('A38') || '');
@@ -223,14 +223,15 @@ export function parseRequirementExcel(arrayBuffer) {
       otherFixture.noNeed = false;
     }
 
-    const stencilNeed = parseCheckbox(getVal('A33')) || String(getVal('A33') || '').includes('☑');
+    const stencilNeed = true; // SMT鋼板需求是 100%，強制為 true
     data.basicInfo.tooling = {
       stencil: {
         need: stencilNeed,
-        noNeed: !stencilNeed && (String(getVal('A33') || '').includes('☐') || parseCheckbox(getVal('A33')) === false),
+        noNeed: false,
         thickness: cleanPlaceholder(getVal('B33')),
         apertureRatio: cleanPlaceholder(getVal('C33')),
-        stencilType: stencilType
+        style: stencilStyle,
+        nanoCoating: nanoCoating
       },
       routingFixture: {
         need: parseCheckbox(getVal('B34')),
@@ -263,11 +264,27 @@ export function parseRequirementExcel(arrayBuffer) {
       qaConfirm: getVal('G40') || ''
     };
 
-    // 解析 G1 儲存格以還原防呆鎖定狀態
+    // 解析 G1 儲存格以還原防呆鎖定狀態與電子簽章
     const g1Val = getVal('G1');
     if (g1Val) {
       try {
-        data._owners = JSON.parse(g1Val);
+        const parsed = JSON.parse(g1Val);
+        if (parsed && typeof parsed === 'object') {
+          if ('owners' in parsed && 'signatures' in parsed) {
+            data._owners = parsed.owners || {};
+            // 還原簽名圖檔
+            if (data.basicInfo.signOff && parsed.signatures) {
+              data.basicInfo.signOff.rdSignature = parsed.signatures.rdSignature || '';
+              data.basicInfo.signOff.engineeringReviewSignature = parsed.signatures.engineeringReviewSignature || '';
+              data.basicInfo.signOff.qaSignature = parsed.signatures.qaSignature || '';
+            }
+          } else {
+            // 舊版相容性：G1 直接是 owners
+            data._owners = parsed;
+          }
+        } else {
+          data._owners = {};
+        }
       } catch (e) {
         data._owners = {};
       }

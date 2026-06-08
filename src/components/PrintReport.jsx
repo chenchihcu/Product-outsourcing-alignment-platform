@@ -60,15 +60,13 @@ export default function PrintReport({ data }) {
             <tr>
               <td className="cell-bold">SMT 鋼板</td>
               <td>
-                {renderCheck(tooling.stencil?.need)} 需要
-                <span style={{ marginLeft: '16px' }}>{renderCheck(tooling.stencil?.noNeed)} 不需要</span>
-                {tooling.stencil?.need && (
-                  <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
-                    厚度: {tooling.stencil?.thickness || '—'} mm | 
-                    開口比例: {tooling.stencil?.apertureRatio || '—'} % | 
-                    類型: {tooling.stencil?.stencilType || '—'}
-                  </div>
-                )}
+                <div style={{ fontSize: '0.9rem', fontWeight: 'bold', color: '#111' }}>☑ 鋼板規格 (100% 需要)</div>
+                <div style={{ marginTop: '4px', fontSize: '0.85rem' }}>
+                  厚度: {tooling.stencil?.thickness || '—'} mm | 
+                  開口比例: {tooling.stencil?.apertureRatio || '—'} % | 
+                  樣式: {(tooling.stencil?.style === 'step' ? '階梯鋼板' : '一般鋼板')}
+                  {tooling.stencil?.nanoCoating && <span style={{ marginLeft: '10px', color: '#4f46e5', fontWeight: 'bold' }}>(表面奈米塗層)</span>}
+                </div>
               </td>
               <td>—</td>
             </tr>
@@ -338,24 +336,45 @@ export default function PrintReport({ data }) {
       <div className="print-sign-grid">
         <div className="print-sign-box">
           <div className="print-sign-header">研發確認簽核 (RD)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">姓名: <span className="sign-text">{sign.rdConfirm || '(未簽章)'}</span></div>
+          <div className="print-sign-body" style={{ display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
+            <div className="print-sign-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+              <span>姓名:</span>
+              {sign.rdSignature ? (
+                <img src={sign.rdSignature} alt="RD Signature" style={{ height: '36px', objectFit: 'contain' }} />
+              ) : (
+                <span className="sign-text">{sign.rdConfirm || '(未簽章)'}</span>
+              )}
+            </div>
             <div className="print-sign-terms">確認產品基本資料與風險零件已填寫完整，並經研發部門核准。</div>
           </div>
         </div>
 
         <div className="print-sign-box">
           <div className="print-sign-header">工程審核簽核 (PE)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">姓名: <span className="sign-text">{sign.engineeringReview || '(未簽章)'}</span></div>
+          <div className="print-sign-body" style={{ display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
+            <div className="print-sign-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+              <span>姓名:</span>
+              {sign.engineeringReviewSignature ? (
+                <img src={sign.engineeringReviewSignature} alt="PE Signature" style={{ height: '36px', objectFit: 'contain' }} />
+              ) : (
+                <span className="sign-text">{sign.engineeringReview || '(未簽章)'}</span>
+              )}
+            </div>
             <div className="print-sign-terms">確認生產治工具規格、鋼板開口以及製程工程參數已審查通過。</div>
           </div>
         </div>
 
         <div className="print-sign-box">
           <div className="print-sign-header">品保處最後審核 (QA)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">姓名: <span className="sign-text">{sign.qaConfirm || '(未簽章)'}</span></div>
+          <div className="print-sign-body" style={{ display: 'flex', flexDirection: 'column', minHeight: '110px' }}>
+            <div className="print-sign-name" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1 }}>
+              <span>姓名:</span>
+              {sign.qaSignature ? (
+                <img src={sign.qaSignature} alt="QA Signature" style={{ height: '36px', objectFit: 'contain' }} />
+              ) : (
+                <span className="sign-text">{sign.qaConfirm || '(未簽章)'}</span>
+              )}
+            </div>
             <div className="print-sign-terms">確認兩端資訊與防呆管制點皆已完成填寫與覆核，符合試產要求。</div>
           </div>
         </div>

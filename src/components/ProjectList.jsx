@@ -222,8 +222,8 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
             <tr>
               <th>📁 機種與一覽表名稱</th>
               <th>📊 雙向資訊對齊率</th>
-              <th>🏷️ 對齊狀態</th>
-              <th>🕒 更新時間</th>
+              <th className="hide-on-mobile">🏷️ 對齊狀態</th>
+              <th className="hide-on-mobile">🕒 更新時間</th>
               <th className="text-center">⚙️ 動作</th>
             </tr>
           </thead>
@@ -265,12 +265,12 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                         </span>
                       </div>
                     </td>
-                    <td>
+                    <td className="hide-on-mobile">
                       <span className={`status-badge ${proj.alignmentRate === 100 ? 'aligned' : 'in-progress'}`}>
                         {proj.alignmentRate === 100 ? '已對齊 ✓' : '進行中 ⏳'}
                       </span>
                     </td>
-                    <td className="table-date-cell">{dateStr}</td>
+                    <td className="table-date-cell hide-on-mobile">{dateStr}</td>
                     <td>
                       <div className="table-actions-cell">
                         <button 
