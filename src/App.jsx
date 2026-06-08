@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { Component } from 'react';
+import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import ProjectList from './components/ProjectList';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
@@ -7,8 +8,38 @@ import PrintReport from './components/PrintReport';
 import Settings from './components/Settings';
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
+import { parseRequirementExcel } from './utils/excelParser';
 import * as XLSX from 'xlsx';
 import './App.css';
+
+class ErrorBoundary extends Component {
+  constructor(props) {
+    super(props);
+    this.state = { hasError: false };
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true };
+  }
+  componentDidCatch(error, info) {
+    console.error('ErrorBoundary caught:', error, info);
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="app-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', minHeight: '100vh', padding: '40px', textAlign: 'center' }}>
+          <div className="glass-card" style={{ padding: '40px', maxWidth: '500px' }}>
+            <h2 style={{ color: '#ef4444', marginBottom: '16px' }}>系統發生錯誤</h2>
+            <p style={{ marginBottom: '24px', color: '#6b7280' }}>請重新整理頁面或回到機種列表重新載入。</p>
+            <button className="btn btn-primary" onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}>
+              重新整理
+            </button>
+          </div>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 
 export default function App() {
   const getProjectsKey = (user) => {
@@ -43,7 +74,7 @@ export default function App() {
     const saved = localStorage.getItem('ag_current_user');
     if (!saved) return null;
     const parsed = JSON.parse(saved);
-    delete parsed.name;
+    // 保留所有欄位 (含 name) 以供向後相容
     return parsed;
   });
 
@@ -62,15 +93,14 @@ export default function App() {
   const [accounts, setAccounts] = useState(() => {
     const saved = localStorage.getItem('ag_accounts');
     const parsed = saved ? JSON.parse(saved) : defaultAccounts;
-    return parsed.map((acc) => {
-      const copy = { ...acc };
-      delete copy.name;
-      return copy;
-    });
+    // 保留所有欄位以向後相容
+    return parsed;
   });
 
-  // 動態計算對齊率，取代原本的 React state
-  const currentAlignmentRate = data ? validateAlignment(data).alignmentRate : 0;
+  const currentAlignmentRate = useMemo(
+    () => data ? validateAlignment(data).alignmentRate : 0,
+    [data]
+  );
 
   // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
   useEffect(() => {
@@ -91,7 +121,7 @@ export default function App() {
           const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
           if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
           const ab = await response.arrayBuffer();
-          const parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
+          const parsedData = parseRequirementExcel(ab);
           
           // 轉為 Base64 以供後續匯出回寫
           const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
@@ -120,42 +150,60 @@ export default function App() {
 
     if (currentUser) {
       loadDefaultTemplate();
-    } else {
-      setProjects([]);
     }
   }, [currentUser]);
 
   // 2. 自動存檔功能 (提供即時與 Debounce 800ms 機制)
-  const saveProjectData = (projId, name, projData) => {
+  const saveProjectData = useCallback((projId, name, projData) => {
     if (!projId || !projData) return;
     const report = validateAlignment(projData);
-    setProjects(prev => {
-      const updated = prev.map(p => 
-        p.id === projId 
-          ? { 
-              ...p, 
-              name: name, 
-              data: projData, 
-              alignmentRate: report.alignmentRate, 
-              updatedAt: new Date().toISOString() 
-            } 
-          : p
-      );
-      const key = getProjectsKey(currentUser);
-      localStorage.setItem(key, JSON.stringify(updated));
-      return updated;
-    });
-  };
+    setProjects(prev => prev.map(p =>
+      p.id === projId
+        ? { ...p, name, data: projData, alignmentRate: report.alignmentRate, updatedAt: new Date().toISOString() }
+        : p
+    ));
+  }, []);
+
+  const debounceRef = useRef(null);
+  const pendingSaveRef = useRef(null);
+
+  const flushPendingSave = useCallback(() => {
+    if (debounceRef.current) {
+      clearTimeout(debounceRef.current);
+      debounceRef.current = null;
+    }
+    if (pendingSaveRef.current) {
+      const { projId, name, projData } = pendingSaveRef.current;
+      saveProjectData(projId, name, projData);
+      pendingSaveRef.current = null;
+    }
+  }, [saveProjectData]);
+
+  const flushPendingSaveRef = useRef(flushPendingSave);
+  flushPendingSaveRef.current = flushPendingSave;
 
   useEffect(() => {
     if (currentProjectId && data) {
-      const saveTimeout = setTimeout(() => {
+      pendingSaveRef.current = { projId: currentProjectId, name: fileName, projData: data };
+      debounceRef.current = setTimeout(() => {
         saveProjectData(currentProjectId, fileName, data);
+        pendingSaveRef.current = null;
       }, 800);
 
-      return () => clearTimeout(saveTimeout);
+      return () => clearTimeout(debounceRef.current);
     }
-  }, [data, currentProjectId, fileName]);
+  }, [data, currentProjectId, fileName, saveProjectData]);
+
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      const flush = flushPendingSaveRef.current;
+      flush();
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+    };
+  }, []);
 
   useEffect(() => {
     localStorage.setItem('ag_factories', JSON.stringify(factories));
@@ -172,6 +220,12 @@ export default function App() {
       localStorage.removeItem('ag_current_user');
     }
   }, [currentUser]);
+
+  useEffect(() => {
+    if (!currentUser || projects.length === 0) return;
+    const key = getProjectsKey(currentUser);
+    localStorage.setItem(key, JSON.stringify(projects));
+  }, [projects, currentUser]);
 
   const handleAddFactory = (fac) => {
     if (!factories.includes(fac)) {
@@ -197,7 +251,6 @@ export default function App() {
     if (project) {
       setData(project.data);
       setFileName(project.name);
-      window.uploadedFileName = project.name; // 存入全域以供匯出使用
 
       // 解析原始 Excel 二進位資料為 Workbook 物件
       if (project.originalWbBase64) {
@@ -209,6 +262,9 @@ export default function App() {
         }
         const wb = XLSX.read(bytes.buffer, { type: 'array' });
         setOriginalWb(wb);
+      } else {
+        // 若無 base64 備份，先設為 null，由 SignOff 處理
+        setOriginalWb(null);
       }
       
       setCurrentProjectId(id);
@@ -243,13 +299,13 @@ export default function App() {
         const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
         if (!response.ok) throw new Error('無法載入範本');
         const ab = await response.arrayBuffer();
-        parsedData = await import('./utils/excelParser').then(m => m.parseRequirementExcel(ab));
+        parsedData = parseRequirementExcel(ab);
         const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
         base64 = btoa(binaryString);
       }
 
       const newProj = {
-        id: 'proj_' + Math.random().toString(36).substr(2, 9),
+        id: 'proj_' + crypto.randomUUID(),
         name: trimmedName,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -292,11 +348,10 @@ export default function App() {
         bytes[i] = binaryString.charCodeAt(i);
       }
       
-      const { parseRequirementExcel } = await import('./utils/excelParser');
       const parsedData = parseRequirementExcel(bytes.buffer);
 
       const newProj = {
-        id: 'proj_' + Math.random().toString(36).substr(2, 9),
+        id: 'proj_' + crypto.randomUUID(),
         name: name || `未命名機種_${new Date().toLocaleDateString()}`,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -348,29 +403,17 @@ export default function App() {
   };
 
   const handleUpdateAccountLevel = (uname, newLevel) => {
-    setAccounts(prev => {
-      const updated = prev.map(a => 
-        a.username === uname ? { ...a, level: newLevel } : a
-      );
-      localStorage.setItem('ag_accounts', JSON.stringify(updated));
-      return updated;
-    });
+    setAccounts(prev => prev.map(a =>
+      a.username === uname ? { ...a, level: newLevel } : a
+    ));
   };
 
   const handleUpdateAccountSignature = (uname, signature) => {
-    setAccounts(prev => {
-      const updated = prev.map(a => 
-        a.username === uname ? { ...a, signature } : a
-      );
-      localStorage.setItem('ag_accounts', JSON.stringify(updated));
-      return updated;
-    });
+    setAccounts(prev => prev.map(a =>
+      a.username === uname ? { ...a, signature } : a
+    ));
     if (currentUser && currentUser.username === uname) {
-      setCurrentUser(prev => {
-        const updated = { ...prev, signature };
-        localStorage.setItem('ag_current_user', JSON.stringify(updated));
-        return updated;
-      });
+      setCurrentUser(prev => ({ ...prev, signature }));
     }
   };
 
@@ -434,6 +477,7 @@ export default function App() {
           <SignOff 
             data={data} 
             originalWb={originalWb} 
+            fileName={fileName}
             onChange={setData} 
             onExportComplete={handleExportComplete} 
             currentUser={currentUser}
@@ -467,7 +511,8 @@ export default function App() {
 
   return (
     <>
-      <PrintReport data={data} />
+      <ErrorBoundary>
+      {data && <PrintReport data={data} />}
       <div className="app-container">
       {/* 頂部 Header */}
       <header className="app-header glass-card">
@@ -649,6 +694,7 @@ export default function App() {
         <p className="footer-meta">Vite + React Premium 製程管制平台</p>
       </footer>
       </div>
+      </ErrorBoundary>
     </>
   );
 }

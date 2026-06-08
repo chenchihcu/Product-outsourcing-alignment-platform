@@ -46,17 +46,14 @@ export function validateAlignment(data) {
     check(fpcaValid, '已勾選需要烘烤，但未填妥「FPCA 烘烤條件」數值（溫度 / 時間）', 'error');
   }
 
-  // 治工具對齊檢核
   const tooling = bi.tooling || {};
-  if (pi.smt) {
-    const hasStencilConfirm = tooling.stencil?.need || tooling.stencil?.noNeed;
-    check(hasStencilConfirm, '加工廠未確認「SMT 鋼板」是否需要', 'error');
-    if (tooling.stencil?.need) {
-      check(!!tooling.stencil.thickness && !tooling.stencil.thickness.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
-      check(!!tooling.stencil.apertureRatio && !tooling.stencil.apertureRatio.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
-      const hasType = ['general', 'step'].includes(tooling.stencil.style);
-      check(hasType, '加工廠未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
-    }
+  if (pi.smt && tooling.stencil?.need) {
+    const thickStr = String(tooling.stencil.thickness || '');
+    const apertStr = String(tooling.stencil.apertureRatio || '');
+    check(!!tooling.stencil.thickness && !thickStr.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
+    check(!!tooling.stencil.apertureRatio && !apertStr.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
+    const hasType = ['general', 'step'].includes(tooling.stencil.style);
+    check(hasType, '加工廠未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
   }
 
   // 治具對齊：若加工項目需要，應確認治具
@@ -64,7 +61,8 @@ export function validateAlignment(data) {
     const hasFixtureConfirm = fixture?.need || fixture?.noNeed;
     check(hasFixtureConfirm, `加工廠未確認「${name}」是否需要或提供`, 'error');
     if (fixture?.need) {
-      check(!!fixture.qty && !fixture.qty.includes('__'), `已確認需要「${name}」，但未填寫數量`, 'error');
+      const qtyStr = String(fixture.qty || '');
+      check(!!fixture.qty && !qtyStr.includes('__'), `已確認需要「${name}」，但未填寫數量`, 'error');
     }
   };
   checkFixture(tooling.routingFixture, 'Routing 治具');
@@ -84,10 +82,12 @@ export function validateAlignment(data) {
   const otherFixture = tooling.otherFixture || {};
   const hasOtherConfirm = otherFixture.need || otherFixture.noNeed;
   check(hasOtherConfirm, '加工廠未確認「其他治具」是否需要', 'error');
-  if (otherFixture.need) {
-    check(!!otherFixture.name && !otherFixture.name.includes('___'), '已勾選需要「其他治具」，但未填寫治具名稱', 'error');
-    check(!!otherFixture.qty && !otherFixture.qty.includes('__'), '已勾選需要「其他治具」，但未填寫治具數量', 'error');
-  }
+    if (otherFixture.need) {
+      const otherNameStr = String(otherFixture.name || '');
+      const otherQtyStr = String(otherFixture.qty || '');
+      check(!!otherFixture.name && !otherNameStr.includes('___'), '已勾選需要「其他治具」，但未填寫治具名稱', 'error');
+      check(!!otherFixture.qty && !otherQtyStr.includes('__'), '已勾選需要「其他治具」，但未填寫治具數量', 'error');
+    }
 
   // SMT/DIP 首件檢查與樣品提供
   const hasSample = pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart;
@@ -143,7 +143,10 @@ export function validateAlignment(data) {
   const sign = bi.signOff || {};
   check(!!sign.rdSignature, '「研發」電子簽章未上傳', 'error');
   check(!!sign.engineeringReviewSignature, '「工程」電子簽章未上傳', 'warning');
-  check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
+  // QA 簽章檢查：僅當 RD 和 PE 均已簽署後才計入檢查，避免 QA 因前置簽署未完成而無法達到 100%
+  if (sign.rdSignature && sign.engineeringReviewSignature) {
+    check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
+  }
 
   // 計算對齊率
   const alignmentRate = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) : 0;

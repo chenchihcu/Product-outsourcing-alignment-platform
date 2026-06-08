@@ -148,8 +148,9 @@ function applyFormatting(sheet) {
  * @returns {ArrayBuffer} 導出的 Excel ArrayBuffer
  */
 export function exportRequirementExcel(originalWorkbook, data) {
-  // 複製一份 workbook 以免修改到原始的
-  const wb = JSON.parse(JSON.stringify(originalWorkbook));
+  // 複製一份 workbook 以免修改到原始的 (使用 SheetJS 自身的寫/讀回圈以保留內部結構)
+  const tempBuffer = XLSX.write(originalWorkbook, { bookType: 'xlsx', type: 'array' });
+  const wb = XLSX.read(tempBuffer, { type: 'array' });
 
   // 1. 更新【產品基本資料】
   const sheet1 = wb.Sheets['產品基本資料'] || wb.Sheets[wb.SheetNames[0]];
@@ -167,9 +168,10 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'F5', 'Pilot-run', stage.politRun);
     writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
 
-    // 烘烤
-    writeCell(sheet1, 'D5', bi.pcbBake || '');
-    writeCell(sheet1, 'D6', bi.fpcaBake || '');
+    // 烘烤 (優先使用製程管制頁填寫的詳細條件，同步避免 sheet1 殘留範本預設值)
+    const bake = data.processControl?.bakeRequired || {};
+    writeCell(sheet1, 'D5', bake.pcbBakeCond || bi.pcbBake || '');
+    writeCell(sheet1, 'D6', bake.fpcaBakeCond || bi.fpcaBake || '');
 
     // 產品類別 (已移除)
     writeCell(sheet1, 'B6', '');
@@ -259,7 +261,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'A29', '組裝(包裝)作業標準書', docs.assemblyPackingSop);
     writeCheckbox(sheet1, 'C29', '測試作業標準書', docs.testSop);
     writeCell(sheet1, 'E29', '');
-    writeCheckbox(sheet1, 'G29', '包裝作業標準書', docs.assemblyPackingSop);
+    writeCell(sheet1, 'G29', docs.assemblyPackingSop ? '☑ 包裝作業標準書' : '☐ 包裝作業標準書');
 
     // 治工具
     const tool = bi.tooling || {};

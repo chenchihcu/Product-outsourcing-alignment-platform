@@ -1,22 +1,22 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { validateAlignment } from '../utils/validator';
 import './Dashboard.css';
 
 export default function Dashboard({ data, onGoToSection }) {
-  const report = validateAlignment(data);
+  const report = useMemo(() => validateAlignment(data), [data]);
   const { warnings } = report;
 
-  const errors = warnings.filter(w => w.type === 'error');
-  const warns = warnings.filter(w => w.type === 'warning');
+  const errors = useMemo(() => warnings.filter(w => w.type === 'error'), [warnings]);
+  const warns = useMemo(() => warnings.filter(w => w.type === 'warning'), [warnings]);
 
-  // 對應警示訊息的導航按鈕
+  // 對應警示訊息的導航按鈕 (擴充關鍵字以涵蓋所有 validator 訊息)
   const handleWarningClick = (msg) => {
     let tab = 'basicInfo';
-    if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具')) {
+    if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具') || msg.includes('委外加工廠')) {
       tab = 'basicInfo';
-    } else if (msg.includes('烘烤') || msg.includes('首件') || msg.includes('順序') || msg.includes('樣品') || msg.includes('測溫') || msg.includes('Underfill') || msg.includes('包材') || msg.includes('維修記號') || msg.includes('備註')) {
+    } else if (msg.includes('烘烤') || msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('樣品') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('包材') || msg.includes('包裝') || msg.includes('維修記號') || msg.includes('備註')) {
       tab = 'processControl';
-    } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
+    } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('翹曲') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
       tab = 'trialReport';
     }
     onGoToSection(tab, msg);

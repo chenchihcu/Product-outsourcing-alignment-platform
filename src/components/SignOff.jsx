@@ -1,13 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { validateAlignment } from '../utils/validator';
 import { exportRequirementExcel } from '../utils/excelExporter';
 import { compressImage } from '../utils/imageCompressor';
 import './SignOff.css';
 
-export default function SignOff({ data, originalWb, onChange, onExportComplete, currentUser, onUpdateAccountSignature }) {
-  const report = validateAlignment(data);
+export default function SignOff({ data, originalWb, fileName, onChange, onExportComplete, currentUser, onUpdateAccountSignature }) {
+  const report = useMemo(() => validateAlignment(data), [data]);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
+  const exportTimerRef = useRef(null);
+
+  useEffect(() => {
+    return () => {
+      if (exportTimerRef.current) {
+        clearTimeout(exportTimerRef.current);
+        exportTimerRef.current = null;
+      }
+    };
+  }, []);
 
   const handleSignChange = (field, val) => {
     const updatedSign = { ...data.basicInfo.signOff, [field]: val };
@@ -23,20 +33,26 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
   };
 
   const handleExport = () => {
+    if (!originalWb) {
+      alert('無法匯出：缺少原始 Excel 範本資料。請重新載入機種或從範本重新建立。');
+      return;
+    }
     setExportLoading(true);
-    setTimeout(() => {
+
+    if (exportTimerRef.current) {
+      clearTimeout(exportTimerRef.current);
+    }
+
+    exportTimerRef.current = setTimeout(() => {
       try {
         const outArray = exportRequirementExcel(originalWb, data);
         
-        // 建立下載 Blob
         const blob = new Blob([outArray], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
         
-        const originalName = window.uploadedFileName || '新機種製作需求一覽表2026';
-        const baseName = originalName.endsWith('.xlsx') ? originalName.slice(0, -5) : originalName;
         a.href = url;
-        a.download = `${baseName}_對齊簽核版.xlsx`;
+        a.download = `${fileName}_對齊簽核版.xlsx`;
         
         document.body.appendChild(a);
         a.click();
@@ -49,6 +65,7 @@ export default function SignOff({ data, originalWb, onChange, onExportComplete, 
         alert('匯出 Excel 檔案出錯！');
       } finally {
         setExportLoading(false);
+        exportTimerRef.current = null;
       }
     }, 1000);
   };
