@@ -102,6 +102,23 @@ export default function App() {
     [data]
   );
 
+  const sectionStatus = useMemo(() => {
+    if (!data) return {};
+    const bi = data.basicInfo || {};
+    const pc = data.processControl || {};
+    const tr = data.trialReport || {};
+    const sign = bi.signOff || {};
+    return {
+      basicInfo: !!(bi.factory && bi.productNo && Object.values(bi.stage || {}).some(v => v)),
+      processControl: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
+        (pc.bakeRequired?.need || pc.bakeRequired?.noNeed) &&
+        (pc.smtOrder?.bToT || pc.smtOrder?.tToB)),
+      trialReport: !!(tr.printRecords?.some(r => r.checked) || tr.inspectRecords?.some(r => r.checked) || tr.photoRecords?.some(r => r.checked)),
+      documents: !!Object.values(bi.documents || {}).some(v => v),
+      signOff: !!(sign.rdSignature || sign.engineeringReviewSignature || sign.qaSignature)
+    };
+  }, [data]);
+
   // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
   useEffect(() => {
     const loadDefaultTemplate = async () => {
@@ -227,6 +244,29 @@ export default function App() {
     localStorage.setItem(key, JSON.stringify(projects));
   }, [projects, currentUser]);
 
+  // 自動恢復上次編輯的機種
+  const lastIdRef = useRef(null);
+  useEffect(() => {
+    if (!currentUser || currentProjectId || projects.length === 0) return;
+    const lastId = localStorage.getItem('ag_last_project_id');
+    if (lastId && lastId !== lastIdRef.current && projects.some(p => p.id === lastId)) {
+      lastIdRef.current = lastId;
+      const project = projects.find(p => p.id === lastId);
+      if (project) {
+        setData(project.data);
+        setFileName(project.name);
+        if (project.originalWbBase64) {
+          const binaryString = atob(project.originalWbBase64);
+          const bytes = new Uint8Array(binaryString.length);
+          for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+          setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+        }
+        setCurrentProjectId(lastId);
+        setActiveTab('dashboard');
+      }
+    }
+  }, [currentUser, projects, currentProjectId]);
+
   const handleAddFactory = (fac) => {
     if (!factories.includes(fac)) {
       setFactories([...factories, fac]);
@@ -269,6 +309,7 @@ export default function App() {
       
       setCurrentProjectId(id);
       setActiveTab('dashboard');
+      localStorage.setItem('ag_last_project_id', id);
     } else {
       alert('找不到該機種資料。');
     }
@@ -610,45 +651,22 @@ export default function App() {
               </button>
               <div className="tab-nav-divider"></div>
               
-              <button 
-                className={`tab-btn ${activeTab === 'basicInfo' ? 'active' : ''}`}
-                onClick={() => setActiveTab('basicInfo')}
-              >
-                <span className="tab-icon">📋</span>
-                <span className="tab-label">基本資料</span>
-              </button>
-              
-              <button 
-                className={`tab-btn ${activeTab === 'processControl' ? 'active' : ''}`}
-                onClick={() => setActiveTab('processControl')}
-              >
-                <span className="tab-icon">🔰</span>
-                <span className="tab-label">製程管制</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'trialReport' ? 'active' : ''}`}
-                onClick={() => setActiveTab('trialReport')}
-              >
-                <span className="tab-icon">🎯</span>
-                <span className="tab-label">試產要求</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'documents' ? 'active' : ''}`}
-                onClick={() => setActiveTab('documents')}
-              >
-                <span className="tab-icon">📂</span>
-                <span className="tab-label">工程文件</span>
-              </button>
-
-              <button 
-                className={`tab-btn ${activeTab === 'signOff' ? 'active' : ''}`}
-                onClick={() => setActiveTab('signOff')}
-              >
-                <span className="tab-icon">✍️</span>
-                <span className="tab-label">簽章匯出</span>
-              </button>
+              {['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'].map(tab => {
+                const labels = { basicInfo: '基本資料', processControl: '製程管制', trialReport: '試產要求', documents: '工程文件', signOff: '簽章匯出' };
+                const icons = { basicInfo: '📋', processControl: '🔰', trialReport: '🎯', documents: '📂', signOff: '✍️' };
+                const done = sectionStatus[tab];
+                return (
+                  <button key={tab}
+                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
+                    onClick={() => setActiveTab(tab)}
+                    title={`${done ? '✓ 已完成' : '○ 進行中'} — 點擊直接跳轉`}
+                  >
+                    <span className="tab-icon">{done ? '✅' : icons[tab]}</span>
+                    <span className="tab-label">{labels[tab]}</span>
+                    {done && <span className="tab-check">✓</span>}
+                  </button>
+                );
+              })}
 
               <div className="tab-nav-divider"></div>
               

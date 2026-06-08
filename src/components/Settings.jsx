@@ -21,7 +21,6 @@ export default function Settings({
   // 帳號清單密碼遮罩：預設隱藏，可逐列切換顯示
   const [revealedPasswords, setRevealedPasswords] = useState({});
   const [newUnit, setNewUnit] = useState('研發單位');
-  const [newRole, setNewRole] = useState('rd');
   const [newLevel, setNewLevel] = useState('Standard');
 
   const handleAddFactorySubmit = (e) => {
@@ -47,7 +46,7 @@ export default function Settings({
       username: newUsername.trim(),
       password: newPassword.trim(),
       unit: newUnit,
-      role: newRole,
+      role: newUnit === '研發單位' ? 'rd' : newUnit === '工程單位' ? 'eng' : newUnit === '審核單位(品保處)' ? 'qa' : 'admin',
       level: newLevel
     };
 
@@ -59,11 +58,6 @@ export default function Settings({
 
   const handleUnitChange = (val) => {
     setNewUnit(val);
-    // 自動對應角色代碼以防呆
-    if (val === '研發單位') setNewRole('rd');
-    else if (val === '工程單位') setNewRole('eng');
-    else if (val === '審核單位(品保處)') setNewRole('qa');
-    else setNewRole('admin');
   };
 
   return (

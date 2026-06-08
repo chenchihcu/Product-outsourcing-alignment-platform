@@ -262,7 +262,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                 )}
               </div>
               
-              {(currentUser.role === 'qa' || currentUser.role === 'admin') && data.basicInfo.signOff?.rdSignature && data.basicInfo.signOff?.engineeringReviewSignature && (
+              {(currentUser.role === 'qa' || currentUser.role === 'admin') && (
                 <div className="signature-btn-row">
                   {currentUser.signature && (
                     <button 
@@ -314,8 +314,8 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
             </div>
 
             {(!data.basicInfo.signOff?.rdSignature || !data.basicInfo.signOff?.engineeringReviewSignature) ? (
-              <p className="sign-terms" style={{ color: '#ef4444', fontWeight: 'bold' }}>
-                ⚠️ 需等研發與工程皆完成電子簽章後，方可由品保處進行最後審核。
+              <p className="sign-terms" style={{ color: '#f59e0b', fontWeight: 'bold' }}>
+                ⚠️ 建議等研發與工程完成簽章後再進行最終審核，但目前不強制阻擋。
               </p>
             ) : (
               <p className="sign-terms">本簽章確認：兩端資訊與防呆管制點皆已完成填寫與覆核，符合量產試產要求。</p>
