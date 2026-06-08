@@ -1089,6 +1089,77 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           <div className="divider"></div>
 
+          {/* 測溫點配置 (關鍵防呆) */}
+          <h3 className="sub-section-title">🌡️ 測溫點配置與 Reflow 參數 (關鍵零件要求)</h3>
+          
+          <div className={`form-group ${getFieldHighlightClass('tempPoints')}`}>
+            <label className="form-label">關鍵零件狀態</label>
+            <div className="radio-group">
+              <label className="radio-label">
+                <input 
+                  type="radio" 
+                  name="keyParts" 
+                  checked={data.processControl?.keyParts?.has || false}
+                  onChange={() => handleProcessChange('keyParts', { has: true, none: false })}
+                  disabled={isFieldDisabled('processControl.keyParts.has')}
+                />
+                <span>有關鍵零件 (需配置至少 6 點測溫)</span>
+              </label>
+              <label className="radio-label">
+                <input 
+                  type="radio" 
+                  name="keyParts" 
+                  checked={data.processControl?.keyParts?.none || false}
+                  onChange={() => handleProcessChange('keyParts', { has: false, none: true })}
+                  disabled={isFieldDisabled('processControl.keyParts.none')}
+                />
+                <span>無關鍵零件</span>
+              </label>
+            </div>
+          </div>
+
+          {data.processControl?.keyParts?.has && (
+            <div className={`temp-points-table-wrapper animate-fade-in ${getFieldHighlightClass('tempPoints')}`}>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                {[0, 1, 2].map((idx) => {
+                  const point = data.processControl.tempPoints?.[idx] || {};
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <input 
+                        type="text" 
+                        className="form-input edit-active" 
+                        placeholder="例如: U12, Q5" 
+                        value={point.pos || ''}
+                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
+                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
+                        style={{ fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[3, 4, 5].map((idx) => {
+                  const point = data.processControl.tempPoints?.[idx] || {};
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <input 
+                        type="text" 
+                        className="form-input edit-active" 
+                        placeholder="例如: U12, Q5" 
+                        value={point.pos || ''}
+                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
+                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
+                        style={{ fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
           {/* SMT 與 DIP 首件/焊接順序併排（2 欄 Grid） */}
           <div className="form-row-grid">
             {/* 左側：SMT 製程管制 */}
@@ -1241,80 +1312,6 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           <div className="divider"></div>
 
-          {/* 測溫點配置 (關鍵防呆) */}
-          <h3 className="sub-section-title">🌡️ 測溫點配置與 Reflow 參數 (關鍵零件要求)</h3>
-          
-          <div className={`form-group ${getFieldHighlightClass('tempPoints')}`}>
-            <label className="form-label">關鍵零件狀態</label>
-            <div className="radio-group">
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="keyParts" 
-                  checked={data.processControl?.keyParts?.has || false}
-                  onChange={() => handleProcessChange('keyParts', { has: true, none: false })}
-                  disabled={isFieldDisabled('processControl.keyParts.has')}
-                />
-                <span>有關鍵零件 (需配置至少 6 點測溫)</span>
-              </label>
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="keyParts" 
-                  checked={data.processControl?.keyParts?.none || false}
-                  onChange={() => handleProcessChange('keyParts', { has: false, none: true })}
-                  disabled={isFieldDisabled('processControl.keyParts.none')}
-                />
-                <span>無關鍵零件</span>
-              </label>
-            </div>
-          </div>
-
-          {data.processControl?.keyParts?.has && (
-            <div className={`temp-points-table-wrapper animate-fade-in ${getFieldHighlightClass('tempPoints')}`}>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px' }}>
-                {[0, 1, 2].map((idx) => {
-                  const point = data.processControl.tempPoints?.[idx] || {};
-                  return (
-                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
-                      <input 
-                        type="text" 
-                        className="form-input edit-active" 
-                        placeholder="例如: U12, Q5" 
-                        value={point.pos || ''}
-                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
-                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
-                        style={{ fontSize: '0.9rem' }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
-                {[3, 4, 5].map((idx) => {
-                  const point = data.processControl.tempPoints?.[idx] || {};
-                  return (
-                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
-                      <input 
-                        type="text" 
-                        className="form-input edit-active" 
-                        placeholder="例如: U12, Q5" 
-                        value={point.pos || ''}
-                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
-                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
-                        style={{ fontSize: '0.9rem' }}
-                      />
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          <div className="divider"></div>
-
           {/* Underfill 與維修記號 */}
           <div className="form-row-grid">
             <div className="form-group">
@@ -1457,6 +1454,34 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   </label>
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* C. SMT 良率報告 */}
+          <div className="record-list-section">
+            <h4 className="list-group-title">📈 C. SMT 生產良率報告（含可製造性設計問題分析 DFM）</h4>
+            <div className="records-grid">
+              <div className="record-row edit-active" style={{ margin: 0 }}>
+                <label className="checkbox-label flex-1">
+                  <input
+                    type="checkbox"
+                    checked={data.trialReport?.yieldReport?.ready || false}
+                    onChange={(e) => {
+                      const yr = { ready: e.target.checked };
+                      const updatedTR = { ...data.trialReport, yieldReport: yr };
+                      const owners = { ...(data._owners || {}) };
+                      if (e.target.checked) {
+                        owners["trialReport.yieldReport.ready"] = currentUser.unit;
+                      } else {
+                        delete owners["trialReport.yieldReport.ready"];
+                      }
+                      onChange({ ...data, trialReport: updatedTR, _owners: owners });
+                    }}
+                    disabled={isFieldDisabled("trialReport.yieldReport.ready")}
+                  />
+                  <span className="record-name">SMT 良率報告已備妥</span>
+                </label>
+              </div>
             </div>
           </div>
 

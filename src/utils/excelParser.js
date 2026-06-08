@@ -469,15 +469,19 @@ export function parseRequirementExcel(arrayBuffer) {
       { id: 3, name: getVal('B8') || '', checked: parseCheckbox(getVal('C8')), date: '' }
     ];
 
-    // B. 檢驗紀錄
+    // B. 檢驗紀錄（移除鋼板IQC；板彎翹曲改原材料檢驗）
     data.trialReport.inspectRecords = [
-      { id: 1, name: getVal('B12') || '', checked: parseCheckbox(getVal('C12')), date: '' },
+      { id: 1, name: 'PCB 板彎/翹曲檢驗紀錄（原材料檢驗：烘烤前/烘烤後）', checked: parseCheckbox(getVal('C12')), date: '' },
       { id: 2, name: getVal('B13') || '', checked: parseCheckbox(getVal('C13')), date: '' },
       { id: 3, name: getVal('B14') || '', checked: parseCheckbox(getVal('C14')), date: '' },
-      { id: 4, name: getVal('B15') || '', checked: parseCheckbox(getVal('C15')), date: '' },
-      { id: 5, name: getVal('B16') || '', checked: parseCheckbox(getVal('C16')), date: '' },
-      { id: 6, name: getVal('B17') || '', checked: parseCheckbox(getVal('C17')), date: '' }
+      { id: 4, name: getVal('B16') || '', checked: parseCheckbox(getVal('C16')), date: '' },
+      { id: 5, name: getVal('B17') || '', checked: parseCheckbox(getVal('C17')), date: '' }
     ];
+
+    // C. SMT 良率報告（單一 checkbox）
+    data.trialReport.yieldReport = {
+      ready: parseCheckbox(getVal('C20'))
+    };
 
     // D. 照片提供
     const parseXrayParts = (val) => {
@@ -514,3 +518,4 @@ export function parseRequirementExcel(arrayBuffer) {
 
   return data;
 }
+

@@ -259,7 +259,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'A29', '組裝(包裝)作業標準書', docs.assemblyPackingSop);
     writeCheckbox(sheet1, 'C29', '測試作業標準書', docs.testSop);
     writeCell(sheet1, 'E29', '');
-    writeCell(sheet1, 'G29', '');
+    writeCheckbox(sheet1, 'G29', '包裝作業標準書', docs.assemblyPackingSop);
 
     // 治工具
     const tool = bi.tooling || {};
@@ -306,11 +306,15 @@ export function exportRequirementExcel(originalWorkbook, data) {
       writeCell(sheet1, 'B38', '');
     }
 
-    // 簽核回寫對齊 (B40 研發, D40 工程, G40 品保)
+    // 簽核回寫對齊 + 標籤修正 (A40=研發, C40=工程, F40=品保)
     const sign = bi.signOff || {};
     writeCell(sheet1, 'B40', sign.rdConfirm || '');
     writeCell(sheet1, 'D40', sign.engineeringReview || '');
     writeCell(sheet1, 'G40', sign.qaConfirm || '');
+
+    // 修正簽核區標籤（對應實際填寫角色）
+    writeCell(sheet1, 'A40', '研發確認');
+    writeCell(sheet1, 'F40', '品保處審核');
 
     // 儲存防呆鎖定狀態 owners 與 電子簽章圖片 到 G1 (可跨檔案、重整後還原)
     const exportMetadata = {
@@ -481,6 +485,10 @@ export function exportRequirementExcel(originalWorkbook, data) {
     if (tr.printRecords) updateRecords(tr.printRecords, 6);
     if (tr.inspectRecords) updateRecords(tr.inspectRecords, 12);
     if (tr.photoRecords) updatePhotoRecords(tr.photoRecords, 24);
+
+    // C. SMT 良率報告回寫
+    const yr = tr.yieldReport || {};
+    writeCheckbox(sheet3, 'C20', '', yr.ready);
   }
 
   // 在寫出前對每個要輸出的 sheet 套用排版改善
