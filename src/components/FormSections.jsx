@@ -418,127 +418,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   ))}
                 </div>
               </div>
-              <div className={`form-group ${getFieldHighlightClass('category')}`}>
-                <label className="form-label">產品類別</label>
-                <div className="checkbox-flex">
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.category?.general || false} 
-                      onChange={(e) => {
-                        const category = { ...(data.basicInfo.category || {}), general: e.target.checked };
-                        handleBasicChange('category', category);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.category.general')}
-                    />
-                    <span>一般</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.category?.medical || false} 
-                      onChange={(e) => {
-                        const category = { ...(data.basicInfo.category || {}), medical: e.target.checked };
-                        handleBasicChange('category', category);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.category.medical')}
-                    />
-                    <span>醫療</span>
-                  </label>
-                </div>
-              </div>
-            </div>
-          </div>
 
-          {/* 卡片 2: 電路板規格與材質屬性 */}
-          <div className="form-section-card glass-card">
-            <h3 className="card-title">📐 電路板規格與材質屬性</h3>
-            <div className="form-row-grid-3">
-              <div className="form-group">
-                <label className="form-label">材質分類</label>
-                <div className="checkbox-flex">
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="materialType"
-                      checked={data.basicInfo.materialType === 'pcb'} 
-                      onChange={() => handleBasicChange('materialType', 'pcb')}
-                      disabled={isFieldDisabled('basicInfo.materialType')}
-                    />
-                    <span>PCB硬板</span>
-                  </label>
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name="materialType"
-                      checked={data.basicInfo.materialType === 'fpc'} 
-                      onChange={() => handleBasicChange('materialType', 'fpc')}
-                      disabled={isFieldDisabled('basicInfo.materialType')}
-                    />
-                    <span>FPC軟板</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">PCBA 類型</label>
-                <div className="checkbox-flex">
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.pcbaType?.single || false} 
-                      onChange={(e) => {
-                        const pt = { ...(data.basicInfo.pcbaType || {}), single: e.target.checked };
-                        handleBasicChange('pcbaType', pt);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.pcbaType.single')}
-                    />
-                    <span>單面板</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.pcbaType?.double || false} 
-                      onChange={(e) => {
-                        const pt = { ...(data.basicInfo.pcbaType || {}), double: e.target.checked };
-                        handleBasicChange('pcbaType', pt);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.pcbaType.double')}
-                    />
-                    <span>雙面板</span>
-                  </label>
-                </div>
-              </div>
-
-              <div className={`form-group ${getFieldHighlightClass('aoi')}`}>
-                <label className="form-label">AOI 檢驗面</label>
-                <div className="checkbox-flex">
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.aoi?.top || false} 
-                      onChange={(e) => {
-                        const aoi = { ...(data.basicInfo.aoi || {}), top: e.target.checked };
-                        handleBasicChange('aoi', aoi);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.aoi.top')}
-                    />
-                    <span>Top (頂面)</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.aoi?.bottom || false} 
-                      onChange={(e) => {
-                        const aoi = { ...(data.basicInfo.aoi || {}), bottom: e.target.checked };
-                        handleBasicChange('aoi', aoi);
-                      }}
-                      disabled={isFieldDisabled('basicInfo.aoi.bottom')}
-                    />
-                    <span>Bottom (底面)</span>
-                  </label>
-                </div>
-              </div>
             </div>
           </div>
 
@@ -685,6 +565,35 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       disabled={isFieldDisabled('basicInfo.snControl.noNeed')}
                     />
                     <span>不需要</span>
+                  </label>
+                </div>
+              </div>
+              <div className={`form-group ${getFieldHighlightClass('aoi')}`}>
+                <label className="form-label">AOI 檢驗面</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.aoi?.top || false} 
+                      onChange={(e) => {
+                        const aoi = { ...(data.basicInfo.aoi || {}), top: e.target.checked };
+                        handleBasicChange('aoi', aoi);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.aoi.top')}
+                    />
+                    <span>Top (頂面)</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.aoi?.bottom || false} 
+                      onChange={(e) => {
+                        const aoi = { ...(data.basicInfo.aoi || {}), bottom: e.target.checked };
+                        handleBasicChange('aoi', aoi);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.aoi.bottom')}
+                    />
+                    <span>Bottom (底面)</span>
                   </label>
                 </div>
               </div>
@@ -1363,56 +1272,44 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {data.processControl?.keyParts?.has && (
             <div className={`temp-points-table-wrapper animate-fade-in ${getFieldHighlightClass('tempPoints')}`}>
-              <table className="form-table">
-                <thead>
-                  <tr>
-                    <th style={{ width: '60px' }}>#</th>
-                    <th>位置 / 位號 <span className="req">*</span></th>
-                    <th>零件描述 <span className="req">*</span></th>
-                    <th>備註</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {[0, 1, 2, 3, 4, 5].map((idx) => {
-                    const point = data.processControl.tempPoints?.[idx] || {};
-                    return (
-                      <tr key={idx}>
-                        <td>{idx + 1}</td>
-                        <td>
-                          <input 
-                            type="text" 
-                            className="table-input edit-active" 
-                            placeholder="例如: U12, Q5" 
-                            value={point.pos || ''}
-                            onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
-                            disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
-                          />
-                        </td>
-                        <td>
-                          <input 
-                            type="text" 
-                            className="table-input edit-active" 
-                            placeholder="例如: BGA SOC / MCU" 
-                            value={point.desc || ''}
-                            onChange={(e) => handleTempPointChange(idx, 'desc', e.target.value)}
-                            disabled={isFieldDisabled(`processControl.tempPoints.${idx}.desc`)}
-                          />
-                        </td>
-                        <td>
-                          <input 
-                            type="text" 
-                            className="table-input edit-active" 
-                            placeholder="選填備註" 
-                            value={point.memo || ''}
-                            onChange={(e) => handleTempPointChange(idx, 'memo', e.target.value)}
-                            disabled={isFieldDisabled(`processControl.tempPoints.${idx}.memo`)}
-                          />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', marginBottom: '16px' }}>
+                {[0, 1, 2].map((idx) => {
+                  const point = data.processControl.tempPoints?.[idx] || {};
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <input 
+                        type="text" 
+                        className="form-input edit-active" 
+                        placeholder="例如: U12, Q5" 
+                        value={point.pos || ''}
+                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
+                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
+                        style={{ fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px' }}>
+                {[3, 4, 5].map((idx) => {
+                  const point = data.processControl.tempPoints?.[idx] || {};
+                  return (
+                    <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <input 
+                        type="text" 
+                        className="form-input edit-active" 
+                        placeholder="例如: U12, Q5" 
+                        value={point.pos || ''}
+                        onChange={(e) => handleTempPointChange(idx, 'pos', e.target.value)}
+                        disabled={isFieldDisabled(`processControl.tempPoints.${idx}.pos`)}
+                        style={{ fontSize: '0.9rem' }}
+                      />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
 

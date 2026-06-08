@@ -29,6 +29,7 @@ export default function PrintReport({ data }) {
             <td className="cell-label" style={{ width: '15%' }}>產品料號</td>
             <td className="cell-value" style={{ width: '35%' }}>{bi.productNo || '(未填寫)'}</td>
           </tr>
+
           <tr>
             <td className="cell-label">產品名稱/描述</td>
             <td className="cell-value">{bi.productDesc || '(未填寫)'}</td>
@@ -249,9 +250,7 @@ export default function PrintReport({ data }) {
             <thead>
               <tr>
                 <th style={{ width: '10%' }}>#</th>
-                <th style={{ width: '30%' }}>位置 / 位號</th>
-                <th style={{ width: '40%' }}>零件描述</th>
-                <th style={{ width: '20%' }}>備註</th>
+                <th style={{ width: '40%' }}>位置 / 位號</th>
               </tr>
             </thead>
             <tbody>
@@ -259,8 +258,6 @@ export default function PrintReport({ data }) {
                 <tr key={idx}>
                   <td>{idx + 1}</td>
                   <td>{pt.pos || '—'}</td>
-                  <td>{pt.desc || '—'}</td>
-                  <td>{pt.memo || '—'}</td>
                 </tr>
               ))}
             </tbody>

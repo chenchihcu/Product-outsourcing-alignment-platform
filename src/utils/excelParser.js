@@ -76,11 +76,8 @@ export function parseRequirementExcel(arrayBuffer) {
     data.basicInfo.pcbBake = getVal('D5') || '';
     data.basicInfo.fpcaBake = getVal('D6') || '';
 
-    // 產品類別
-    data.basicInfo.category = {
-      general: parseCheckbox(getVal('B6')),
-      medical: parseCheckbox(getVal('C6'))
-    };
+    // 產品類別 (已移除)
+    data.basicInfo.category = { general: false, medical: false };
 
     data.basicInfo.productNo = getVal('B7') || '';
     data.basicInfo.productDesc = getVal('B8') || '';
@@ -95,16 +92,9 @@ export function parseRequirementExcel(arrayBuffer) {
       jStd001: parseCheckbox(getVal('F10'))
     };
 
-    // PCBA 資訊
-    data.basicInfo.pcbaType = {
-      single: parseCheckbox(getVal('B11')),
-      double: parseCheckbox(getVal('C11'))
-    };
-
-    // 材質分類
-    const e11Checked = parseCheckbox(getVal('E11')) || String(getVal('E11') || '').includes('☑');
-    const f11Checked = parseCheckbox(getVal('F11')) || String(getVal('F11') || '').includes('☑');
-    data.basicInfo.materialType = e11Checked ? 'pcb' : (f11Checked ? 'fpc' : '');
+    // PCBA 資訊 (已移除)
+    data.basicInfo.pcbaType = { single: false, double: false };
+    data.basicInfo.materialType = '';
 
     // 加工項目 (Checkbox)
     const f15Val = String(getVal('F15') || '');

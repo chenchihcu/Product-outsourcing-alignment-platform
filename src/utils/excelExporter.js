@@ -171,10 +171,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCell(sheet1, 'D5', bi.pcbBake || '');
     writeCell(sheet1, 'D6', bi.fpcaBake || '');
 
-    // 產品類別
-    const cat = bi.category || {};
-    writeCheckbox(sheet1, 'B6', '一般', cat.general);
-    writeCheckbox(sheet1, 'C6', '醫療', cat.medical);
+    // 產品類別 (已移除)
+    writeCell(sheet1, 'B6', '');
+    writeCell(sheet1, 'C6', '');
 
     writeCell(sheet1, 'B7', bi.productNo || '');
     writeCell(sheet1, 'B8', bi.productDesc || '');
@@ -193,15 +192,12 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet1, 'E10', 'IPC-A-610', ipc.ipcA610);
     writeCheckbox(sheet1, 'F10', 'J-STD-001', ipc.jStd001);
 
-    // PCBA 資訊
-    const pcba = bi.pcbaType || {};
-    writeCheckbox(sheet1, 'B11', '單面', pcba.single);
-    writeCheckbox(sheet1, 'C11', '雙面', pcba.double);
-
-    // 材質分類
-    writeCell(sheet1, 'D11', '材質分類');
-    writeCheckbox(sheet1, 'E11', 'PCB硬板', bi.materialType === 'pcb');
-    writeCheckbox(sheet1, 'F11', 'FPC軟板', bi.materialType === 'fpc');
+    // PCBA 資訊 (已移除)
+    writeCell(sheet1, 'B11', '');
+    writeCell(sheet1, 'C11', '');
+    writeCell(sheet1, 'D11', '');
+    writeCell(sheet1, 'E11', '');
+    writeCell(sheet1, 'F11', '');
 
     // 加工項目
     const pi = bi.processItems || {};

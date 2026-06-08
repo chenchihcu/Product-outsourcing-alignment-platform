@@ -54,8 +54,8 @@ export function validateAlignment(data) {
     if (tooling.stencil?.need) {
       check(!!tooling.stencil.thickness && !tooling.stencil.thickness.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
       check(!!tooling.stencil.apertureRatio && !tooling.stencil.apertureRatio.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
-      const hasType = ['一般鋼板', '奈米鋼板', '階梯鋼板'].includes(tooling.stencil.stencilType);
-      check(hasType, '加工廠未選擇鋼板類型「一般鋼板 / 奈米鋼板 / 階梯鋼板」', 'error');
+      const hasType = ['general', 'step'].includes(tooling.stencil.style);
+      check(hasType, '加工廠未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
     }
   }
 
@@ -126,8 +126,8 @@ export function validateAlignment(data) {
   const hasKeyParts = pc.keyParts?.has;
   if (hasKeyParts) {
     const tempPoints = pc.tempPoints || [];
-    const validPoints = tempPoints.filter(p => !!p.pos && !!p.desc);
-    check(validPoints.length >= 6, '已勾選有關鍵零件，但「測溫點配置」未填滿至少 6 點（位置與描述）', 'error');
+    const validPoints = tempPoints.filter(p => !!p.pos);
+    check(validPoints.length >= 6, '已勾選有關鍵零件，但「測溫點配置」未填滿至少 6 點位置', 'error');
   }
 
   // 包材種類 (PCBA 與 FPCA 各需確認至少一項)

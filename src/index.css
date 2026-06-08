@@ -195,3 +195,22 @@ h1, h2, h3, h4 {
   border-color: var(--accent-color);
   box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
 }
+
+/* 下拉選單 (Select) 與選項 (Option) 樣式修正：
+   解決在深色/淺色主題變更時，下拉選單選項可能因瀏覽器預設樣式或繼承關係
+   導致文字與背景色相同（如白底白字、黑底黑字）而看不見選項的幾何視覺衝突 */
+select.form-input {
+  cursor: pointer;
+}
+
+/* 深色模式下的 option 背景與文字顏色 */
+select option {
+  background-color: #1a1c24 !important;
+  color: #f3f4f6 !important;
+}
+
+/* 淺色模式下的 option 背景與文字顏色 */
+[data-theme="light"] select option {
+  background-color: #ffffff !important;
+  color: #1f2937 !important;
+}
