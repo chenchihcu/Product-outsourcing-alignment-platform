@@ -1,14 +1,14 @@
 .uploader-container {
   width: 100%;
-  max-width: 680px;
-  margin: 2rem auto;
-  padding: 1.5rem;
+  max-width: 480px;
+  margin: 1.5rem auto;
+  padding: 1rem;
 }
 
 .drop-zone {
   border: 2px dashed rgba(99, 102, 241, 0.25);
   border-radius: 12px;
-  padding: 3rem 2rem;
+  padding: 1.25rem;
   text-align: center;
   cursor: pointer;
   background: rgba(0, 0, 0, 0.1);
@@ -29,13 +29,13 @@
 
 .upload-icon-wrapper {
   background: rgba(99, 102, 241, 0.08);
-  width: 64px;
-  height: 64px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.5rem;
+  margin: 0 auto 1rem;
   transition: all 0.3s ease;
 }
 
@@ -45,31 +45,31 @@
 }
 
 .upload-icon {
-  width: 32px;
-  height: 32px;
+  width: 24px;
+  height: 24px;
   color: #818cf8;
 }
 
 .upload-title {
   font-family: 'Outfit', sans-serif;
-  font-size: 1.15rem;
+  font-size: 1rem;
   font-weight: 500;
   color: #f3f4f6;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
 }
 
 .upload-subtitle {
-  font-size: 0.88rem;
+  font-size: 0.8rem;
   color: #9ca3af;
 }
 
 .uploader-footer {
   display: flex;
   justify-content: space-around;
-  margin-top: 1.5rem;
-  padding-top: 1.25rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
   border-top: 1px solid var(--border-color);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   color: #9ca3af;
 }
 
@@ -122,8 +122,8 @@
 }
 
 .error-alert {
-  margin-top: 1.25rem;
-  padding: 0.75rem 1rem;
+  margin-top: 0.75rem;
+  padding: 0.5rem 0.75rem;
   background: rgba(239, 68, 68, 0.1);
   border: 1px solid rgba(239, 68, 68, 0.2);
   border-radius: 8px;

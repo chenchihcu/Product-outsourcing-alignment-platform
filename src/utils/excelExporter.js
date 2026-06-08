@@ -308,9 +308,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核回寫對齊 + 標籤修正 (A40=研發, C40=工程, F40=品保)
     const sign = bi.signOff || {};
-    writeCell(sheet1, 'B40', sign.rdConfirm || '');
-    writeCell(sheet1, 'D40', sign.engineeringReview || '');
-    writeCell(sheet1, 'G40', sign.qaConfirm || '');
+    writeCell(sheet1, 'B40', sign.rdSignature ? '✓ 已簽章' : '');
+    writeCell(sheet1, 'D40', sign.engineeringReviewSignature ? '✓ 已簽章' : '');
+    writeCell(sheet1, 'G40', sign.qaSignature ? '✓ 已簽章' : '');
 
     // 修正簽核區標籤（對應實際填寫角色）
     writeCell(sheet1, 'A40', '研發確認');
@@ -449,7 +449,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核 (稽核人員確認 - 回寫品保確認人)
     const sign = bi.signOff || {};
-    writeCell(sheet2, 'E34', sign.qaConfirm || '');
+    writeCell(sheet2, 'E34', sign.qaSignature ? 'QA 已簽章' : '');
   }
 
   // 3. 更新【試產報告要求】

@@ -4,7 +4,7 @@
 }
 
 .status-banner {
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   padding: 1.25rem;
@@ -27,12 +27,12 @@
   font-family: 'Outfit', sans-serif;
   font-size: 1.4rem;
   font-weight: 700;
-  color: white;
+  color: #1f2937;
 }
 
 .status-bar-bg {
   height: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 4px;
   overflow: hidden;
 }
@@ -58,7 +58,7 @@
 }
 
 .sign-box {
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-color);
   border-radius: 12px;
   overflow: hidden;
@@ -70,7 +70,7 @@
   padding: 1rem;
   font-size: 0.95rem;
   font-weight: 600;
-  color: white;
+  color: #1f2937;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -94,10 +94,11 @@
 .badge-role {
   font-size: 0.68rem;
   padding: 2px 6px;
-  background: rgba(0, 0, 0, 0.3);
+  background: rgba(0, 0, 0, 0.04);
   border-radius: 4px;
   font-weight: 550;
-  border: 1px solid rgba(255, 255, 255, 0.06);
+  color: #4b5563;
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .sign-body {
@@ -113,7 +114,7 @@
   font-size: 0.76rem;
   color: #6b7280;
   line-height: 1.4;
-  border-top: 1px solid rgba(255, 255, 255, 0.02);
+  border-top: 1px solid rgba(0, 0, 0, 0.05);
   padding-top: 0.75rem;
 }
 
@@ -150,7 +151,7 @@
 
 .warning-detail, .success-detail {
   font-size: 0.85rem;
-  color: #9ca3af;
+  color: #4b5563;
   line-height: 1.5;
 }
 
@@ -182,9 +183,9 @@
 .spinner {
   width: 20px;
   height: 20px;
-  border: 3px solid rgba(255, 255, 255, 0.3);
+  border: 3px solid rgba(0, 0, 0, 0.1);
   border-radius: 50%;
-  border-top-color: white;
+  border-top-color: var(--accent-color);
   animation: spin 1s ease-in-out infinite;
 }
 
@@ -192,57 +193,50 @@
   to { transform: rotate(360deg); }
 }
 
-/* Light 模式主題覆蓋 */
-[data-theme="light"] .status-banner {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
+/* ===== 響應式優化：電子簽章預覽區樣式 ===== */
+.signature-preview-area {
+  margin-top: 4px;
 }
 
-[data-theme="light"] .status-percentage {
-  color: #1f2937;
-}
-
-[data-theme="light"] .status-bar-bg {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .sign-box {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .sign-header {
-  color: #1f2937;
-}
-
-[data-theme="light"] .badge-role {
-  color: #4b5563;
+.signature-container-preview {
+  height: 60px;
+  border: 1px dashed var(--border-color);
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+  margin-top: 4px;
 }
 
-[data-theme="light"] .sign-terms {
+.signature-img-preview {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.signature-empty-text {
+  font-size: 0.75rem;
   color: #6b7280;
-  border-top-color: rgba(0, 0, 0, 0.05);
 }
 
-[data-theme="light"] .export-warning {
-  background: rgba(217, 119, 6, 0.03);
-  border-color: rgba(217, 119, 6, 0.15);
+.signature-btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
 }
 
-[data-theme="light"] .export-success {
-  background: rgba(5, 150, 105, 0.03);
-  border-color: rgba(5, 150, 105, 0.15);
+.signature-btn-danger-xs {
+  background: rgba(239, 68, 68, 0.15) !important;
+  color: #f87171 !important;
+  border: 1px solid rgba(239, 68, 68, 0.3) !important;
 }
 
-[data-theme="light"] .warning-detail,
-[data-theme="light"] .success-detail {
-  color: #4b5563;
+.signature-btn-danger-xs:hover {
+  background: rgba(239, 68, 68, 0.25) !important;
 }
 
-[data-theme="light"] .spinner {
-  border-color: rgba(0, 0, 0, 0.1);
-  border-top-color: var(--accent-color);
-}
+/* Light theme defaults */
 

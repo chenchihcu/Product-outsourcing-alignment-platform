@@ -1,6 +1,95 @@
 import React from 'react';
 import './FormSections.css';
 
+const sectionSvg = {
+  chip: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <rect x="4" y="4" width="16" height="16" rx="2" />
+      <path d="M9 9h6v6H9z" />
+      <path d="M12 2v2M12 20v2M2 12h2M20 12h2" />
+    </svg>
+  ),
+  shield: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="M9 12l2 2 4-4" />
+    </svg>
+  ),
+  gear: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <circle cx="12" cy="12" r="3" />
+      <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+    </svg>
+  ),
+  wrench: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+    </svg>
+  ),
+  thermometer: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z" />
+      <circle cx="11.5" cy="18.5" r="2.5" />
+    </svg>
+  ),
+  microscope: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M6 18h8" />
+      <path d="M3 22h18" />
+      <path d="M14 22a7 7 0 1 0 0-14h-1" />
+      <path d="M9 14h2" />
+      <path d="M9 12a1 1 0 0 1 0-2 1 1 0 0 0 0-2" />
+    </svg>
+  ),
+  search: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <circle cx="11" cy="11" r="8" />
+      <path d="M21 21l-4.3-4.3" />
+    </svg>
+  ),
+  chart: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <line x1="18" y1="20" x2="18" y2="10" />
+      <line x1="12" y1="20" x2="12" y2="4" />
+      <line x1="6" y1="20" x2="6" y2="14" />
+    </svg>
+  ),
+  camera: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+      <circle cx="12" cy="13" r="4" />
+    </svg>
+  ),
+  printer: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <polyline points="6 9 6 2 18 2 18 9" />
+      <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2" />
+      <rect x="6" y="14" width="12" height="8" />
+    </svg>
+  ),
+  box: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+      <line x1="12" y1="22.08" x2="12" y2="12" />
+    </svg>
+  ),
+  clipboard: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect x="8" y="2" width="8" height="4" rx="1" ry="1" />
+      <path d="M9 14l2 2 4-4" />
+    </svg>
+  ),
+  layers: (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
+      <polygon points="12 2 2 7 12 12 22 7 12 2" />
+      <polyline points="2 17 12 22 22 17" />
+      <polyline points="2 12 12 17 22 12" />
+    </svg>
+  ),
+};
+
 const getDocumentIcon = (key) => {
   const commonProps = {
     className: "doc-svg",
@@ -353,8 +442,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <p className="section-subtitle">請核對發包方資訊，並由加工廠確實填寫廠區及治工具資訊。</p>
 
           {/* 卡片 1: 機種基本資訊 */}
-          <div className="form-section-card glass-card">
-            <h3 className="card-title">📄 機種基本資訊</h3>
+          <div className="form-section-card glass-card" data-accent="indigo">
+            <h3 className="card-title"><span className="card-icon-circle">{sectionSvg.chip}</span>機種基本資訊</h3>
             <div className="form-row-grid-3">
               <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
                 <label className="form-label">委外加工廠 <span className="req">*</span></label>
@@ -423,8 +512,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* 卡片 3: 品質與驗收標準 */}
-          <div className="form-section-card glass-card">
-            <h3 className="card-title">🏅 品質與驗收標準</h3>
+          <div className="form-section-card glass-card" data-accent="emerald">
+            <h3 className="card-title"><span className="card-icon-circle">{sectionSvg.shield}</span>品質與驗收標準</h3>
             <div className="form-row-grid-2">
               <div className="form-group">
                 <label className="form-label">品質水準要求</label>
@@ -489,8 +578,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* 卡片 4: 加工製程與管制需求 */}
-          <div className="form-section-card glass-card">
-            <h3 className="card-title">⚙️ 加工製程與管制需求</h3>
+          <div className="form-section-card glass-card" data-accent="amber">
+            <h3 className="card-title"><span className="card-icon-circle">{sectionSvg.gear}</span>加工製程與管制需求</h3>
             <div className="form-row-grid-3">
               <div className="form-group">
                 <label className="form-label">點膠工藝</label>
@@ -660,8 +749,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* 卡片 5: 鋼板與治工具一覽表 */}
-          <div className="form-section-card glass-card">
-            <h3 className="card-title">🔧 鋼板與治工具一覽表</h3>
+          <div className="form-section-card glass-card" data-accent="slate">
+            <h3 className="card-title"><span className="card-icon-circle">{sectionSvg.wrench}</span>鋼板與治工具一覽表</h3>
           
           {/* SMT 鋼板規格 */}
           {data.basicInfo.processItems?.smt && (
@@ -724,7 +813,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                           onChange={(e) => handleToolingChange('stencil', 'nanoCoating', e.target.checked)}
                           disabled={isFieldDisabled('basicInfo.tooling.stencil.nanoCoating')}
                         />
-                        <span style={{ fontSize: '0.85rem', color: '#a5b4fc', fontWeight: '600' }}>表面奈米塗層 (可複選)</span>
+                        <span style={{ fontSize: '0.85rem', color: '#4f46e5', fontWeight: '600' }}>表面奈米塗層 (可複選)</span>
                       </label>
                     </div>
                   </div>
@@ -780,7 +869,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   </div>
                   {item.need && (
                     <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '140px' }}>
-                      <span style={{ fontSize: '0.78rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>數量:</span>
+                      <span style={{ fontSize: '0.78rem', color: '#6b7280', whiteSpace: 'nowrap' }}>數量:</span>
                       <input 
                         type="text" 
                         className="form-input edit-active compact" 
@@ -948,9 +1037,9 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <p className="section-subtitle">請回填樣品提供狀態、烘烤確認、焊接順序及測溫點等關鍵生產防呆項目。</p>
 
           {/* 樣品提供與烘烤 */}
-          <div className="form-row-grid">
+          <div className="form-row-grid" data-accent="indigo">
             <div className={`form-group required-highlight ${getFieldHighlightClass('sampleProvided')}`}>
-              <label className="form-label">樣品提供確認 <span className="req">*</span></label>
+              <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.clipboard}</span> 樣品提供確認 <span className="req">*</span></label>
               <div className="checkbox-flex">
                 <label className="checkbox-label">
                   <input 
@@ -983,7 +1072,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
 
             <div className={`form-group required-highlight ${getFieldHighlightClass('bakeRequired')}`}>
-              <label className="form-label">PCB / FPCA 烘烤需求 <span className="req">*</span></label>
+              <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.thermometer}</span> PCB / FPCA 烘烤需求 <span className="req">*</span></label>
               <div className="radio-group">
                 <label className="radio-label">
                   <input 
@@ -1090,7 +1179,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <div className="divider"></div>
 
           {/* 測溫點配置 (關鍵防呆) */}
-          <h3 className="sub-section-title">🌡️ 測溫點配置與 Reflow 參數 (關鍵零件要求)</h3>
+          <h3 className="sub-section-title"><span className="card-icon-circle card-icon-sm">{sectionSvg.thermometer}</span>測溫點配置與 Reflow 參數 (關鍵零件要求)</h3>
           
           <div className={`form-group ${getFieldHighlightClass('tempPoints')}`}>
             <label className="form-label">關鍵零件狀態</label>
@@ -1125,7 +1214,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   const point = data.processControl.tempPoints?.[idx] || {};
                   return (
                     <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#000000' }}>#{idx + 1}</label>
                       <input 
                         type="text" 
                         className="form-input edit-active" 
@@ -1144,7 +1233,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   const point = data.processControl.tempPoints?.[idx] || {};
                   return (
                     <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#d1d5db' }}>#{idx + 1}</label>
+                      <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#000000' }}>#{idx + 1}</label>
                       <input 
                         type="text" 
                         className="form-input edit-active" 
@@ -1161,11 +1250,10 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           )}
           {/* SMT 與 DIP 首件/焊接順序併排（2 欄 Grid） */}
-          <div className="form-row-grid">
+          <div className="form-row-grid" data-accent="cyan">
             {/* 左側：SMT 製程管制 */}
             <div className={`form-group required-highlight ${getFieldHighlightClass('smtFirstPiece')}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
-              <label className="form-label">
-                SMT 首件檢查項目 <span className="req">*</span>
+              <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.layers}</span> SMT 首件檢查項目 <span className="req">*</span>
                 {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 'bold' }}>(不適用，請至基本資料勾選加工項目 SMT)</span>}
               </label>
               <div className={`checkbox-flex ${!data.basicInfo.processItems?.smt ? 'readonly-flex' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
@@ -1195,7 +1283,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 
                 {/* LED 點亮測試 */}
                 <div className={getFieldHighlightClass('ledTest')} style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '4px' }}>
-                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 550, whiteSpace: 'nowrap' }}>LED點亮測試:</span>
+                  <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 550, whiteSpace: 'nowrap' }}>LED點亮測試:</span>
                   <div className="radio-group" style={{ display: 'inline-flex', gap: '10px' }}>
                     <label className="radio-label" style={{ fontSize: '0.8rem' }}>
                       <input 
@@ -1251,8 +1339,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
             {/* 右側：DIP 製程管制 */}
             <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
-              <label className="form-label">
-                DIP 首件檢查項目 <span className="req">*</span>
+              <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.microscope}</span> DIP 首件檢查項目 <span className="req">*</span>
                 {!data.basicInfo.processItems?.dip && <span style={{ marginLeft: '8px', color: '#ef4444', fontSize: '0.82rem', fontWeight: 'bold' }}>(不適用，請至基本資料勾選加工項目 DIP)</span>}
               </label>
               <div className={`checkbox-flex ${!data.basicInfo.processItems?.dip ? 'readonly-flex' : ''}`} style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -1268,7 +1355,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 
                 {/* DIP 注意事項 */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
-                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 550 }}>DIP 注意事項 (限 50 字):</span>
+                  <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 550 }}>DIP 注意事項 (限 50 字):</span>
                   <textarea 
                     className="form-input edit-active compact" 
                     placeholder={data.basicInfo.processItems?.dip ? "請輸入 DIP 注意事項..." : "不適用"}
@@ -1326,7 +1413,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   disabled={isFieldDisabled('processControl.underfill.bakeTemp')}
                   style={{ width: '80px' }}
                 />
-                <span style={{ color: '#9ca3af' }}>°C x</span>
+                <span style={{ color: '#6b7280' }}>°C x</span>
                 <input 
                   type="text" 
                   className="form-input edit-active compact" 
@@ -1336,7 +1423,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   disabled={isFieldDisabled('processControl.underfill.bakeTime')}
                   style={{ width: '80px' }}
                 />
-                <span style={{ color: '#9ca3af' }}>min</span>
+                <span style={{ color: '#6b7280' }}>min</span>
               </div>
             </div>
             <div className="form-group">
@@ -1353,8 +1440,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* PCBA 包材種類 */}
-          <div className={`form-group required-highlight ${getFieldHighlightClass('pcbaPackaging')}`}>
-            <label className="form-label">PCBA 包材種類 <span className="req">*</span></label>
+          <div className={`form-group required-highlight ${getFieldHighlightClass('pcbaPackaging')}`} data-accent="violet">
+            <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.box}</span> PCBA 包材種類 <span className="req">*</span></label>
             <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
               {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
                 <label key={key} className="checkbox-label">
@@ -1371,8 +1458,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* FPCA 包材種類 */}
-          <div className={`form-group required-highlight ${getFieldHighlightClass('fpcaPackaging')}`} style={{ marginTop: '12px' }}>
-            <label className="form-label">FPCA 包材種類 <span className="req">*</span></label>
+          <div className={`form-group required-highlight ${getFieldHighlightClass('fpcaPackaging')}`} style={{ marginTop: '12px' }} data-accent="violet">
+            <label className="form-label"><span className="card-icon-circle card-icon-xs">{sectionSvg.box}</span> FPCA 包材種類 <span className="req">*</span></label>
             <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px' }}>
               {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
                 <label key={key} className="checkbox-label">
@@ -1414,12 +1501,12 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <h2 className="section-title">試產要求</h2>
 
           {/* 報告清單與完成日期確認 */}
-          <h3 className="sub-section-title">📂 試產交付文件、檢驗紀錄與照片清單</h3>
+          <h3 className="sub-section-title"><span className="card-icon-circle card-icon-sm">{sectionSvg.clipboard}</span>試產交付文件、檢驗紀錄與照片清單</h3>
           <p className="description-text">請勾選確認已完成的項目以利兩端追蹤。</p>
 
           {/* A. 印刷品質 */}
           <div className="record-list-section">
-            <h4 className="list-group-title">🖨️ A. 印刷品質 / 迴焊紀錄</h4>
+            <h4 className="list-group-title" data-accent="blue"><span className="card-icon-circle card-icon-xs">{sectionSvg.printer}</span>A. 印刷品質 / 迴焊紀錄</h4>
             <div className="records-grid">
               {data.trialReport?.printRecords?.map((rec, idx) => (
                 <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
@@ -1439,7 +1526,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* B. 檢驗紀錄 */}
           <div className="record-list-section">
-            <h4 className="list-group-title">🔍 B. 檢驗紀錄</h4>
+            <h4 className="list-group-title" data-accent="purple"><span className="card-icon-circle card-icon-xs">{sectionSvg.search}</span>B. 檢驗紀錄</h4>
             <div className="records-grid">
               {data.trialReport?.inspectRecords?.map((rec, idx) => (
                 <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
@@ -1459,7 +1546,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* C. SMT 良率報告 */}
           <div className="record-list-section">
-            <h4 className="list-group-title">📈 C. SMT 生產良率報告（含可製造性設計問題分析 DFM）</h4>
+            <h4 className="list-group-title" data-accent="emerald"><span className="card-icon-circle card-icon-xs">{sectionSvg.chart}</span>C. SMT 生產良率報告（含可製造性設計問題分析 DFM）</h4>
             <div className="records-grid">
               <div className="record-row edit-active" style={{ margin: 0 }}>
                 <label className="checkbox-label flex-1">
@@ -1487,7 +1574,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           {/* D. 照片提供 */}
           <div className="record-list-section">
-            <h4 className="list-group-title">📸 D. 照片提供</h4>
+            <h4 className="list-group-title" data-accent="pink"><span className="card-icon-circle card-icon-xs">{sectionSvg.camera}</span>D. 照片提供</h4>
             <div className="records-grid">
               {data.trialReport?.photoRecords?.map((rec, idx) => (
                 <div key={rec.id} className="record-row edit-active" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', margin: 0 }}>
@@ -1507,11 +1594,11 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                     <div className="xray-parts-inputs animate-fade-in" style={{ display: 'flex', gap: '8px', marginLeft: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
                       {[0, 1, 2, 3].map((pIdx) => (
                         <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                          <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{pIdx + 1}:</span>
+                          <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{pIdx + 1}:</span>
                           <input 
                             type="text" 
                             className="form-input edit-active compact" 
-                            placeholder={`U${pIdx + 1}`}
+                            placeholder={pIdx === 0 ? '預設空白' : `U${pIdx + 1}`}
                             value={rec.parts?.[pIdx] || ''}
                             onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
                             disabled={isFieldDisabled(`trialReport.photoRecords.xray.parts.${pIdx}`)}
@@ -1581,7 +1668,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                     </div>
                     <div style={{ flex: 1 }}>
                       <span className="doc-label" style={{ fontWeight: 600, fontSize: '0.95rem' }}>{label}</span>
-                      <p className="doc-desc" style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px', lineHeight: 1.4 }}>{desc}</p>
+                      <p className="doc-desc" style={{ fontSize: '0.78rem', color: '#6b7280', marginTop: '4px', lineHeight: 1.4 }}>{desc}</p>
                     </div>
                   </label>
                 </div>

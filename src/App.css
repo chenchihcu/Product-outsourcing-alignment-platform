@@ -37,14 +37,14 @@
 .logo-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.25rem;
-  color: white;
+  color: #000000;
   font-weight: 600;
   line-height: 1.2;
 }
 
 .logo-subtitle {
   font-size: 0.75rem;
-  color: #9ca3af;
+  color: #111111;
 }
 
 .header-file-info {
@@ -58,11 +58,11 @@
   align-items: center;
   gap: 6px;
   padding: 0.4rem 0.8rem;
-  background: rgba(99, 102, 241, 0.08);
-  border: 1px solid rgba(99, 102, 241, 0.15);
+  background: rgba(79, 70, 229, 0.06);
+  border: 1px solid rgba(79, 70, 229, 0.15);
   border-radius: 8px;
   font-size: 0.82rem;
-  color: #a5b4fc;
+  color: #4f46e5;
 }
 
 .file-name-text {
@@ -103,12 +103,12 @@
 
 .welcome-intro h2 {
   font-size: 1.8rem;
-  color: white;
+  color: #000000;
   margin-bottom: 0.5rem;
 }
 
 .welcome-intro p {
-  color: #9ca3af;
+  color: #111111;
   font-size: 0.95rem;
   max-width: 480px;
   margin: 0 auto 1.5rem;
@@ -141,7 +141,7 @@
 .tab-btn {
   background: transparent;
   border: none;
-  color: #9ca3af;
+  color: #111111;
   font-family: inherit;
   font-size: 0.88rem;
   font-weight: 550;
@@ -157,13 +157,13 @@
 }
 
 .tab-btn:hover {
-  color: white;
-  background: rgba(255, 255, 255, 0.03);
+  color: #000000;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tab-btn.active {
-  color: white;
-  background: rgba(255, 255, 255, 0.06);
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.08);
 }
 
 .tab-nav-divider {
@@ -176,19 +176,19 @@
 .tab-indicator {
   font-size: 0.7rem;
   padding: 1px 5px;
-  background: rgba(99, 102, 241, 0.15);
-  color: #a5b4fc;
+  background: rgba(79, 70, 229, 0.1);
+  color: #4f46e5;
   border-radius: 4px;
   font-weight: 650;
   margin-left: 4px;
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  border: 1px solid rgba(79, 70, 229, 0.2);
   transition: all 0.3s ease;
 }
 
 .tab-indicator.aligned {
-  background: rgba(16, 185, 129, 0.15);
-  color: #a7f3d0;
-  border-color: rgba(16, 185, 129, 0.25);
+  background: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border-color: rgba(5, 150, 105, 0.2);
 }
 
 /* Success Overlay */
@@ -232,13 +232,13 @@
 
 .success-card h2 {
   font-size: 1.4rem;
-  color: white;
+  color: #000000;
   margin-bottom: 0.75rem;
 }
 
 .success-card p {
   font-size: 0.88rem;
-  color: #9ca3af;
+  color: #111111;
   line-height: 1.5;
   margin-bottom: 2rem;
 }
@@ -289,8 +289,8 @@
   align-items: center;
   gap: 10px;
   padding: 6px 12px;
-  background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 8px;
 }
 
@@ -306,12 +306,12 @@
 .user-name {
   font-size: 0.85rem;
   font-weight: bold;
-  color: #f8fafc;
+  color: #000000;
 }
 
 .user-role-desc {
   font-size: 0.7rem;
-  color: #94a3b8;
+  color: #111111;
 }
 
 .btn-logout {
@@ -329,40 +329,6 @@
 .btn-logout:hover {
   background: rgba(239, 68, 68, 0.2);
   border-color: rgba(239, 68, 68, 0.4);
-}
-
-/* Light 模式主題覆蓋 */
-[data-theme="light"] .logo-title,
-[data-theme="light"] .welcome-intro h2,
-[data-theme="light"] .success-card h2,
-[data-theme="light"] .user-name {
-  color: #000000;
-}
-
-[data-theme="light"] .logo-subtitle,
-[data-theme="light"] .welcome-intro p,
-[data-theme="light"] .user-role-desc,
-[data-theme="light"] .success-card p {
-  color: #111111;
-}
-
-[data-theme="light"] .tab-btn {
-  color: #111111;
-}
-
-[data-theme="light"] .tab-btn:hover {
-  color: #000000;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .tab-btn.active {
-  color: #4f46e5;
-  background: rgba(79, 70, 229, 0.08);
-}
-
-[data-theme="light"] .user-profile-badge {
-  background: rgba(0, 0, 0, 0.02);
-  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 /* SQE 負責人 Badge */
@@ -396,34 +362,27 @@
 .sqe-name {
   font-size: 0.85rem;
   font-weight: 700;
-  color: #f8fafc;
-}
-
-[data-theme="light"] .sqe-profile-badge {
-  background: rgba(79, 70, 229, 0.05);
-  border-color: rgba(79, 70, 229, 0.25);
-}
-
-[data-theme="light"] .sqe-label {
-  color: #4f46e5;
-}
-
-[data-theme="light"] .sqe-name {
   color: #000000;
 }
 
-/* 響應式優化：消除平板與手機版下的幾何幾何排版衝突 */
+/* 響應式優化：消除平板與手機版下的幾何幾何排版衝突，改為流暢的水平滑動導覽 */
 @media (max-width: 1024px) {
   .tab-navigation {
-    flex-wrap: wrap !important;
+    flex-wrap: nowrap !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
     gap: 8px !important;
+    scrollbar-width: none; /* 隱藏 Firefox 滾動條 */
+    padding: 0.5rem !important;
+  }
+  .tab-navigation::-webkit-scrollbar {
+    display: none; /* 隱藏 Chrome/Safari 滾動條 */
   }
   .tab-btn {
-    flex: 1 1 calc(33.333% - 8px);
-    min-width: 120px;
+    flex: 0 0 auto !important; /* 確保不被折行壓縮，維持內容原始尺寸 */
     justify-content: center;
     padding: 0.6rem 1rem;
-    font-size: 0.82rem;
+    font-size: 0.85rem;
   }
 }
 
@@ -446,9 +405,6 @@
   .logo-title {
     font-size: 1.15rem !important;
   }
-  .tab-btn {
-    flex: 1 1 calc(50% - 8px);
-  }
   .header-right-controls {
     width: 100% !important;
     flex-direction: column !important;
@@ -462,9 +418,6 @@
 }
 
 @media (max-width: 480px) {
-  .tab-btn {
-    flex: 1 1 100%;
-  }
   .app-container {
     padding: 0.75rem !important;
   }

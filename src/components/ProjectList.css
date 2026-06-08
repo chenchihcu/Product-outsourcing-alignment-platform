@@ -20,8 +20,8 @@
   font-size: 24px;
   font-weight: 700;
   margin: 0 0 8px 0;
-  color: #fff;
-  background: linear-gradient(135deg, #fff 0%, #a5b4fc 100%);
+  color: #1f2937;
+  background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -29,7 +29,7 @@
 .project-list-header p {
   margin: 0;
   font-size: 14px;
-  color: #94a3b8;
+  color: #4b5563;
 }
 
 .header-actions {
@@ -43,8 +43,8 @@
   align-items: center;
   gap: 12px;
   padding: 12px 20px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(30, 41, 59, 0.4);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.95);
   transition: border-color 0.2s, box-shadow 0.2s;
   border-radius: 12px;
 }
@@ -63,13 +63,13 @@
   flex: 1;
   border: none;
   background: transparent;
-  color: #f1f5f9;
+  color: #1f2937;
   font-size: 15px;
   outline: none;
 }
 
 .search-input::placeholder {
-  color: #64748b;
+  color: #9ca3af;
 }
 
 .search-clear-btn {
@@ -83,7 +83,7 @@
 }
 
 .search-clear-btn:hover {
-  color: #cbd5e1;
+  color: #374151;
 }
 
 /* 工具列與檢視模式設定 */
@@ -94,7 +94,7 @@
   padding: 12px 20px;
   flex-wrap: wrap;
   gap: 16px;
-  background: rgba(30, 41, 59, 0.2);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .toolbar-tabs {
@@ -105,7 +105,7 @@
 .tab-filter-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #4b5563;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 13px;
@@ -115,14 +115,14 @@
 }
 
 .tab-filter-btn:hover {
-  color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.04);
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .tab-filter-btn.active {
-  color: #fff;
-  background: rgba(99, 102, 241, 0.15);
-  border: 1px solid rgba(99, 102, 241, 0.25);
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.08);
+  border: 1px solid rgba(79, 70, 229, 0.2);
 }
 
 .toolbar-settings {
@@ -145,16 +145,16 @@
 
 .btn-toggle-group {
   display: flex;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.04);
   padding: 2px;
   border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .toggle-btn {
   background: transparent;
   border: none;
-  color: #64748b;
+  color: #4b5563;
   padding: 4px 10px;
   border-radius: 4px;
   font-size: 12px;
@@ -164,20 +164,20 @@
 }
 
 .toggle-btn:hover {
-  color: #cbd5e1;
+  color: #1f2937;
 }
 
 .toggle-btn.active {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.08);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+  color: #1f2937;
+  background: rgba(255, 255, 255, 0.9);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 /* 一覽表 (表格視圖) */
 .project-table-wrapper {
   overflow-x: auto;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(26, 28, 36, 0.75);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
 }
 
 .project-table {
@@ -187,23 +187,23 @@
 }
 
 .project-table th {
-  background: rgba(255, 255, 255, 0.02);
-  color: #64748b;
+  background: rgba(0, 0, 0, 0.02);
+  color: #4b5563;
   font-weight: 600;
   font-size: 13px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .project-table td {
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-  color: #cbd5e1;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: #374151;
   transition: background-color 0.2s;
 }
 
 .project-table tbody tr:hover td {
-  background: rgba(255, 255, 255, 0.01);
+  background: rgba(0, 0, 0, 0.01);
 }
 
 .project-table tbody tr:last-child td {
@@ -216,12 +216,12 @@
   align-items: center;
   gap: 10px;
   font-weight: 550;
-  color: #f1f5f9;
+  color: #1f2937;
 }
 
 .proj-folder-icon {
   font-size: 16px;
-  color: #a5b4fc;
+  color: #4f46e5;
 }
 
 .proj-name-text {
@@ -241,7 +241,7 @@
 .table-progress-bar-bg {
   flex: 1;
   height: 6px;
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 3px;
   overflow: hidden;
 }
@@ -272,7 +272,7 @@
 
 .table-date-cell {
   font-size: 13px;
-  color: #64748b;
+  color: #6b7280;
 }
 
 .table-actions-cell {
@@ -288,16 +288,16 @@
 }
 
 .btn-edit {
-  background: rgba(99, 102, 241, 0.1);
-  color: #a5b4fc;
-  border: 1px solid rgba(99, 102, 241, 0.2);
+  background: rgba(79, 70, 229, 0.08);
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.2);
 }
 
 .btn-edit:hover {
   background: var(--accent-color);
   color: #fff;
   border-color: var(--accent-color);
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.4);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.3);
 }
 
 /* 空白狀態 */
@@ -315,13 +315,13 @@
 
 .table-empty-state h4 {
   font-size: 16px;
-  color: #cbd5e1;
+  color: #374151;
   margin: 0 0 4px 0;
 }
 
 .table-empty-state p {
   font-size: 13px;
-  color: #64748b;
+  color: #6b7280;
   margin: 0;
 }
 
@@ -360,13 +360,13 @@
   align-items: center;
   gap: 16px;
   padding: 12px 24px;
-  background: rgba(30, 41, 59, 0.2);
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .pagination-btn {
-  background: rgba(255, 255, 255, 0.04);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  color: #cbd5e1;
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  color: #374151;
   padding: 6px 12px;
   border-radius: 6px;
   font-size: 12px;
@@ -375,8 +375,8 @@
 }
 
 .pagination-btn:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.1);
-  color: #fff;
+  background: #fff;
+  color: #1f2937;
 }
 
 .pagination-btn:disabled {
@@ -392,7 +392,7 @@
 .pagination-number-btn {
   background: transparent;
   border: none;
-  color: #94a3b8;
+  color: #4b5563;
   width: 28px;
   height: 28px;
   border-radius: 6px;
@@ -406,8 +406,8 @@
 }
 
 .pagination-number-btn:hover {
-  color: #f1f5f9;
-  background: rgba(255, 255, 255, 0.04);
+  color: #1f2937;
+  background: rgba(0, 0, 0, 0.04);
 }
 
 .pagination-number-btn.active {
@@ -435,7 +435,8 @@
   width: 100%;
   max-width: 480px;
   padding: 0;
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  border: 1px solid var(--border-color);
+  background: var(--bg-secondary);
   overflow: hidden;
 }
 
@@ -444,14 +445,14 @@
   justify-content: space-between;
   align-items: center;
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.01);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.01);
 }
 
 .modal-header h3 {
   margin: 0;
   font-size: 18px;
-  color: #fff;
+  color: #1f2937;
 }
 
 .close-btn {
@@ -466,7 +467,7 @@
 }
 
 .close-btn:hover {
-  color: #f1f5f9;
+  color: #1f2937;
 }
 
 .modal-body {
@@ -481,30 +482,31 @@
 
 .form-group label {
   font-size: 14px;
-  color: #cbd5e1;
+  color: #374151;
   font-weight: 500;
 }
 
 .form-group input {
   padding: 10px 14px;
-  background: rgba(15, 23, 42, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.85);
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: 6px;
-  color: #fff;
+  color: #1f2937;
   font-size: 15px;
   outline: none;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 .form-group input:focus {
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.25);
+  border-color: var(--accent-color);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.25);
+  background: #fff;
 }
 
 .form-help {
   margin: 4px 0 0 0;
   font-size: 12px;
-  color: #64748b;
+  color: #6b7280;
   line-height: 1.4;
 }
 
@@ -513,8 +515,8 @@
   justify-content: flex-end;
   gap: 12px;
   padding: 16px 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.05);
-  background: rgba(255, 255, 255, 0.01);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.01);
 }
 
 /* Animations */
@@ -572,171 +574,18 @@
 }
 
 .status-badge.aligned {
-  background-color: rgba(16, 185, 129, 0.15);
-  color: #10b981;
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  background-color: rgba(5, 150, 105, 0.1);
+  color: #059669;
+  border: 1px solid rgba(5, 150, 105, 0.25);
 }
 
 .status-badge.in-progress {
-  background-color: rgba(245, 158, 11, 0.15);
-  color: #fbbf24;
-  border: 1px solid rgba(245, 158, 11, 0.3);
+  background-color: rgba(217, 119, 6, 0.1);
+  color: #d97706;
+  border: 1px solid rgba(217, 119, 6, 0.25);
 }
 
-/* Light 模式主題覆蓋 */
-[data-theme="light"] .project-list-header h2 {
-  background: linear-gradient(135deg, #1f2937 0%, #4f46e5 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-[data-theme="light"] .project-list-header p {
-  color: #4b5563;
-}
-
-[data-theme="light"] .project-search-container {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .search-input {
-  color: #1f2937;
-}
-
-[data-theme="light"] .search-input::placeholder {
-  color: #9ca3af;
-}
-
-[data-theme="light"] .project-list-toolbar {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="light"] .tab-filter-btn {
-  color: #4b5563;
-}
-
-[data-theme="light"] .tab-filter-btn:hover {
-  color: #1f2937;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .tab-filter-btn.active {
-  color: #4f46e5;
-  background: rgba(79, 70, 229, 0.08);
-  border-color: rgba(79, 70, 229, 0.2);
-}
-
-[data-theme="light"] .btn-toggle-group {
-  background: rgba(0, 0, 0, 0.04);
-  border-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .toggle-btn {
-  color: #4b5563;
-}
-
-[data-theme="light"] .toggle-btn.active {
-  color: #1f2937;
-  background: rgba(255, 255, 255, 0.9);
-}
-
-[data-theme="light"] .project-table-wrapper {
-  background: var(--bg-secondary);
-  border-color: var(--border-color);
-}
-
-[data-theme="light"] .project-table th {
-  background: rgba(0, 0, 0, 0.02);
-  color: #4b5563;
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .project-table td {
-  color: #374151;
-  border-bottom-color: rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .project-table tbody tr:hover td {
-  background: rgba(0, 0, 0, 0.01);
-}
-
-[data-theme="light"] .proj-name-cell {
-  color: #1f2937;
-}
-
-[data-theme="light"] .table-progress-bar-bg {
-  background: rgba(0, 0, 0, 0.05);
-}
-
-[data-theme="light"] .table-date-cell {
-  color: #6b7280;
-}
-
-[data-theme="light"] .table-empty-state h4 {
-  color: #374151;
-}
-
-[data-theme="light"] .table-empty-state p {
-  color: #6b7280;
-}
-
-[data-theme="light"] .table-pagination {
-  background: rgba(0, 0, 0, 0.02);
-}
-
-[data-theme="light"] .pagination-btn {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #374151;
-}
-
-[data-theme="light"] .pagination-btn:hover:not(:disabled) {
-  background: #fff;
-  color: #1f2937;
-}
-
-[data-theme="light"] .pagination-number-btn {
-  color: #4b5563;
-}
-
-[data-theme="light"] .pagination-number-btn:hover {
-  color: #1f2937;
-  background: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .modal-content {
-  border-color: rgba(0, 0, 0, 0.08);
-  background: var(--bg-secondary);
-}
-
-[data-theme="light"] .modal-header {
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.01);
-}
-
-[data-theme="light"] .modal-header h3 {
-  color: #1f2937;
-}
-
-[data-theme="light"] .modal-footer {
-  border-top-color: rgba(0, 0, 0, 0.08);
-  background: rgba(0, 0, 0, 0.01);
-}
-
-[data-theme="light"] .form-group label {
-  color: #374151;
-}
-
-[data-theme="light"] .form-group input {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.12);
-  color: #1f2937;
-}
-
-[data-theme="light"] .form-group input:focus {
-  border-color: var(--accent-color);
-  background: #fff;
-}
+/* Use light theme colors as defaults */
 
 /* 響應式優化：機種管理中心手機版排版幾何衝突修正 */
 @media (max-width: 768px) {
@@ -799,12 +648,8 @@
     flex-direction: column;
     gap: 10px;
     width: 100%;
-    border-top: 1px dashed rgba(255, 255, 255, 0.08);
+    border-top: 1px dashed rgba(0, 0, 0, 0.08);
     padding-top: 10px;
-  }
-
-  [data-theme="light"] .toolbar-settings {
-    border-top-color: rgba(0, 0, 0, 0.08);
   }
 
   .control-group {

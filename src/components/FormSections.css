@@ -6,7 +6,7 @@
 .section-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.4rem;
-  color: white;
+  color: #000000;
   margin-bottom: 0.5rem;
   border-bottom: 2px solid var(--accent-color);
   padding-bottom: 0.5rem;
@@ -15,36 +15,36 @@
 
 .section-subtitle {
   font-size: 0.88rem;
-  color: #9ca3af;
+  color: #111111;
   margin-bottom: 2rem;
 }
 
 /* Card Design System */
 .form-section-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.8);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   border-radius: 12px;
   padding: 1.5rem;
   margin-bottom: 1.5rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
   transition: all 0.3s ease;
 }
 
 .form-section-card:hover {
-  border-color: rgba(99, 102, 241, 0.3);
-  box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.08);
+  border-color: rgba(79, 70, 229, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(79, 70, 229, 0.06);
 }
 
 .form-section-card .card-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.1rem;
   font-weight: 600;
-  color: #f3f4f6;
+  color: #000000;
   margin-bottom: 1.25rem;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   display: flex;
   align-items: center;
   gap: 8px;
@@ -54,13 +54,16 @@
 .sub-section-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.1rem;
-  color: #e5e7eb;
+  color: #000000;
   margin: 1.5rem 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .description-text {
   font-size: 0.85rem;
-  color: #6b7280;
+  color: #111111;
   margin-bottom: 1rem;
 }
 
@@ -133,13 +136,13 @@
   flex-wrap: wrap;
   gap: 1rem;
   padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
 }
 
 .readonly-flex {
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.04);
   pointer-events: none;
   opacity: 0.7;
 }
@@ -149,7 +152,7 @@
   align-items: center;
   gap: 8px;
   font-size: 0.9rem;
-  color: #d1d5db;
+  color: #000000;
   cursor: pointer;
   padding: 0.25rem 0.5rem;
   border-radius: 4px;
@@ -157,8 +160,8 @@
 }
 
 .checkbox-label:hover:not([disabled]), .radio-label:hover:not([disabled]) {
-  background: rgba(255, 255, 255, 0.05);
-  color: white;
+  background: rgba(0, 0, 0, 0.04);
+  color: #000000;
 }
 
 .checkbox-label input[type="checkbox"], .radio-label input[type="radio"] {
@@ -224,8 +227,8 @@ input:checked + .slider:before {
 
 /* Tooling boxes */
 .tooling-box {
-  background: rgba(99, 102, 241, 0.03);
-  border: 1px dashed rgba(99, 102, 241, 0.2);
+  background: rgba(79, 70, 229, 0.04);
+  border: 1px dashed rgba(79, 70, 229, 0.25);
   border-radius: 12px;
   padding: 1.25rem;
   margin-bottom: 1.5rem;
@@ -236,12 +239,12 @@ input:checked + .slider:before {
   position: absolute;
   top: -10px;
   left: 15px;
-  background: #1a1c24;
+  background: #ffffff;
   padding: 2px 8px;
   border-radius: 4px;
   font-size: 0.72rem;
-  color: #818cf8;
-  border: 1px solid rgba(99, 102, 241, 0.3);
+  color: #4f46e5;
+  border: 1px solid rgba(79, 70, 229, 0.3);
   font-weight: 600;
 }
 
@@ -250,7 +253,7 @@ input:checked + .slider:before {
   align-items: center;
   justify-content: space-between;
   padding: 0.85rem 1rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 0.75rem;
@@ -260,7 +263,7 @@ input:checked + .slider:before {
 .tool-name {
   font-size: 0.9rem;
   font-weight: 550;
-  color: #e5e7eb;
+  color: #000000;
   min-width: 120px;
 }
 
@@ -270,13 +273,13 @@ input:checked + .slider:before {
 
 /* Edit active VS Readonly styling */
 .form-input.edit-active {
-  border-color: rgba(99, 102, 241, 0.3);
-  background: rgba(99, 102, 241, 0.02);
+  border-color: rgba(79, 70, 229, 0.3);
+  background: rgba(79, 70, 229, 0.02);
 }
 
 .form-input.edit-active:focus {
   border-color: var(--accent-color);
-  box-shadow: 0 0 10px rgba(99, 102, 241, 0.2);
+  box-shadow: 0 0 10px rgba(79, 70, 229, 0.15);
 }
 
 .form-input.readonly {
@@ -294,10 +297,10 @@ input:checked + .slider:before {
 .form-textarea {
   width: 100%;
   padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: white;
+  color: #000000;
   font-family: inherit;
   font-size: 0.95rem;
   resize: vertical;
@@ -307,12 +310,13 @@ input:checked + .slider:before {
 .form-textarea:focus {
   outline: none;
   border-color: var(--accent-color);
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.15);
 }
 
 /* Highlights for missing / required fields */
 .required-highlight .form-label {
-  color: #e5e7eb;
+  color: #000000;
+  font-weight: 600;
 }
 
 .req {
@@ -335,22 +339,26 @@ input:checked + .slider:before {
 
 .form-table th, .form-table td {
   padding: 0.75rem;
-  border-bottom: 1px solid var(--border-color);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 .form-table th {
-  color: #9ca3af;
+  color: #000000;
   font-weight: 500;
-  background: rgba(255, 255, 255, 0.02);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.form-table td {
+  color: #000000;
 }
 
 .table-input {
   width: 100%;
   padding: 0.5rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.85);
   border: 1px solid var(--border-color);
   border-radius: 6px;
-  color: white;
+  color: #000000;
   font-size: 0.85rem;
   transition: all 0.2s ease;
 }
@@ -364,8 +372,8 @@ input:checked + .slider:before {
 .bake-cond-box {
   margin-top: 0.75rem;
   padding: 1rem;
-  background: rgba(245, 158, 11, 0.03);
-  border: 1px dashed rgba(245, 158, 11, 0.2);
+  background: rgba(217, 119, 6, 0.04);
+  border: 1px dashed rgba(217, 119, 6, 0.25);
   border-radius: 8px;
 }
 
@@ -387,7 +395,7 @@ input:checked + .slider:before {
   align-items: center;
   justify-content: space-between;
   padding: 0.6rem 1rem;
-  background: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
   margin-bottom: 0.5rem;
@@ -397,6 +405,7 @@ input:checked + .slider:before {
 .record-name {
   font-size: 0.88rem;
   line-height: 1.4;
+  color: #000000;
 }
 
 .date-input-wrapper {
@@ -433,10 +442,10 @@ input:checked + .slider:before {
   flex-wrap: wrap;
   align-items: center;
   padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  color: #cbd5e1;
+  color: #000000;
   font-size: 0.95rem;
   line-height: 1.5;
   gap: 6px;
@@ -447,8 +456,8 @@ input:checked + .slider:before {
   text-align: center;
   border: none;
   border-bottom: 2px solid var(--accent-color);
-  background: rgba(255, 255, 255, 0.05);
-  color: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  color: #000000;
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
@@ -499,105 +508,6 @@ input:checked + .slider:before {
   font-weight: 500;
 }
 
-/* Light 模式主題覆蓋 */
-[data-theme="light"] .section-title,
-[data-theme="light"] .sub-section-title,
-[data-theme="light"] .tool-name,
-[data-theme="light"] .doc-label,
-[data-theme="light"] .form-section-card .card-title {
-  color: #000000;
-}
-
-[data-theme="light"] .form-section-card {
-  background: rgba(255, 255, 255, 0.8);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .form-section-card .card-title {
-  border-bottom-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .form-section-card:hover {
-  border-color: rgba(99, 102, 241, 0.4);
-}
-
-[data-theme="light"] .section-title {
-  border-bottom-color: var(--accent-color);
-}
-
-[data-theme="light"] .section-subtitle,
-[data-theme="light"] .description-text,
-[data-theme="light"] .doc-desc {
-  color: #111111;
-}
-
-[data-theme="light"] .checkbox-flex,
-[data-theme="light"] .tooling-row-align,
-[data-theme="light"] .record-row,
-[data-theme="light"] .inline-bake-inputs {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-[data-theme="light"] .readonly-flex {
-  background: rgba(0, 0, 0, 0.04);
-}
-
-[data-theme="light"] .checkbox-label,
-[data-theme="light"] .radio-label,
-[data-theme="light"] .record-name {
-  color: #000000;
-}
-
-[data-theme="light"] .checkbox-label:hover:not([disabled]),
-[data-theme="light"] .radio-label:hover:not([disabled]) {
-  background: rgba(0, 0, 0, 0.06);
-  color: #000000;
-}
-
-[data-theme="light"] .form-textarea,
-[data-theme="light"] .table-input,
-[data-theme="light"] .inline-num-input {
-  background: rgba(255, 255, 255, 0.95);
-  color: #000000;
-  border-color: rgba(0, 0, 0, 0.2);
-}
-
-[data-theme="light"] .form-textarea:focus,
-[data-theme="light"] .table-input:focus,
-[data-theme="light"] .inline-num-input:focus {
-  border-color: var(--accent-color);
-  background: #fff;
-}
-
-[data-theme="light"] .tooling-box {
-  background: rgba(79, 70, 229, 0.04);
-  border-color: rgba(79, 70, 229, 0.25);
-}
-
-[data-theme="light"] .tooling-badge {
-  background: #ffffff;
-  color: #4f46e5;
-  border-color: rgba(79, 70, 229, 0.35);
-}
-
-[data-theme="light"] .bake-cond-box {
-  background: rgba(217, 119, 6, 0.04);
-  border-color: rgba(217, 119, 6, 0.25);
-}
-
-[data-theme="light"] .form-table th {
-  color: #000000;
-  background: rgba(0, 0, 0, 0.05);
-  border-bottom-color: rgba(0, 0, 0, 0.15);
-}
-
-[data-theme="light"] .form-table td {
-  border-bottom-color: rgba(0, 0, 0, 0.12);
-  color: #000000;
-}
-
 /* 工程文件卡片高亮樣式 */
 .document-card {
   transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
@@ -607,18 +517,13 @@ input:checked + .slider:before {
 .document-card:hover {
   transform: translateY(-2px);
   border-color: var(--accent-color);
-  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+  box-shadow: 0 4px 12px rgba(79, 70, 229, 0.15);
 }
 
 .document-card.checked-active {
   border-color: var(--success-color);
-  background: rgba(16, 185, 129, 0.04);
-  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08);
-}
-
-[data-theme="light"] .document-card.checked-active {
   background: rgba(5, 150, 105, 0.06);
-  border-color: var(--success-color);
+  box-shadow: 0 4px 15px rgba(5, 150, 105, 0.08);
 }
 
 /* SVG 插圖樣式 */
@@ -629,7 +534,7 @@ input:checked + .slider:before {
   width: 42px;
   height: 42px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.04);
+  background: rgba(0, 0, 0, 0.03);
   color: var(--accent-color);
   flex-shrink: 0;
   transition: all 0.25s ease;
@@ -637,14 +542,6 @@ input:checked + .slider:before {
 
 .document-card.checked-active .doc-icon-container {
   color: var(--success-color);
-  background: rgba(16, 185, 129, 0.1);
-}
-
-[data-theme="light"] .doc-icon-container {
-  background: rgba(0, 0, 0, 0.03);
-}
-
-[data-theme="light"] .document-card.checked-active .doc-icon-container {
   background: rgba(5, 150, 105, 0.12);
 }
 
@@ -652,6 +549,213 @@ input:checked + .slider:before {
   width: 24px;
   height: 24px;
   fill: currentColor;
+}
+
+/* ===== SVG 圖示容器 ===== */
+.card-icon-circle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+  transition: all 0.25s ease;
+}
+
+.card-icon-sm {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+}
+
+.card-icon-xs {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+}
+
+.section-svg {
+  width: 18px;
+  height: 18px;
+}
+
+.card-icon-sm .section-svg {
+  width: 16px;
+  height: 16px;
+}
+
+.card-icon-xs .section-svg {
+  width: 14px;
+  height: 14px;
+}
+
+/* ===== 卡片色條強調 ===== */
+.form-section-card {
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+}
+
+.form-section-card[data-accent="indigo"] {
+  border-left-color: #4f46e5;
+}
+.form-section-card[data-accent="indigo"] .card-icon-circle {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.form-section-card[data-accent="emerald"] {
+  border-left-color: #059669;
+}
+.form-section-card[data-accent="emerald"] .card-icon-circle {
+  color: #059669;
+  background: rgba(5, 150, 105, 0.1);
+}
+
+.form-section-card[data-accent="amber"] {
+  border-left-color: #d97706;
+}
+.form-section-card[data-accent="amber"] .card-icon-circle {
+  color: #d97706;
+  background: rgba(217, 119, 6, 0.1);
+}
+
+.form-section-card[data-accent="slate"] {
+  border-left-color: #64748b;
+}
+.form-section-card[data-accent="slate"] .card-icon-circle {
+  color: #64748b;
+  background: rgba(100, 116, 139, 0.1);
+}
+
+/* ===== 製程管制區塊色條 ===== */
+.form-row-grid[data-accent="indigo"] .form-label .card-icon-circle {
+  color: #4f46e5;
+  background: rgba(79, 70, 229, 0.1);
+}
+
+.form-row-grid[data-accent="cyan"] .form-label .card-icon-circle {
+  color: #0891b2;
+  background: rgba(8, 145, 178, 0.1);
+}
+
+.form-group[data-accent="violet"] .form-label .card-icon-circle {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.form-row-grid[data-accent="cyan"] {
+  border-left: 4px solid #0891b2;
+  padding-left: 12px;
+  background: rgba(8, 145, 178, 0.02);
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.form-row-grid[data-accent="indigo"] {
+  border-left: 4px solid #4f46e5;
+  padding-left: 12px;
+  background: rgba(79, 70, 229, 0.02);
+  border-radius: 8px;
+  margin-bottom: 1.25rem;
+}
+
+.form-group[data-accent="violet"] {
+  border-left: 4px solid #7c3aed;
+  padding-left: 12px;
+  background: rgba(124, 58, 237, 0.02);
+  border-radius: 8px;
+}
+
+/* ===== 清單群組標題圖示 ===== */
+.list-group-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.list-group-title[data-accent="blue"] .card-icon-circle {
+  color: #2563eb;
+  background: rgba(37, 99, 235, 0.1);
+}
+
+.list-group-title[data-accent="purple"] .card-icon-circle {
+  color: #7c3aed;
+  background: rgba(124, 58, 237, 0.1);
+}
+
+.list-group-title[data-accent="emerald"] .card-icon-circle {
+  color: #059669;
+  background: rgba(5, 150, 105, 0.1);
+}
+
+.list-group-title[data-accent="pink"] .card-icon-circle {
+  color: #db2777;
+  background: rgba(219, 39, 119, 0.1);
+}
+
+/* ===== 卡片懸浮增強 ===== */
+.form-section-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== 樣品/烘烤區塊 label 插入間距 ===== */
+.form-row-grid .form-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* ===== 額外響應式與相容性優化：防止窄螢幕下彈性列重疊擠壓 ===== */
+@media (max-width: 600px) {
+  .tooling-row-align {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+  .tool-name {
+    min-width: auto !important;
+    width: 100% !important;
+  }
+  .fixture-qty-input {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  .record-row {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+    padding: 10px !important;
+  }
+  .record-name {
+    width: 100% !important;
+  }
+  .date-input-wrapper {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+  .inline-bake-inputs {
+    padding: 8px !important;
+    gap: 4px !important;
+    font-size: 0.88rem !important;
+  }
+  .sections-container {
+    padding: 1rem 0.5rem !important;
+  }
+}
+
+/* 中等尺寸平板優化：確保 2 欄在平板直向也能易讀 */
+@media (min-width: 601px) and (max-width: 900px) {
+  .form-row-grid, .form-row-grid-2 {
+    grid-template-columns: 1fr !important;
+  }
+  .tooling-grid {
+    grid-template-columns: 1fr !important;
+  }
 }
 
 

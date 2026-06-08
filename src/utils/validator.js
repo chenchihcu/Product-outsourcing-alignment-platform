@@ -139,11 +139,11 @@ export function validateAlignment(data) {
   const hasFpcaPkg = fpcaPkg.staticBag || fpcaPkg.honeycomb || fpcaPkg.tray || fpcaPkg.sensorCover || fpcaPkg.cameraCover;
   check(hasFpcaPkg, '加工廠未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
 
-  // 簽核欄對齊
+  // 簽核欄對齊（檢查電子簽章圖片）
   const sign = bi.signOff || {};
-  check(!!sign.rdConfirm, '「研發」簽章未填寫', 'error');
-  check(!!sign.engineeringReview, '「工程」簽章未填寫', 'warning');
-  check(!!sign.qaConfirm, '「品保處」簽章未填寫', 'error');
+  check(!!sign.rdSignature, '「研發」電子簽章未上傳', 'error');
+  check(!!sign.engineeringReviewSignature, '「工程」電子簽章未上傳', 'warning');
+  check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
 
   // 計算對齊率
   const alignmentRate = totalChecks > 0 ? Math.round((passedChecks / totalChecks) * 100) : 0;

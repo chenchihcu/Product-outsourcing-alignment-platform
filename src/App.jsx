@@ -12,7 +12,11 @@ import './App.css';
 
 export default function App() {
   const getProjectsKey = (user) => {
-    return user && user.role === 'guest' ? 'ag_projects_guest' : 'ag_projects';
+    if (!user) return 'ag_projects';
+    if (user.role === 'admin') {
+      return 'ag_projects_admin_test'; // 系統管理員最高權限測試資料庫，避免與部門正式數據混淆
+    }
+    return 'ag_projects';
   };
 
   const [projects, setProjects] = useState([]);
@@ -23,12 +27,6 @@ export default function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [highlightField, setHighlightField] = useState('');
-  const [theme, setTheme] = useState(() => localStorage.getItem('ag_theme') || 'dark');
-
-  useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('ag_theme', theme);
-  }, [theme]);
 
   const handleGoToSection = (tab, msg) => {
     setActiveTab(tab);
@@ -43,7 +41,10 @@ export default function App() {
   // 登入狀態與使用者管理
   const [currentUser, setCurrentUser] = useState(() => {
     const saved = localStorage.getItem('ag_current_user');
-    return saved ? JSON.parse(saved) : null;
+    if (!saved) return null;
+    const parsed = JSON.parse(saved);
+    delete parsed.name;
+    return parsed;
   });
 
   const [factories, setFactories] = useState(() => {
@@ -52,16 +53,20 @@ export default function App() {
   });
 
   const defaultAccounts = [
-    { username: 'rd', password: 'rd123', name: '研發處專員', unit: '研發單位', role: 'rd', level: 'Standard' },
-    { username: 'eng', password: 'eng123', name: '工程處專員', unit: '工程單位', role: 'eng', level: 'Standard' },
-    { username: 'qa', password: 'qa123', name: '品保處審核員', unit: '審核單位(品保處)', role: 'qa', level: 'Standard' },
-    { username: 'admin', password: 'admin123', name: '系統管理員', unit: '管理處', role: 'admin', level: 'Administrator' },
-    { username: 'guest', password: 'guest123', name: '訪客測試帳號', unit: '測試單位', role: 'guest', level: 'Guest' }
+    { username: 'rd', password: 'rd123', unit: '研發單位', role: 'rd', level: 'Standard' },
+    { username: 'eng', password: 'eng123', unit: '工程單位', role: 'eng', level: 'Standard' },
+    { username: 'qa', password: 'qa123', unit: '審核單位(品保處)', role: 'qa', level: 'Standard' },
+    { username: 'admin', password: 'admin123', unit: '管理處', role: 'admin', level: 'Administrator' }
   ];
 
   const [accounts, setAccounts] = useState(() => {
     const saved = localStorage.getItem('ag_accounts');
-    return saved ? JSON.parse(saved) : defaultAccounts;
+    const parsed = saved ? JSON.parse(saved) : defaultAccounts;
+    return parsed.map((acc) => {
+      const copy = { ...acc };
+      delete copy.name;
+      return copy;
+    });
   });
 
   // 動態計算對齊率，取代原本的 React state
@@ -508,36 +513,12 @@ export default function App() {
             </div>
           </div>
 
-          {/* 主題切換按鈕 */}
-          <button 
-            className="theme-toggle-btn"
-            onClick={() => setTheme(prev => prev === 'dark' ? 'light' : 'dark')}
-            title={`切換至 ${theme === 'dark' ? '淺色' : '深色'} 主題`}
-            style={{ 
-              background: 'rgba(255, 255, 255, 0.08)', 
-              border: '1px solid var(--border-color)', 
-              color: 'var(--text-color)', 
-              padding: '6px 12px', 
-              borderRadius: '8px', 
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              gap: '6px',
-              fontSize: '0.85rem',
-              fontWeight: '600',
-              transition: 'all 0.25s ease'
-            }}
-          >
-            {theme === 'dark' ? '☀️ 淺色' : '🌙 深色'}
-          </button>
-
           {/* 使用者資訊 */}
           <div className="user-profile-badge">
             <span className="user-avatar">👤</span>
             <div className="user-info-text">
-              <span className="user-name">{currentUser.name}</span>
-              <span className="user-role-desc">{currentUser.unit} ({currentUser.level})</span>
+              <span className="user-name">{currentUser.username}</span>
+              <span className="user-role-desc">{currentUser.unit} · {currentUser.level}</span>
             </div>
             <button className="btn-logout" onClick={() => { setCurrentUser(null); handleBackToList(); }} title="登出系統">
               🚪 登出

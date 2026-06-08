@@ -20,7 +20,6 @@ export default function Settings({
   const [newPassword, setNewPassword] = useState('');
   // 帳號清單密碼遮罩：預設隱藏，可逐列切換顯示
   const [revealedPasswords, setRevealedPasswords] = useState({});
-  const [newName, setNewName] = useState('');
   const [newUnit, setNewUnit] = useState('研發單位');
   const [newRole, setNewRole] = useState('rd');
   const [newLevel, setNewLevel] = useState('Standard');
@@ -34,7 +33,7 @@ export default function Settings({
 
   const handleAddAccountSubmit = (e) => {
     e.preventDefault();
-    if (!newUsername.trim() || !newPassword.trim() || !newName.trim()) {
+    if (!newUsername.trim() || !newPassword.trim()) {
       alert('請填寫所有必要欄位！');
       return;
     }
@@ -47,7 +46,6 @@ export default function Settings({
     const newAcc = {
       username: newUsername.trim(),
       password: newPassword.trim(),
-      name: newName.trim(),
       unit: newUnit,
       role: newRole,
       level: newLevel
@@ -56,7 +54,6 @@ export default function Settings({
     onAddAccount(newAcc);
     setNewUsername('');
     setNewPassword('');
-    setNewName('');
     alert('使用者帳號新增成功！');
   };
 
@@ -81,7 +78,7 @@ export default function Settings({
         <div className="settings-section-card glass-card" style={{ gridColumn: '1 / -1' }}>
           <h3>🖋️ 個人電子簽章設定</h3>
           <p className="card-desc">
-            在此上傳您的個人電子簽章圖片（建議使用透明背景的 PNG 圖檔，比例約 3:1）。設定後，您在「簽章匯出」進行線上簽名時，系統將直接以簽章圖檔取代打字姓名，使報告更顯正式與專業。
+             在此上傳您的個人電子簽章圖片（建議使用透明背景的 PNG 圖檔，比例約 3:1）。設定後，您在「簽章匯出」進行線上簽名時，系統將直接以簽章圖檔作為簽核依據，使報告更顯正式與專業。
           </p>
           <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
             <div 
@@ -223,17 +220,6 @@ export default function Settings({
 
               <div className="form-row-grid" style={{ marginTop: '8px' }}>
                 <div className="form-group">
-                  <label className="form-label">使用者姓名 <span className="req">*</span></label>
-                  <input
-                    type="text"
-                    className="form-input edit-active"
-                    placeholder="例如: 王小明"
-                    value={newName}
-                    onChange={(e) => setNewName(e.target.value)}
-                    required
-                  />
-                </div>
-                <div className="form-group">
                   <label className="form-label">權限等級</label>
                   <select
                     className="form-input edit-active"
@@ -245,20 +231,19 @@ export default function Settings({
                     <option value="Administrator">Administrator (最高權限)</option>
                   </select>
                 </div>
-              </div>
-
-              <div className="form-group" style={{ marginTop: '8px' }}>
-                <label className="form-label">所屬單位</label>
-                <select
-                  className="form-input edit-active"
-                  value={newUnit}
-                  onChange={(e) => handleUnitChange(e.target.value)}
-                >
-                  <option value="研發單位">研發單位 (EVT / DVT 負責)</option>
-                  <option value="工程單位">工程單位 (PVT / Pilot-run 負責)</option>
-                  <option value="審核單位(品保處)">審核單位 (品保處 - 僅審核)</option>
-                  <option value="管理處">管理處 (Admin 級別)</option>
-                </select>
+                <div className="form-group">
+                  <label className="form-label">所屬單位</label>
+                  <select
+                    className="form-input edit-active"
+                    value={newUnit}
+                    onChange={(e) => handleUnitChange(e.target.value)}
+                  >
+                    <option value="研發單位">研發單位 (EVT / DVT 負責)</option>
+                    <option value="工程單位">工程單位 (PVT / Pilot-run 負責)</option>
+                    <option value="審核單位(品保處)">審核單位 (品保處 - 僅審核)</option>
+                    <option value="管理處">管理處 (Admin 級別)</option>
+                  </select>
+                </div>
               </div>
 
               <button type="submit" className="btn btn-secondary btn-block" style={{ marginTop: '12px' }}>
@@ -272,7 +257,6 @@ export default function Settings({
                 <table className="settings-table">
                   <thead>
                     <tr>
-                      <th>姓名</th>
                       <th>單位</th>
                       <th>帳號</th>
                       <th>密碼</th>
@@ -283,8 +267,7 @@ export default function Settings({
                   <tbody>
                     {accounts.map((acc) => (
                       <tr key={acc.username} className={currentUser.username === acc.username ? 'current-user-row' : ''}>
-                        <td>{acc.name} {currentUser.username === acc.username && '(您)'}</td>
-                        <td>{acc.unit}</td>
+                        <td>{acc.unit} {currentUser.username === acc.username && '(您)'}</td>
                         <td><code>{acc.username}</code></td>
                         <td>
                           <code>{revealedPasswords[acc.username] ? acc.password : '••••••'}</code>

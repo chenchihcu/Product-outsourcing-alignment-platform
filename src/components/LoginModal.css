@@ -4,7 +4,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(15, 23, 42, 0.75);
+  background: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(12px);
   display: flex;
   justify-content: center;
@@ -17,9 +17,9 @@
   max-width: 440px;
   padding: 32px;
   border-radius: 16px;
-  background: rgba(30, 41, 59, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
 }
 
 .login-header {
@@ -35,14 +35,14 @@
 
 .login-header h2 {
   font-size: 1.5rem;
-  color: #f8fafc;
+  color: #1f2937;
   margin-bottom: 6px;
   font-weight: 700;
 }
 
 .login-header p {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #4b5563;
 }
 
 .login-form .form-group {
@@ -50,9 +50,9 @@
 }
 
 .login-error-msg {
-  background: rgba(239, 68, 68, 0.15);
-  border: 1px solid rgba(239, 68, 68, 0.3);
-  color: #f87171;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  color: #dc2626;
   padding: 10px 14px;
   border-radius: 8px;
   font-size: 0.85rem;
@@ -67,13 +67,13 @@
 
 .quick-login-section {
   margin-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: 20px;
 }
 
 .quick-login-title {
   font-size: 0.85rem;
-  color: #94a3b8;
+  color: #4b5563;
   margin-bottom: 12px;
 }
 
@@ -90,86 +90,65 @@
   justify-content: center;
   padding: 10px;
   border-radius: 8px;
-  background: rgba(51, 65, 85, 0.5);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(243, 244, 246, 0.8);
+  border: 1px solid rgba(0, 0, 0, 0.08);
   cursor: pointer;
   transition: all 0.2s ease;
-  color: #e2e8f0;
+  color: #374151;
 }
 
 .quick-login-btn:hover {
-  background: rgba(51, 65, 85, 0.8);
-  border-color: rgba(255, 255, 255, 0.15);
+  background: rgba(229, 231, 235, 0.9);
+  border-color: rgba(0, 0, 0, 0.15);
   transform: translateY(-2px);
 }
 
 .quick-login-btn strong {
   font-size: 0.9rem;
   margin-bottom: 2px;
+  color: #1f2937;
 }
 
 .quick-login-btn span {
   font-size: 0.75rem;
-  color: #94a3b8;
+  color: #6b7280;
 }
 
 /* 角色按鈕色彩微調 */
 .quick-login-btn.role-rd:hover {
-  border-color: rgba(59, 130, 246, 0.4);
-  box-shadow: 0 0 10px rgba(59, 130, 246, 0.15);
+  border-color: rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 10px rgba(37, 99, 235, 0.12);
 }
 .quick-login-btn.role-eng:hover {
-  border-color: rgba(245, 158, 11, 0.4);
-  box-shadow: 0 0 10px rgba(245, 158, 11, 0.15);
+  border-color: rgba(217, 119, 6, 0.5);
+  box-shadow: 0 0 10px rgba(217, 119, 6, 0.12);
 }
 .quick-login-btn.role-qa:hover {
-  border-color: rgba(16, 185, 129, 0.4);
-  box-shadow: 0 0 10px rgba(16, 185, 129, 0.15);
+  border-color: rgba(5, 150, 105, 0.5);
+  box-shadow: 0 0 10px rgba(5, 150, 105, 0.12);
 }
 .quick-login-btn.role-admin:hover {
-  border-color: rgba(139, 92, 246, 0.4);
-  box-shadow: 0 0 10px rgba(139, 92, 246, 0.15);
+  border-color: rgba(124, 58, 237, 0.5);
+  box-shadow: 0 0 10px rgba(124, 58, 237, 0.12);
 }
 
-/* Light 模式主題覆蓋 */
-[data-theme="light"] .login-card {
-  background: rgba(255, 255, 255, 0.95);
-  border-color: rgba(0, 0, 0, 0.08);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+/* ===== 響應式優化：手機窄螢幕下登入視窗排版微調 ===== */
+@media (max-width: 480px) {
+  .login-card {
+    padding: 24px 18px !important;
+    max-width: 90% !important;
+  }
+  .login-header h2 {
+    font-size: 1.3rem !important;
+  }
+  .quick-login-grid {
+    grid-template-columns: 1fr !important; /* 單列堆疊，防止小尺寸下重疊 */
+    gap: 8px !important;
+  }
+  .quick-login-btn {
+    padding: 8px !important;
+  }
 }
 
-[data-theme="light"] .login-header h2 {
-  color: #1f2937;
-}
 
-[data-theme="light"] .login-header p {
-  color: #4b5563;
-}
-
-[data-theme="light"] .quick-login-section {
-  border-top-color: rgba(0, 0, 0, 0.08);
-}
-
-[data-theme="light"] .quick-login-title {
-  color: #4b5563;
-}
-
-[data-theme="light"] .quick-login-btn {
-  background: rgba(243, 244, 246, 0.8);
-  border-color: rgba(0, 0, 0, 0.08);
-  color: #374151;
-}
-
-[data-theme="light"] .quick-login-btn:hover {
-  background: rgba(229, 231, 235, 0.9);
-  border-color: rgba(0, 0, 0, 0.15);
-}
-
-[data-theme="light"] .quick-login-btn strong {
-  color: #1f2937;
-}
-
-[data-theme="light"] .quick-login-btn span {
-  color: #6b7280;
-}
 

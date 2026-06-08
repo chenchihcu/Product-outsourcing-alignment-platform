@@ -43,90 +43,203 @@
   /* 報表標頭 */
   .print-header {
     text-align: center;
-    margin-bottom: 20px;
-    border-bottom: 2px double #000;
-    padding-bottom: 8px;
+    margin-bottom: 24px;
+    border-bottom: 3px double #1e3a8a; /* 科技深藍雙線 */
+    padding-bottom: 12px;
+    position: relative;
   }
 
   .print-title {
-    font-size: 18pt;
-    font-weight: bold;
-    margin: 0 0 4px 0;
-    color: #000;
+    font-size: 20pt;
+    font-weight: 800;
+    margin: 0 0 6px 0;
+    color: #1e3a8a !important; /* Tech Blue Title */
+    letter-spacing: 1px;
   }
 
   .print-subtitle {
-    font-size: 10pt;
-    color: #555;
+    font-size: 10.5pt;
+    color: #475569;
     margin: 0;
+    font-weight: 600;
   }
 
   /* 表格樣式 */
   .print-section-title {
-    font-size: 12pt;
+    font-size: 13pt;
     font-weight: bold;
-    margin: 20px 0 8px 0;
-    border-left: 4px solid #000;
-    padding-left: 8px;
+    margin: 24px 0 10px 0;
+    border-left: 5px solid #1e3a8a !important; /* 科技深藍 */
+    padding-left: 10px;
+    color: #1e3a8a !important;
     page-break-after: avoid;
   }
 
   .print-sub-section-title {
     font-size: 11pt;
     font-weight: bold;
-    margin: 10px 0 6px 0;
+    margin: 12px 0 6px 0;
+    color: #1e293b !important;
     page-break-after: avoid;
   }
 
   .print-table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 12px;
+    margin-bottom: 16px;
     page-break-inside: avoid;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   .print-table th,
   .print-table td {
-    border: 1px solid #000;
-    padding: 6px 10px;
+    border: 1px solid #cbd5e1 !important; /* 柔和灰框線 */
+    padding: 8px 12px;
     text-align: left;
     vertical-align: middle;
     font-size: 9.5pt;
   }
 
   .print-table th {
-    background-color: #f3f4f6 !important;
+    background-color: #1e293b !important; /* 深色 Header */
+    color: #ffffff !important;
     font-weight: bold;
+    border-color: #334155 !important;
   }
 
   .cell-label {
-    background-color: #f9fafb !important;
+    background-color: #f8fafc !important; /* 柔和背景 */
+    color: #334155 !important;
     font-weight: bold;
     width: 20%;
   }
 
   .cell-value {
     background-color: #fff !important;
+    color: #0f172a !important;
   }
 
   .cell-bold {
     font-weight: bold;
+    color: #1e293b !important;
   }
 
-  .print-checkbox {
-    display: inline-block;
+  /* 自訂 Checkbox 精緻化渲染 */
+  .print-checkbox-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
     margin-right: 14px;
-    font-size: 9.5pt;
+    vertical-align: middle;
+    page-break-inside: avoid;
+  }
+
+  .checkbox-square {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid #94a3b8 !important; /* 預設邊框 */
+    border-radius: 3px;
+    text-align: center;
+    line-height: 11px;
+    font-size: 8.5pt;
+    font-weight: 900;
+  }
+
+  /* 已勾選：選項 A 科技藍 */
+  .print-checkbox-item.is-checked .checkbox-square {
+    background-color: #2563eb !important; /* 科技藍背景 */
+    border-color: #1d4ed8 !important;
+    color: #ffffff !important; /* 白色打勾 */
+  }
+
+  .print-checkbox-item.is-checked .checkbox-label {
+    color: #0f172a !important;
+    font-weight: bold !important;
+  }
+
+  /* 未勾選：視覺淡化 */
+  .print-checkbox-item.is-unchecked .checkbox-square {
+    background-color: #f8fafc !important;
+    border-color: #cbd5e1 !important;
+    color: transparent !important;
+  }
+
+  .print-checkbox-item.is-unchecked .checkbox-label {
+    color: #94a3b8 !important;
+  }
+
+  /* 多欄排版 grid 系統 */
+  .print-checkbox-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 6px 12px;
+    padding: 4px 0;
+  }
+
+  .print-checkbox-vertical {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 2px 0;
+  }
+
+  /* 奈米塗層精美徽章 */
+  .nano-coating-badge {
+    display: inline-block;
+    margin-left: 10px;
+    padding: 2px 8px;
+    background-color: #eff6ff !important;
+    color: #1d4ed8 !important;
+    border: 1px solid #bfdbfe !important;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 8pt;
+  }
+
+  /* 試產確認：對齊狀態 Status Badges */
+  .badge {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 8.5pt;
+    font-weight: bold;
+    border-radius: 4px;
+    border: 1px solid transparent;
+  }
+
+  .badge-success {
+    background-color: #dcfce7 !important; /* 柔和綠 */
+    color: #15803d !important;
+    border-color: #bbf7d0 !important;
+  }
+
+  /* 已勾選選項 A 待辦警示：淡紅背景 + 紅色文字 */
+  .badge-danger {
+    background-color: #fee2e2 !important; /* 淡紅 */
+    color: #dc2626 !important; /* 紅色 */
+    border-color: #fca5a5 !important;
+    font-weight: 800 !important;
+  }
+
+  .text-danger {
+    color: #ea580c !important; /* 警告橘紅 */
+    font-weight: bold !important;
+  }
+
+  .text-nowrap {
+    white-space: nowrap !important;
   }
 
   /* 備註對話框 */
   .print-memo-box {
-    border: 1px solid #000;
-    padding: 8px 12px;
-    background: #fff;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 6px;
+    padding: 10px 14px;
+    background: #f8fafc !important;
     font-size: 9.5pt;
     min-height: 50px;
     white-space: pre-wrap;
+    color: #334155;
   }
 
   /* 雙向線上簽核區 */
@@ -142,22 +255,51 @@
 
   .print-sign-box {
     display: table-cell;
-    border: 1px solid #000;
+    border-radius: 6px;
     background: #fff;
     vertical-align: top;
+    transition: all 0.3s ease;
+  }
+
+  /* 狀態感知邊框 */
+  .print-sign-box.is-unsigned {
+    border: 1.5px dashed #f97316 !important; /* 虛線警告橘 */
+    background-color: #fffbeb !important; /* 淡淡黃 */
+  }
+
+  .print-sign-box.is-signed {
+    border: 1.5px solid #10b981 !important; /* 實線安全綠 */
+    background-color: #ffffff !important;
   }
 
   .print-sign-header {
-    background: #f3f4f6 !important;
-    border-bottom: 1px solid #000;
-    padding: 6px;
+    padding: 8px;
     font-weight: bold;
     text-align: center;
     font-size: 10pt;
   }
 
+  /* 簽章卡頭部職能配色 */
+  .print-sign-box.role-rd .print-sign-header {
+    background: #e0f2fe !important; /* 藍色 */
+    color: #0369a1 !important;
+    border-bottom: 1.5px solid #bae6fd !important;
+  }
+
+  .print-sign-box.role-pe .print-sign-header {
+    background: #f3e8ff !important; /* 紫色 */
+    color: #6b21a8 !important;
+    border-bottom: 1.5px solid #e9d5ff !important;
+  }
+
+  .print-sign-box.role-qa .print-sign-header {
+    background: #d1fae5 !important; /* 綠色 */
+    color: #065f46 !important;
+    border-bottom: 1.5px solid #a7f3d0 !important;
+  }
+
   .print-sign-body {
-    padding: 10px;
+    padding: 12px;
     font-size: 9pt;
   }
 
@@ -165,30 +307,34 @@
     font-size: 11pt;
     font-weight: bold;
     margin-bottom: 8px;
-    border-bottom: 1px dashed #777;
-    padding-bottom: 4px;
+    border-bottom: 1px dashed #cbd5e1;
+    padding-bottom: 6px;
     display: flex;
     align-items: center;
     gap: 8px;
-    height: 36px;
+    height: 42px;
   }
 
   .print-sign-name img {
-    height: 32px;
-    max-height: 32px;
+    height: 36px;
+    max-height: 36px;
     display: inline-block;
     vertical-align: middle;
   }
 
   .sign-text {
-    color: #111827;
     font-family: "Courier New", monospace;
     font-weight: bold;
   }
+  
+  .sign-text.text-danger {
+    color: #f97316 !important; /* 待簽章顯示警告橘 */
+    font-size: 9pt;
+  }
 
   .print-sign-terms {
-    color: #555;
-    line-height: 1.3;
+    color: #64748b;
+    line-height: 1.4;
   }
 
   /* 分頁控制 */
@@ -199,11 +345,11 @@
   /* 報表頁尾 */
   .print-footer {
     margin-top: 30px;
-    border-top: 1px solid #000;
-    padding-top: 6px;
+    border-top: 1.5px solid #1e3a8a;
+    padding-top: 8px;
     text-align: center;
     font-size: 8pt;
-    color: #666;
+    color: #475569;
     page-break-inside: avoid;
   }
 }

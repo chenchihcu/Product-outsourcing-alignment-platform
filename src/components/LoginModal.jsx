@@ -78,8 +78,8 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
                 className={`quick-login-btn role-${acc.role}`}
                 onClick={() => handleQuickLogin(acc)}
               >
-                <strong>{acc.name}</strong>
-                <span>({acc.unit})</span>
+                <strong>{acc.username}</strong>
+                <span>{acc.unit}</span>
               </button>
             ))}
           </div>
