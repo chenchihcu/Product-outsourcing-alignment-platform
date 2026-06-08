@@ -39,15 +39,35 @@
   margin-bottom: 1.25rem;
 }
 
+.form-row-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
 .form-row-grid-4 {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 1rem;
 }
 
+.tooling-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.records-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 0.75rem;
+}
+
 @media (max-width: 768px) {
-  .form-row-grid, .form-row-grid-4 {
-    grid-template-columns: 1fr;
+  .form-row-grid, .form-row-grid-3, .form-row-grid-4, .tooling-grid, .records-grid {
+    grid-template-columns: 1fr !important;
   }
 }
 
@@ -434,7 +454,7 @@ input:checked + .slider:before {
 [data-theme="light"] .sub-section-title,
 [data-theme="light"] .tool-name,
 [data-theme="light"] .doc-label {
-  color: #1f2937;
+  color: #000000;
 }
 
 [data-theme="light"] .section-title {
@@ -444,39 +464,39 @@ input:checked + .slider:before {
 [data-theme="light"] .section-subtitle,
 [data-theme="light"] .description-text,
 [data-theme="light"] .doc-desc {
-  color: #4b5563;
+  color: #111111;
 }
 
 [data-theme="light"] .checkbox-flex,
 [data-theme="light"] .tooling-row-align,
 [data-theme="light"] .record-row,
 [data-theme="light"] .inline-bake-inputs {
-  background: rgba(255, 255, 255, 0.85);
-  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(255, 255, 255, 0.95);
+  border-color: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="light"] .readonly-flex {
-  background: rgba(0, 0, 0, 0.02);
+  background: rgba(0, 0, 0, 0.04);
 }
 
 [data-theme="light"] .checkbox-label,
 [data-theme="light"] .radio-label,
 [data-theme="light"] .record-name {
-  color: #374151;
+  color: #000000;
 }
 
 [data-theme="light"] .checkbox-label:hover:not([disabled]),
 [data-theme="light"] .radio-label:hover:not([disabled]) {
-  background: rgba(0, 0, 0, 0.04);
-  color: #1f2937;
+  background: rgba(0, 0, 0, 0.06);
+  color: #000000;
 }
 
 [data-theme="light"] .form-textarea,
 [data-theme="light"] .table-input,
 [data-theme="light"] .inline-num-input {
-  background: rgba(255, 255, 255, 0.85);
-  color: #1f2937;
-  border-color: rgba(0, 0, 0, 0.12);
+  background: rgba(255, 255, 255, 0.95);
+  color: #000000;
+  border-color: rgba(0, 0, 0, 0.2);
 }
 
 [data-theme="light"] .form-textarea:focus,
@@ -487,28 +507,86 @@ input:checked + .slider:before {
 }
 
 [data-theme="light"] .tooling-box {
-  background: rgba(79, 70, 229, 0.02);
-  border-color: rgba(79, 70, 229, 0.15);
+  background: rgba(79, 70, 229, 0.04);
+  border-color: rgba(79, 70, 229, 0.25);
 }
 
 [data-theme="light"] .tooling-badge {
-  background: #f3f4f6;
+  background: #ffffff;
   color: #4f46e5;
-  border-color: rgba(79, 70, 229, 0.2);
+  border-color: rgba(79, 70, 229, 0.35);
 }
 
 [data-theme="light"] .bake-cond-box {
-  background: rgba(217, 119, 6, 0.02);
-  border-color: rgba(217, 119, 6, 0.15);
+  background: rgba(217, 119, 6, 0.04);
+  border-color: rgba(217, 119, 6, 0.25);
 }
 
 [data-theme="light"] .form-table th {
-  color: #4b5563;
-  background: rgba(0, 0, 0, 0.02);
-  border-bottom-color: rgba(0, 0, 0, 0.08);
+  color: #000000;
+  background: rgba(0, 0, 0, 0.05);
+  border-bottom-color: rgba(0, 0, 0, 0.15);
 }
 
 [data-theme="light"] .form-table td {
-  border-bottom-color: rgba(0, 0, 0, 0.06);
+  border-bottom-color: rgba(0, 0, 0, 0.12);
+  color: #000000;
 }
+
+/* 工程文件卡片高亮樣式 */
+.document-card {
+  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  border: 1px solid var(--border-color);
+}
+
+.document-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-color);
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
+}
+
+.document-card.checked-active {
+  border-color: var(--success-color);
+  background: rgba(16, 185, 129, 0.04);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.08);
+}
+
+[data-theme="light"] .document-card.checked-active {
+  background: rgba(5, 150, 105, 0.06);
+  border-color: var(--success-color);
+}
+
+/* SVG 插圖樣式 */
+.doc-icon-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--accent-color);
+  flex-shrink: 0;
+  transition: all 0.25s ease;
+}
+
+.document-card.checked-active .doc-icon-container {
+  color: var(--success-color);
+  background: rgba(16, 185, 129, 0.1);
+}
+
+[data-theme="light"] .doc-icon-container {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+[data-theme="light"] .document-card.checked-active .doc-icon-container {
+  background: rgba(5, 150, 105, 0.12);
+}
+
+.doc-svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
 

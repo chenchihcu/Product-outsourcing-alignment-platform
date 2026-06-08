@@ -1,6 +1,113 @@
 import React from 'react';
 import './FormSections.css';
 
+const getDocumentIcon = (key) => {
+  const commonProps = {
+    className: "doc-svg",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round"
+  };
+
+  switch (key) {
+    case 'bom': // 材料清單 BOM (表格清單)
+      return (
+        <svg {...commonProps}>
+          <path d="M12 6h9M12 12h9M12 18h9M3 6h.01M3 12h.01M3 18h.01" strokeWidth="2.5" />
+        </svg>
+      );
+    case 'gerber': // Gerber file / CAD (電路布線)
+      return (
+        <svg {...commonProps}>
+          <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+        </svg>
+      );
+    case 'coordinate': // 元件座標檔 (靶標定位)
+      return (
+        <svg {...commonProps}>
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 2v20M2 12h20" />
+        </svg>
+      );
+    case 'placement': // 零件位置圖 (晶片方向/板子位置)
+      return (
+        <svg {...commonProps}>
+          <rect x="3" y="3" width="18" height="18" rx="2" />
+          <rect x="7" y="7" width="10" height="10" rx="1" />
+          <path d="M12 7v10M7 12h10" />
+        </svg>
+      );
+    case 'materialSpec': // 原物料規格書 (證書/手冊)
+      return (
+        <svg {...commonProps}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+          <line x1="16" y1="13" x2="8" y2="13" />
+          <line x1="16" y1="17" x2="8" y2="17" />
+          <polyline points="10 9 9 9 8 9" />
+        </svg>
+      );
+    case 'mechDrawing': // 機構圖 2D/3D (3D立方體)
+      return (
+        <svg {...commonProps}>
+          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+          <polyline points="3.27 6.96 12 12.01 20.73 6.96" />
+          <line x1="12" y1="22.08" x2="12" y2="12" />
+        </svg>
+      );
+    case 'productSpec': // 產品規格書 (核對清單)
+      return (
+        <svg {...commonProps}>
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <polyline points="22 4 12 14.01 9 11.01" />
+        </svg>
+      );
+    case 'reflowProfile': // Reflow 建議曲線 (溫度曲線)
+      return (
+        <svg {...commonProps}>
+          <path d="M3 20h18M3 17l4-4 4 4 6-10 3 3" />
+        </svg>
+      );
+    case 'assemblySop': // 組裝作業標準書 (螺絲起子與工具)
+      return (
+        <svg {...commonProps}>
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z" />
+        </svg>
+      );
+    case 'testSop': // 測試作業標準書 (波形檢驗)
+      return (
+        <svg {...commonProps}>
+          <path d="M22 12h-4l-3 9L9 3l-3 9H2" />
+        </svg>
+      );
+    case 'smtSpec': // SMT 工藝規範 (精密齒輪)
+      return (
+        <svg {...commonProps}>
+          <circle cx="12" cy="12" r="3" />
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" />
+        </svg>
+      );
+    case 'packingSop': // 包裝作業標準書 (快遞箱子)
+      return (
+        <svg {...commonProps}>
+          <polyline points="21 8 21 21 3 21 3 8" />
+          <rect x="1" y="3" width="22" height="5" />
+          <line x1="10" y1="12" x2="14" y2="12" />
+        </svg>
+      );
+    default:
+      return (
+        <svg {...commonProps}>
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+          <polyline points="14 2 14 8 20 8" />
+        </svg>
+      );
+  }
+};
+
 export default function FormSections({ data, activeSection, onChange, onNext, currentUser, factories, highlightField }) {
   
   // 取得欄位跳轉定位閃爍之 class
@@ -259,35 +366,31 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       {/* 分頁 1: 產品基本資料 */}
       {activeSection === 'basicInfo' && (
         <div className="section-form animate-fade-in">
-          <h2 className="section-title">A. 產品基本資料</h2>
+          <h2 className="section-title">基本資料</h2>
           <p className="section-subtitle">請核對發包方資訊，並請加工廠確實填寫工廠區及治工具資訊。</p>
 
-          <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
-            <label className="form-label">委外加工廠 <span className="req">*</span></label>
-            <select 
-              className="form-input edit-active" 
-              value={data.basicInfo.factory || ''} 
-              onChange={(e) => handleBasicChange('factory', e.target.value)}
-              disabled={isFieldDisabled('basicInfo.factory')}
-            >
-              <option value="">-- 請選擇委外加工廠 --</option>
-              {(() => {
-                const currentFac = data.basicInfo.factory;
-                const list = [...factories];
-                if (currentFac && !list.includes(currentFac)) {
-                  list.unshift(currentFac);
-                }
-                return list.map(fac => (
-                  <option key={fac} value={fac}>{fac}</option>
-                ));
-              })()}
-            </select>
-          </div>
-
-          <div className="divider"></div>
-
-          {/* 產品料號與規格 */}
-          <div className="form-row-grid">
+          <div className="form-row-grid-3">
+            <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
+              <label className="form-label">委外加工廠 <span className="req">*</span></label>
+              <select 
+                className="form-input edit-active" 
+                value={data.basicInfo.factory || ''} 
+                onChange={(e) => handleBasicChange('factory', e.target.value)}
+                disabled={isFieldDisabled('basicInfo.factory')}
+              >
+                <option value="">-- 請選擇委外加工廠 --</option>
+                {(() => {
+                  const currentFac = data.basicInfo.factory;
+                  const list = [...factories];
+                  if (currentFac && !list.includes(currentFac)) {
+                    list.unshift(currentFac);
+                  }
+                  return list.map(fac => (
+                    <option key={fac} value={fac}>{fac}</option>
+                  ));
+                })()}
+              </select>
+            </div>
             <div className={`form-group ${getFieldHighlightClass('productNo')}`}>
               <label className="form-label">產品料號</label>
               <input 
@@ -312,8 +415,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           </div>
 
-          {/* 產品階段與產品類別 */}
-          <div className="form-row-grid">
+          {/* 產品階段、產品類別與 PCBA 類型併排為 3 欄 */}
+          <div className="form-row-grid-3">
             <div className={`form-group ${getFieldHighlightClass('stage')}`}>
               <label className="form-label">產品階段</label>
               <div className="checkbox-flex">
@@ -356,6 +459,35 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                     disabled={isFieldDisabled('basicInfo.category.medical')}
                   />
                   <span>醫療</span>
+                </label>
+              </div>
+            </div>
+            <div className="form-group">
+              <label className="form-label">PCBA 類型</label>
+              <div className="checkbox-flex">
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.basicInfo.pcbaType?.single || false} 
+                    onChange={(e) => {
+                      const pt = { ...(data.basicInfo.pcbaType || {}), single: e.target.checked };
+                      handleBasicChange('pcbaType', pt);
+                    }}
+                    disabled={isFieldDisabled('basicInfo.pcbaType.single')}
+                  />
+                  <span>單面板</span>
+                </label>
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.basicInfo.pcbaType?.double || false} 
+                    onChange={(e) => {
+                      const pt = { ...(data.basicInfo.pcbaType || {}), double: e.target.checked };
+                      handleBasicChange('pcbaType', pt);
+                    }}
+                    disabled={isFieldDisabled('basicInfo.pcbaType.double')}
+                  />
+                  <span>雙面板</span>
                 </label>
               </div>
             </div>
@@ -416,8 +548,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           </div>
 
-          {/* 品質要求與驗收標準 */}
-          <div className="form-row-grid">
+          {/* 品質水準要求、IPC 驗收標準與 AOI 檢驗面併排為 3 欄 */}
+          <div className="form-row-grid-3">
             <div className="form-group">
               <label className="form-label">品質水準要求</label>
               <div className="checkbox-flex">
@@ -476,69 +608,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 </label>
               </div>
             </div>
-          </div>
-
-          {/* PCBA 類型 */}
-          <div className="form-group">
-            <label className="form-label">PCBA 類型</label>
-            <div className="checkbox-flex">
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={data.basicInfo.pcbaType?.single || false} 
-                  onChange={(e) => {
-                    const pt = { ...(data.basicInfo.pcbaType || {}), single: e.target.checked };
-                    handleBasicChange('pcbaType', pt);
-                  }}
-                  disabled={isFieldDisabled('basicInfo.pcbaType.single')}
-                />
-                <span>單面板</span>
-              </label>
-              <label className="checkbox-label">
-                <input 
-                  type="checkbox" 
-                  checked={data.basicInfo.pcbaType?.double || false} 
-                  onChange={(e) => {
-                    const pt = { ...(data.basicInfo.pcbaType || {}), double: e.target.checked };
-                    handleBasicChange('pcbaType', pt);
-                  }}
-                  disabled={isFieldDisabled('basicInfo.pcbaType.double')}
-                />
-                <span>雙面板</span>
-              </label>
-            </div>
-          </div>
-
-          <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '12px' }}>
-            <label className="form-label">主要加工項目 <span className="req">*</span></label>
-            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px' }}>
-              {[
-                ['smt', 'SMT'],
-                ['dip', 'DIP'],
-                ['ict', 'ICT'],
-                ['assembly', '組裝'],
-                ['coating', '三防膠塗覆'],
-                ['packing', '包裝'],
-                ['fct', 'FCT'],
-                ['flyingProbe', 'Flying Probe'],
-                ['finalTest', '成品測試']
-              ].map(([key, label]) => (
-                <label key={key} className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.processItems?.[key] || false} 
-                    onChange={(e) => handleProcessItemsChange(key, e.target.checked)}
-                    disabled={isFieldDisabled(`basicInfo.processItems.${key}`)}
-                  />
-                  <span>{label}</span>
-                </label>
-              ))}
-            </div>
-          </div>
-
-          {/* 進階生產防呆與品質控管 */}
-          <div className="form-row-grid">
-            <div className="form-group">
+            <div className={`form-group ${getFieldHighlightClass('aoi')}`}>
               <label className="form-label">AOI 檢驗面</label>
               <div className="checkbox-flex">
                 <label className="checkbox-label">
@@ -567,6 +637,10 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 </label>
               </div>
             </div>
+          </div>
+
+          {/* 點膠工藝、QR Code 掃描需求與序號管控需求併排為 3 欄 */}
+          <div className="form-row-grid-3">
             <div className="form-group">
               <label className="form-label">點膠工藝</label>
               <div className="checkbox-flex">
@@ -581,12 +655,9 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 </label>
               </div>
             </div>
-          </div>
-
-          <div className="form-row-grid">
             <div className="form-group">
               <label className="form-label">QR Code 掃描需求</label>
-              <div className="radio-group">
+              <div className="radio-group" style={{ padding: '4px 0' }}>
                 <label className="radio-label">
                   <input 
                     type="radio" 
@@ -617,7 +688,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
             <div className="form-group">
               <label className="form-label">序號管控需求</label>
-              <div className="radio-group">
+              <div className="radio-group" style={{ padding: '4px 0' }}>
                 <label className="radio-label">
                   <input 
                     type="radio" 
@@ -645,6 +716,33 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                   <span>不需要</span>
                 </label>
               </div>
+            </div>
+          </div>
+
+          <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '12px' }}>
+            <label className="form-label">主要加工項目 <span className="req">*</span></label>
+            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px' }}>
+              {[
+                ['smt', 'SMT'],
+                ['dip', 'DIP'],
+                ['ict', 'ICT'],
+                ['assembly', '組裝'],
+                ['coating', '三防膠塗覆'],
+                ['packing', '包裝'],
+                ['fct', 'FCT'],
+                ['flyingProbe', 'Flying Probe'],
+                ['finalTest', '成品測試']
+              ].map(([key, label]) => (
+                <label key={key} className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={data.basicInfo.processItems?.[key] || false} 
+                    onChange={(e) => handleProcessItemsChange(key, e.target.checked)}
+                    disabled={isFieldDisabled(`basicInfo.processItems.${key}`)}
+                  />
+                  <span>{label}</span>
+                </label>
+              ))}
             </div>
           </div>
 
@@ -736,200 +834,203 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             </div>
           )}
 
-          {/* 其他治具 */}
-          {['routingFixture', 'glueFixture', 'testFixture', 'assemblyFixture'].map((key) => {
-            const labelMap = {
-              routingFixture: 'Routing 治具',
-              glueFixture: '塗膠治具',
-              testFixture: '測試治具',
-              assemblyFixture: '組裝治具'
-            };
-            const item = data.basicInfo.tooling[key] || {};
-            return (
-              <div key={key} className={`tooling-row-align required-highlight ${getFieldHighlightClass(key)}`}>
-                <span className="tool-name">{labelMap[key]}</span>
-                <div className="radio-group">
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name={key} 
-                      checked={item.need || false}
-                      onChange={() => {
-                        const tool = data.basicInfo.tooling[key] || {};
-                        const updatedTool = { ...tool, need: true, noNeed: false };
-                        const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
-                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
-                      }} 
-                      disabled={isFieldDisabled(`basicInfo.tooling.${key}.need`)}
-                    />
-                    <span>需要</span>
-                  </label>
-                  <label className="radio-label">
-                    <input 
-                      type="radio" 
-                      name={key} 
-                      checked={item.noNeed || false}
-                      onChange={() => {
-                        const tool = data.basicInfo.tooling[key] || {};
-                        const updatedTool = { ...tool, need: false, noNeed: true, qty: '' };
-                        const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
-                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
-                      }} 
-                      disabled={isFieldDisabled(`basicInfo.tooling.${key}.noNeed`)}
-                    />
-                    <span>不需要</span>
-                  </label>
-                </div>
-                {item.need && (
-                  <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '240px', width: '240px' }}>
-                    <span style={{ fontSize: '0.85rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>提供數量:</span>
-                    <input 
-                      type="text" 
-                      className="form-input edit-active compact" 
-                      placeholder="例: 2 SETs" 
-                      value={item.qty || ''}
-                      onChange={(e) => handleToolingChange(key, 'qty', e.target.value)}
-                      disabled={isFieldDisabled(`basicInfo.tooling.${key}.qty`)}
-                    />
+          {/* 其他治具（使用 tooling-grid 網格併排） */}
+          <div className="tooling-grid">
+            {['routingFixture', 'glueFixture', 'testFixture', 'assemblyFixture'].map((key) => {
+              const labelMap = {
+                routingFixture: 'Routing 治具',
+                glueFixture: '塗膠治具',
+                testFixture: '測試治具',
+                assemblyFixture: '組裝治具'
+              };
+              const item = data.basicInfo.tooling[key] || {};
+              return (
+                <div key={key} className={`tooling-row-align required-highlight ${getFieldHighlightClass(key)}`} style={{ margin: 0 }}>
+                  <span className="tool-name" style={{ minWidth: '90px' }}>{labelMap[key]}</span>
+                  <div className="radio-group" style={{ gap: '0.8rem' }}>
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name={key} 
+                        checked={item.need || false}
+                        onChange={() => {
+                          const tool = data.basicInfo.tooling[key] || {};
+                          const updatedTool = { ...tool, need: true, noNeed: false };
+                          const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
+                          onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
+                        }} 
+                        disabled={isFieldDisabled(`basicInfo.tooling.${key}.need`)}
+                      />
+                      <span>需要</span>
+                    </label>
+                    <label className="radio-label">
+                      <input 
+                        type="radio" 
+                        name={key} 
+                        checked={item.noNeed || false}
+                        onChange={() => {
+                          const tool = data.basicInfo.tooling[key] || {};
+                          const updatedTool = { ...tool, need: false, noNeed: true, qty: '' };
+                          const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
+                          onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
+                        }} 
+                        disabled={isFieldDisabled(`basicInfo.tooling.${key}.noNeed`)}
+                      />
+                      <span>不需要</span>
+                    </label>
                   </div>
-                )}
-              </div>
-            );
-          })}
-
-          {/* SMT刷錫載具 */}
-          <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('smtCarrier')}`}>
-            <span className="tool-name">SMT刷錫載具</span>
-            <div className="radio-group">
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="smtCarrierNeed" 
-                  checked={data.basicInfo.tooling?.smtCarrier?.need || false}
-                  onChange={() => {
-                    const tool = data.basicInfo.tooling?.smtCarrier || {};
-                    const updatedTool = { ...tool, need: true, noNeed: false };
-                    const updatedTooling = { ...data.basicInfo.tooling, smtCarrier: updatedTool };
-                    const owners = { ...(data._owners || {}) };
-                    owners['basicInfo.tooling.smtCarrier.need'] = currentUser.unit;
-                    delete owners['basicInfo.tooling.smtCarrier.noNeed'];
-                    onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                  }} 
-                  disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.need')}
-                />
-                <span>需要</span>
-              </label>
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="smtCarrierNeed" 
-                  checked={data.basicInfo.tooling?.smtCarrier?.noNeed || false}
-                  onChange={() => {
-                    const tool = data.basicInfo.tooling?.smtCarrier || {};
-                    const updatedTool = { ...tool, need: false, noNeed: true, upper: false, lower: false };
-                    const updatedTooling = { ...data.basicInfo.tooling, smtCarrier: updatedTool };
-                    const owners = { ...(data._owners || {}) };
-                    owners['basicInfo.tooling.smtCarrier.noNeed'] = currentUser.unit;
-                    delete owners['basicInfo.tooling.smtCarrier.need'];
-                    delete owners['basicInfo.tooling.smtCarrier.upper'];
-                    delete owners['basicInfo.tooling.smtCarrier.lower'];
-                    onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                  }} 
-                  disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.noNeed')}
-                />
-                <span>不需要</span>
-              </label>
-            </div>
-            {data.basicInfo.tooling?.smtCarrier?.need && (
-              <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '12px', maxWidth: '320px', width: '320px' }}>
-                <label className="checkbox-label" style={{ margin: 0 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.tooling?.smtCarrier?.upper || false}
-                    onChange={(e) => handleToolingChange('smtCarrier', 'upper', e.target.checked)}
-                    disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.upper')}
-                  />
-                  <span>上載板</span>
-                </label>
-                <label className="checkbox-label" style={{ margin: 0 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.tooling?.smtCarrier?.lower || false}
-                    onChange={(e) => handleToolingChange('smtCarrier', 'lower', e.target.checked)}
-                    disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.lower')}
-                  />
-                  <span>下載板</span>
-                </label>
-              </div>
-            )}
+                  {item.need && (
+                    <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '140px' }}>
+                      <span style={{ fontSize: '0.78rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>數量:</span>
+                      <input 
+                        type="text" 
+                        className="form-input edit-active compact" 
+                        placeholder="例: 2 SETs" 
+                        value={item.qty || ''}
+                        onChange={(e) => handleToolingChange(key, 'qty', e.target.value)}
+                        disabled={isFieldDisabled(`basicInfo.tooling.${key}.qty`)}
+                        style={{ padding: '4px 6px', fontSize: '0.8rem' }}
+                      />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
           </div>
 
-          {/* 其他治具 */}
-          <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('otherFixture')}`}>
-            <span className="tool-name">其他治具</span>
-            <div className="radio-group">
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="otherFixtureNeed" 
-                  checked={data.basicInfo.tooling?.otherFixture?.need || false}
-                  onChange={() => {
-                    const tool = data.basicInfo.tooling?.otherFixture || {};
-                    const updatedTool = { ...tool, need: true, noNeed: false };
-                    const updatedTooling = { ...data.basicInfo.tooling, otherFixture: updatedTool };
-                    const owners = { ...(data._owners || {}) };
-                    owners['basicInfo.tooling.otherFixture.need'] = currentUser.unit;
-                    delete owners['basicInfo.tooling.otherFixture.noNeed'];
-                    onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                  }} 
-                  disabled={isFieldDisabled('basicInfo.tooling.otherFixture.need')}
-                />
-                <span>需要</span>
-              </label>
-              <label className="radio-label">
-                <input 
-                  type="radio" 
-                  name="otherFixtureNeed" 
-                  checked={data.basicInfo.tooling?.otherFixture?.noNeed || false}
-                  onChange={() => {
-                    const tool = data.basicInfo.tooling?.otherFixture || {};
-                    const updatedTool = { ...tool, need: false, noNeed: true, name: '', qty: '' };
-                    const updatedTooling = { ...data.basicInfo.tooling, otherFixture: updatedTool };
-                    const owners = { ...(data._owners || {}) };
-                    owners['basicInfo.tooling.otherFixture.noNeed'] = currentUser.unit;
-                    delete owners['basicInfo.tooling.otherFixture.need'];
-                    delete owners['basicInfo.tooling.otherFixture.name'];
-                    delete owners['basicInfo.tooling.otherFixture.qty'];
-                    onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
-                  }} 
-                  disabled={isFieldDisabled('basicInfo.tooling.otherFixture.noNeed')}
-                />
-                <span>不需要</span>
-              </label>
-            </div>
-            {data.basicInfo.tooling?.otherFixture?.need && (
-              <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '8px', flex: 1, maxWidth: '400px' }}>
-                <input 
-                  type="text" 
-                  className="form-input edit-active compact" 
-                  placeholder="治具名稱 (空白欄位)" 
-                  value={data.basicInfo.tooling?.otherFixture?.name || ''}
-                  onChange={(e) => handleToolingChange('otherFixture', 'name', e.target.value)}
-                  disabled={isFieldDisabled('basicInfo.tooling.otherFixture.name')}
-                  style={{ flex: 2 }}
-                />
-                <span style={{ fontSize: '0.85rem', color: '#9ca3af', whiteSpace: 'nowrap' }}>數量:</span>
-                <input 
-                  type="text" 
-                  className="form-input edit-active compact" 
-                  placeholder="例: 1 SET" 
-                  value={data.basicInfo.tooling?.otherFixture?.qty || ''}
-                  onChange={(e) => handleToolingChange('otherFixture', 'qty', e.target.value)}
-                  disabled={isFieldDisabled('basicInfo.tooling.otherFixture.qty')}
-                  style={{ flex: 1 }}
-                />
+          {/* SMT刷錫載具 與 其他治具併排 */}
+          <div className="tooling-grid">
+            <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('smtCarrier')}`} style={{ margin: 0 }}>
+              <span className="tool-name" style={{ minWidth: '90px' }}>SMT刷錫載具</span>
+              <div className="radio-group" style={{ gap: '0.8rem' }}>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="smtCarrierNeed" 
+                    checked={data.basicInfo.tooling?.smtCarrier?.need || false}
+                    onChange={() => {
+                      const tool = data.basicInfo.tooling?.smtCarrier || {};
+                      const updatedTool = { ...tool, need: true, noNeed: false };
+                      const updatedTooling = { ...data.basicInfo.tooling, smtCarrier: updatedTool };
+                      const owners = { ...(data._owners || {}) };
+                      owners['basicInfo.tooling.smtCarrier.need'] = currentUser.unit;
+                      delete owners['basicInfo.tooling.smtCarrier.noNeed'];
+                      onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
+                    }} 
+                    disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.need')}
+                  />
+                  <span>需要</span>
+                </label>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="smtCarrierNeed" 
+                    checked={data.basicInfo.tooling?.smtCarrier?.noNeed || false}
+                    onChange={() => {
+                      const tool = data.basicInfo.tooling?.smtCarrier || {};
+                      const updatedTool = { ...tool, need: false, noNeed: true, upper: false, lower: false };
+                      const updatedTooling = { ...data.basicInfo.tooling, smtCarrier: updatedTool };
+                      const owners = { ...(data._owners || {}) };
+                      owners['basicInfo.tooling.smtCarrier.noNeed'] = currentUser.unit;
+                      delete owners['basicInfo.tooling.smtCarrier.need'];
+                      delete owners['basicInfo.tooling.smtCarrier.upper'];
+                      delete owners['basicInfo.tooling.smtCarrier.lower'];
+                      onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
+                    }} 
+                    disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.noNeed')}
+                  />
+                  <span>不需要</span>
+                </label>
               </div>
-            )}
+              {data.basicInfo.tooling?.smtCarrier?.need && (
+                <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '8px', maxWidth: '160px' }}>
+                  <label className="checkbox-label" style={{ margin: 0, padding: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.tooling?.smtCarrier?.upper || false}
+                      onChange={(e) => handleToolingChange('smtCarrier', 'upper', e.target.checked)}
+                      disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.upper')}
+                    />
+                    <span style={{ fontSize: '0.8rem' }}>上</span>
+                  </label>
+                  <label className="checkbox-label" style={{ margin: 0, padding: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.tooling?.smtCarrier?.lower || false}
+                      onChange={(e) => handleToolingChange('smtCarrier', 'lower', e.target.checked)}
+                      disabled={isFieldDisabled('basicInfo.tooling.smtCarrier.lower')}
+                    />
+                    <span style={{ fontSize: '0.8rem' }}>下</span>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('otherFixture')}`} style={{ margin: 0 }}>
+              <span className="tool-name" style={{ minWidth: '90px' }}>其他治具</span>
+              <div className="radio-group" style={{ gap: '0.8rem' }}>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="otherFixtureNeed" 
+                    checked={data.basicInfo.tooling?.otherFixture?.need || false}
+                    onChange={() => {
+                      const tool = data.basicInfo.tooling?.otherFixture || {};
+                      const updatedTool = { ...tool, need: true, noNeed: false };
+                      const updatedTooling = { ...data.basicInfo.tooling, otherFixture: updatedTool };
+                      const owners = { ...(data._owners || {}) };
+                      owners['basicInfo.tooling.otherFixture.need'] = currentUser.unit;
+                      delete owners['basicInfo.tooling.otherFixture.noNeed'];
+                      onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
+                    }} 
+                    disabled={isFieldDisabled('basicInfo.tooling.otherFixture.need')}
+                  />
+                  <span>需要</span>
+                </label>
+                <label className="radio-label">
+                  <input 
+                    type="radio" 
+                    name="otherFixtureNeed" 
+                    checked={data.basicInfo.tooling?.otherFixture?.noNeed || false}
+                    onChange={() => {
+                      const tool = data.basicInfo.tooling?.otherFixture || {};
+                      const updatedTool = { ...tool, need: false, noNeed: true, name: '', qty: '' };
+                      const updatedTooling = { ...data.basicInfo.tooling, otherFixture: updatedTool };
+                      const owners = { ...(data._owners || {}) };
+                      owners['basicInfo.tooling.otherFixture.noNeed'] = currentUser.unit;
+                      delete owners['basicInfo.tooling.otherFixture.need'];
+                      delete owners['basicInfo.tooling.otherFixture.name'];
+                      delete owners['basicInfo.tooling.otherFixture.qty'];
+                      onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
+                    }} 
+                    disabled={isFieldDisabled('basicInfo.tooling.otherFixture.noNeed')}
+                  />
+                  <span>不需要</span>
+                </label>
+              </div>
+              {data.basicInfo.tooling?.otherFixture?.need && (
+                <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, maxWidth: '200px' }}>
+                  <input 
+                    type="text" 
+                    className="form-input edit-active compact" 
+                    placeholder="治具名稱" 
+                    value={data.basicInfo.tooling?.otherFixture?.name || ''}
+                    onChange={(e) => handleToolingChange('otherFixture', 'name', e.target.value)}
+                    disabled={isFieldDisabled('basicInfo.tooling.otherFixture.name')}
+                    style={{ flex: 2, padding: '4px 6px', fontSize: '0.8rem' }}
+                  />
+                  <input 
+                    type="text" 
+                    className="form-input edit-active compact" 
+                    placeholder="數量" 
+                    value={data.basicInfo.tooling?.otherFixture?.qty || ''}
+                    onChange={(e) => handleToolingChange('otherFixture', 'qty', e.target.value)}
+                    disabled={isFieldDisabled('basicInfo.tooling.otherFixture.qty')}
+                    style={{ flex: 1, padding: '4px 6px', fontSize: '0.8rem' }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           <div className="action-row">
@@ -940,10 +1041,10 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
         </div>
       )}
 
-      {/* 分頁 2: 製程管制與前置作業 */}
+      {/* 分頁 2: 製程管制 */}
       {activeSection === 'processControl' && (
         <div className="section-form animate-fade-in">
-          <h2 className="section-title">B. 製程管制與前置作業</h2>
+          <h2 className="section-title">製程管制</h2>
           <p className="section-subtitle">請回填樣品提供狀態、烘烤確認、焊接順序及測溫點等關鍵生產防呆項目。</p>
 
           {/* 樣品提供與烘烤 */}
@@ -1088,187 +1189,156 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
 
           <div className="divider"></div>
 
-          {/* SMT 首件與焊接順序 */}
+          {/* SMT 與 DIP 首件/焊接順序併排（2 欄 Grid） */}
           <div className="form-row-grid">
-            <div className={`form-group required-highlight ${getFieldHighlightClass('smtFirstPiece')}`}>
+            {/* 左側：SMT 製程管制 */}
+            <div className={`form-group required-highlight ${getFieldHighlightClass('smtFirstPiece')}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
               <label className="form-label">
                 SMT 首件檢查項目 <span className="req">*</span>
-                {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(此機種無 SMT 加工，不適用)</span>}
+                {!data.basicInfo.processItems?.smt && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(不適用)</span>}
               </label>
-              <div className={`checkbox-flex ${!data.basicInfo.processItems?.smt ? 'readonly-flex' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px 18px' }}>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.polarity || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, polarity: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.polarity') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>極性方向檢查</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.measureLcr || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, measureLcr: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.measureLcr') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>量測 LCR (電容/電阻/電感)</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.spi || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, spi: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.spi') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>SPI 錫膏厚度測試</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.steelTension || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, steelTension: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.steelTension') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>鋼板張力量測</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.pcbReflow || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, pcbReflow: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.pcbReflow') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>PCB外觀檢查(reflow)</span>
-                  </label>
-                  <label className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.processControl?.smtFirstPiece?.solderability || false}
-                      onChange={(e) => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, solderability: e.target.checked })}
-                      disabled={isFieldDisabled('processControl.smtFirstPiece.solderability') || !data.basicInfo.processItems?.smt}
-                    />
-                    <span>濕潤性檢查 (試錫板)</span>
-                  </label>
+              <div className={`checkbox-flex ${!data.basicInfo.processItems?.smt ? 'readonly-flex' : ''}`} style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 12px' }}>
+                  {[
+                    ['polarity', '極性方向檢查'],
+                    ['measureLcr', '量測 LCR'],
+                    ['spi', 'SPI 錫膏厚度'],
+                    ['steelTension', '鋼板張力量測'],
+                    ['pcbReflow', 'PCB外觀檢查'],
+                    ['solderability', '濕潤性檢查']
+                  ].map(([key, label]) => (
+                    <label key={key} className="checkbox-label" style={{ fontSize: '0.85rem' }}>
+                      <input 
+                        type="checkbox" 
+                        checked={data.processControl?.smtFirstPiece?.[key] || false}
+                        onChange={(e) => {
+                          const smtObj = { ...(data.processControl?.smtFirstPiece || {}), [key]: e.target.checked };
+                          handleProcessChange('smtFirstPiece', smtObj);
+                        }}
+                        disabled={isFieldDisabled(`processControl.smtFirstPiece.${key}`) || !data.basicInfo.processItems?.smt}
+                      />
+                      <span>{label}</span>
+                    </label>
+                  ))}
                 </div>
                 
-                {/* LED 點亮測試，排在下方 */}
-                <div className={getFieldHighlightClass('ledTest')} style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid rgba(255,255,255,0.05)', display: 'flex', alignItems: 'center', gap: '16px', borderRadius: '4px', padding: '4px 8px' }}>
-                  <span style={{ fontSize: '0.85rem', color: '#94a3b8', fontWeight: 550 }}>LED 點亮測試 <span className="req">*</span>:</span>
-                  <div className="radio-group" style={{ display: 'inline-flex', gap: '16px' }}>
-                    <label className="radio-label">
+                {/* LED 點亮測試 */}
+                <div className={getFieldHighlightClass('ledTest')} style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '4px' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 550, whiteSpace: 'nowrap' }}>LED點亮測試:</span>
+                  <div className="radio-group" style={{ display: 'inline-flex', gap: '10px' }}>
+                    <label className="radio-label" style={{ fontSize: '0.8rem' }}>
                       <input 
                         type="radio" 
                         name="ledTest"
                         checked={data.processControl?.smtFirstPiece?.ledTest === 'yes'}
-                        onChange={() => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, ledTest: 'yes' })}
+                        onChange={() => handleProcessChange('smtFirstPiece', { ...(data.processControl?.smtFirstPiece || {}), ledTest: 'yes' })}
                         disabled={isFieldDisabled('processControl.smtFirstPiece.ledTest') || !data.basicInfo.processItems?.smt}
                       />
                       <span>有</span>
                     </label>
-                    <label className="radio-label">
+                    <label className="radio-label" style={{ fontSize: '0.8rem' }}>
                       <input 
                         type="radio" 
                         name="ledTest"
                         checked={data.processControl?.smtFirstPiece?.ledTest === 'no'}
-                        onChange={() => handleProcessChange('smtFirstPiece', { ...data.processControl.smtFirstPiece, ledTest: 'no' })}
+                        onChange={() => handleProcessChange('smtFirstPiece', { ...(data.processControl?.smtFirstPiece || {}), ledTest: 'no' })}
                         disabled={isFieldDisabled('processControl.smtFirstPiece.ledTest') || !data.basicInfo.processItems?.smt}
                       />
-                      <span>無 (不適用)</span>
+                      <span>無</span>
                     </label>
                   </div>
                 </div>
               </div>
+
+              {/* SMT 焊接順序 */}
+              <div className={`form-group required-highlight ${getFieldHighlightClass('smtOrder')}`} style={{ marginTop: '12px', marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.8rem' }}>SMT 焊接順序 <span className="req">*</span></label>
+                <div className="radio-group" style={{ padding: '2px 0' }}>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="smtOrder" 
+                      checked={data.processControl?.smtOrder?.bToT || false}
+                      onChange={() => handleProcessChange('smtOrder', { bToT: true, tToB: false })}
+                      disabled={isFieldDisabled('processControl.smtOrder.bToT') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>先焊底面 (B→T)</span>
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="smtOrder" 
+                      checked={data.processControl?.smtOrder?.tToB || false}
+                      onChange={() => handleProcessChange('smtOrder', { bToT: false, tToB: true })}
+                      disabled={isFieldDisabled('processControl.smtOrder.tToB') || !data.basicInfo.processItems?.smt}
+                    />
+                    <span>先焊頂面 (T→B)</span>
+                  </label>
+                </div>
+              </div>
             </div>
 
-            <div className={`form-group required-highlight ${getFieldHighlightClass('smtOrder')}`}>
-              <label className="form-label">SMT 焊接順序 <span className="req">*</span></label>
-              <div className="radio-group">
-                <label className="radio-label">
+            {/* 右側：DIP 製程管制 */}
+            <div className="form-group" style={{ display: 'flex', flexDirection: 'column', gap: '8px', margin: 0 }}>
+              <label className="form-label">
+                DIP 首件檢查項目 <span className="req">*</span>
+                {!data.basicInfo.processItems?.dip && <span style={{ marginLeft: '8px', color: '#6b7280', fontSize: '0.82rem' }}>(不適用)</span>}
+              </label>
+              <div className={`checkbox-flex ${!data.basicInfo.processItems?.dip ? 'readonly-flex' : ''}`} style={{ padding: '12px', flex: 1, display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                <label className="checkbox-label" style={{ fontSize: '0.85rem' }}>
                   <input 
-                    type="radio" 
-                    name="smtOrder" 
-                    checked={data.processControl?.smtOrder?.bToT || false}
-                    onChange={() => handleProcessChange('smtOrder', { bToT: true, tToB: false })}
-                    disabled={isFieldDisabled('processControl.smtOrder.bToT')}
+                    type="checkbox" 
+                    checked={data.processControl?.dipFirstPiece?.cutLead || false}
+                    onChange={(e) => handleProcessChange('dipFirstPiece', { ...(data.processControl?.dipFirstPiece || {}), cutLead: e.target.checked })}
+                    disabled={isFieldDisabled('processControl.dipFirstPiece.cutLead') || !data.basicInfo.processItems?.dip}
                   />
-                  <span>先焊底面 (B→T)</span>
+                  <span>剪腳前置作業 (切腳、折腳、預成型)</span>
                 </label>
-                <label className="radio-label">
+                
+                {/* DIP 注意事項 */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
+                  <span style={{ fontSize: '0.78rem', color: '#94a3b8', fontWeight: 550 }}>DIP 注意事項 (限 50 字):</span>
                   <input 
-                    type="radio" 
-                    name="smtOrder" 
-                    checked={data.processControl?.smtOrder?.tToB || false}
-                    onChange={() => handleProcessChange('smtOrder', { bToT: false, tToB: true })}
-                    disabled={isFieldDisabled('processControl.smtOrder.tToB')}
+                    type="text" 
+                    className="form-input edit-active compact" 
+                    placeholder={data.basicInfo.processItems?.dip ? "請輸入 DIP 注意事項..." : "不適用"}
+                    maxLength={50}
+                    value={data.processControl?.dipFirstPiece?.memo || ''}
+                    onChange={(e) => handleProcessChange('dipFirstPiece', { ...(data.processControl?.dipFirstPiece || {}), memo: e.target.value })}
+                    disabled={isFieldDisabled('processControl.dipFirstPiece.memo') || !data.basicInfo.processItems?.dip}
+                    style={{ padding: '4px 8px', fontSize: '0.82rem' }}
                   />
-                  <span>先焊頂面 (T→B)</span>
-                </label>
+                </div>
+              </div>
+
+              {/* DIP 焊接順序 */}
+              <div className={`form-group required-highlight ${getFieldHighlightClass('dipOrder')}`} style={{ marginTop: '12px', marginBottom: 0 }}>
+                <label className="form-label" style={{ fontSize: '0.8rem' }}>DIP 焊接順序 <span className="req">*</span></label>
+                <div className="radio-group" style={{ padding: '2px 0' }}>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="dipOrder" 
+                      checked={data.processControl?.dipOrder?.bToT || false}
+                      onChange={() => handleProcessChange('dipOrder', { bToT: true, tToB: false })}
+                      disabled={isFieldDisabled('processControl.dipOrder.bToT') || !data.basicInfo.processItems?.dip}
+                    />
+                    <span>先焊底面 (B→T)</span>
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="dipOrder" 
+                      checked={data.processControl?.dipOrder?.tToB || false}
+                      onChange={() => handleProcessChange('dipOrder', { bToT: false, tToB: true })}
+                      disabled={isFieldDisabled('processControl.dipOrder.tToB') || !data.basicInfo.processItems?.dip}
+                    />
+                    <span>先焊頂面 (T→B)</span>
+                  </label>
+                </div>
               </div>
             </div>
           </div>
-
-          {/* DIP 首件與注意事項 */}
-          {data.basicInfo.processItems.dip && (
-            <div style={{ marginTop: '16px', display: 'flex', flexDirection: 'column', gap: '12px' }}>
-              <div className="form-row-grid">
-                <div className={`form-group required-highlight ${getFieldHighlightClass('dipFirstPiece')}`}>
-                  <label className="form-label">DIP 首件檢查項目 <span className="req">*</span></label>
-                  <div className="checkbox-flex">
-                    <label className="checkbox-label">
-                      <input 
-                        type="checkbox" 
-                        checked={data.processControl?.dipFirstPiece?.cutLead || false}
-                        onChange={(e) => handleProcessChange('dipFirstPiece', { ...data.processControl.dipFirstPiece, cutLead: e.target.checked })}
-                        disabled={isFieldDisabled('processControl.dipFirstPiece.cutLead')}
-                      />
-                      <span>剪腳前置作業</span>
-                    </label>
-                  </div>
-                </div>
-
-                <div className={`form-group required-highlight ${getFieldHighlightClass('dipOrder')}`}>
-                  <label className="form-label">DIP 焊接順序 <span className="req">*</span></label>
-                  <div className="radio-group">
-                    <label className="radio-label">
-                      <input 
-                        type="radio" 
-                        name="dipOrder" 
-                        checked={data.processControl?.dipOrder?.bToT || false}
-                        onChange={() => handleProcessChange('dipOrder', { bToT: true, tToB: false })}
-                        disabled={isFieldDisabled('processControl.dipOrder.bToT')}
-                      />
-                      <span>先焊底面 (B→T)</span>
-                    </label>
-                    <label className="radio-label">
-                      <input 
-                        type="radio" 
-                        name="dipOrder" 
-                        checked={data.processControl?.dipOrder?.tToB || false}
-                        onChange={() => handleProcessChange('dipOrder', { bToT: false, tToB: true })}
-                        disabled={isFieldDisabled('processControl.dipOrder.tToB')}
-                      />
-                      <span>先焊頂面 (T→B)</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">DIP 注意事項 (限 50 字)</label>
-                <input 
-                  type="text" 
-                  className="form-input edit-active" 
-                  placeholder="請輸入 DIP 注意事項 (50 字內)..."
-                  maxLength={50}
-                  value={data.processControl?.dipFirstPiece?.memo || ''}
-                  onChange={(e) => handleProcessChange('dipFirstPiece', { ...data.processControl.dipFirstPiece, memo: e.target.value })}
-                  disabled={isFieldDisabled('processControl.dipFirstPiece.memo')}
-                />
-              </div>
-            </div>
-          )}
 
           <div className="divider"></div>
 
@@ -1457,7 +1527,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
       {/* 分頁 3: 試產報告要求 */}
       {activeSection === 'trialReport' && (
         <div className={`section-form animate-fade-in ${getFieldHighlightClass('trialReport')}`}>
-          <h2 className="section-title">C. 試產報告與對齊確認</h2>
+          <h2 className="section-title">試產要求</h2>
 
           {/* 報告清單與完成日期確認 */}
           <h3 className="sub-section-title">📂 試產交付文件、檢驗紀錄與照片清單</h3>
@@ -1466,76 +1536,82 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           {/* A. 印刷品質 */}
           <div className="record-list-section">
             <h4 className="list-group-title">🖨️ A. 印刷品質 / 迴焊紀錄</h4>
-            {data.trialReport?.printRecords?.map((rec, idx) => (
-              <div key={rec.id} className="record-row edit-active">
-                <label className="checkbox-label flex-1">
-                  <input 
-                    type="checkbox" 
-                    checked={rec.checked || false}
-                    onChange={(e) => handleRecordChange('printRecords', idx, 'checked', e.target.checked)}
-                    disabled={isFieldDisabled(`trialReport.printRecords.${idx}.checked`)}
-                  />
-                  <span className="record-name">{rec.name}</span>
-                </label>
-              </div>
-            ))}
+            <div className="records-grid">
+              {data.trialReport?.printRecords?.map((rec, idx) => (
+                <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
+                  <label className="checkbox-label flex-1">
+                    <input 
+                      type="checkbox" 
+                      checked={rec.checked || false}
+                      onChange={(e) => handleRecordChange('printRecords', idx, 'checked', e.target.checked)}
+                      disabled={isFieldDisabled(`trialReport.printRecords.${idx}.checked`)}
+                    />
+                    <span className="record-name">{rec.name}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* B. 檢驗紀錄 */}
           <div className="record-list-section">
             <h4 className="list-group-title">🔍 B. 檢驗紀錄</h4>
-            {data.trialReport?.inspectRecords?.map((rec, idx) => (
-              <div key={rec.id} className="record-row edit-active">
-                <label className="checkbox-label flex-1">
-                  <input 
-                    type="checkbox" 
-                    checked={rec.checked || false}
-                    onChange={(e) => handleRecordChange('inspectRecords', idx, 'checked', e.target.checked)}
-                    disabled={isFieldDisabled(`trialReport.inspectRecords.${idx}.checked`)}
-                  />
-                  <span className="record-name">{rec.name}</span>
-                </label>
-              </div>
-            ))}
+            <div className="records-grid">
+              {data.trialReport?.inspectRecords?.map((rec, idx) => (
+                <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
+                  <label className="checkbox-label flex-1">
+                    <input 
+                      type="checkbox" 
+                      checked={rec.checked || false}
+                      onChange={(e) => handleRecordChange('inspectRecords', idx, 'checked', e.target.checked)}
+                      disabled={isFieldDisabled(`trialReport.inspectRecords.${idx}.checked`)}
+                    />
+                    <span className="record-name">{rec.name}</span>
+                  </label>
+                </div>
+              ))}
+            </div>
           </div>
 
           {/* D. 照片提供 */}
           <div className="record-list-section">
             <h4 className="list-group-title">📸 D. 照片提供</h4>
-            {data.trialReport?.photoRecords?.map((rec, idx) => (
-              <div key={rec.id} className="record-row edit-active" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start' }}>
-                <label className="checkbox-label flex-1" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <input 
-                    type="checkbox" 
-                    checked={rec.checked || false}
-                    onChange={(e) => handleRecordChange('photoRecords', idx, 'checked', e.target.checked)}
-                    disabled={isFieldDisabled(`trialReport.photoRecords.${idx}.checked`)}
-                  />
-                  <span className="record-name">
-                    {rec.isXray ? String(rec.name).split(/指定零件/)[0] + '指定零件:' : rec.name}
-                  </span>
-                </label>
+            <div className="records-grid">
+              {data.trialReport?.photoRecords?.map((rec, idx) => (
+                <div key={rec.id} className="record-row edit-active" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', margin: 0 }}>
+                  <label className="checkbox-label flex-1" style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
+                    <input 
+                      type="checkbox" 
+                      checked={rec.checked || false}
+                      onChange={(e) => handleRecordChange('photoRecords', idx, 'checked', e.target.checked)}
+                      disabled={isFieldDisabled(`trialReport.photoRecords.${idx}.checked`)}
+                    />
+                    <span className="record-name">
+                      {rec.isXray ? String(rec.name).split(/指定零件/)[0] + '指定零件:' : rec.name}
+                    </span>
+                  </label>
 
-                {rec.isXray && (
-                  <div className="xray-parts-inputs animate-fade-in" style={{ display: 'flex', gap: '8px', marginLeft: '28px', flexWrap: 'wrap', alignItems: 'center' }}>
-                    {[0, 1, 2, 3].map((pIdx) => (
-                      <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                        <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{pIdx + 1}:</span>
-                        <input 
-                          type="text" 
-                          className="form-input edit-active compact" 
-                          placeholder={`例如: U${pIdx + 1}`}
-                          value={rec.parts?.[pIdx] || ''}
-                          onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
-                          disabled={isFieldDisabled(`trialReport.photoRecords.xray.parts.${pIdx}`)}
-                          style={{ width: '80px', padding: '2px 6px', fontSize: '0.85rem' }}
-                        />
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
+                  {rec.isXray && (
+                    <div className="xray-parts-inputs animate-fade-in" style={{ display: 'flex', gap: '8px', marginLeft: '24px', flexWrap: 'wrap', alignItems: 'center' }}>
+                      {[0, 1, 2, 3].map((pIdx) => (
+                        <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          <span style={{ fontSize: '0.8rem', color: '#9ca3af' }}>{pIdx + 1}:</span>
+                          <input 
+                            type="text" 
+                            className="form-input edit-active compact" 
+                            placeholder={`U${pIdx + 1}`}
+                            value={rec.parts?.[pIdx] || ''}
+                            onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
+                            disabled={isFieldDisabled(`trialReport.photoRecords.xray.parts.${pIdx}`)}
+                            style={{ width: '70px', padding: '2px 4px', fontSize: '0.8rem' }}
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
 
           <div className="action-row">
@@ -1546,10 +1622,10 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
         </div>
       )}
 
-      {/* 分頁 5: 工程文件一覽表 */}
+      {/* 分頁 5: 工程文件 */}
       {activeSection === 'documents' && (
         <div className="section-form animate-fade-in">
-          <h2 className="section-title">E. 工程文件一覽表</h2>
+          <h2 className="section-title">工程文件</h2>
           <p className="section-subtitle">請確認以下 12 項關鍵工程文件之對齊勾選狀態，這將會雙向同步寫入 Excel 報表中。</p>
 
           <div className="documents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
@@ -1569,8 +1645,8 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
             ].map(([key, label, desc]) => {
               const checked = data.basicInfo.documents?.[key] || false;
               return (
-                <div key={key} className={`document-card glass-card ${checked ? 'checked-active' : ''}`} style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '8px', transition: 'all 0.25s' }}>
-                  <label className="checkbox-label" style={{ margin: 0, display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer' }}>
+                <div key={key} className={`document-card glass-card ${checked ? 'checked-active' : ''}`} style={{ padding: '16px', display: 'flex', gap: '12px', alignItems: 'flex-start', transition: 'all 0.25s' }}>
+                  <label className="checkbox-label" style={{ margin: 0, display: 'flex', gap: '10px', alignItems: 'flex-start', cursor: 'pointer', flex: 1 }}>
                     <input 
                       type="checkbox" 
                       checked={checked} 
@@ -1590,9 +1666,12 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                         });
                       }}
                       disabled={isFieldDisabled(`basicInfo.documents.${key}`)}
-                      style={{ marginTop: '3px' }}
+                      style={{ marginTop: '12px' }}
                     />
-                    <div>
+                    <div className="doc-icon-container">
+                      {getDocumentIcon(key)}
+                    </div>
+                    <div style={{ flex: 1 }}>
                       <span className="doc-label" style={{ fontWeight: 600, fontSize: '0.95rem' }}>{label}</span>
                       <p className="doc-desc" style={{ fontSize: '0.78rem', color: '#94a3b8', marginTop: '4px', lineHeight: 1.4 }}>{desc}</p>
                     </div>

@@ -329,22 +329,22 @@
 [data-theme="light"] .welcome-intro h2,
 [data-theme="light"] .success-card h2,
 [data-theme="light"] .user-name {
-  color: #1f2937;
+  color: #000000;
 }
 
 [data-theme="light"] .logo-subtitle,
 [data-theme="light"] .welcome-intro p,
 [data-theme="light"] .user-role-desc,
 [data-theme="light"] .success-card p {
-  color: #4b5563;
+  color: #111111;
 }
 
 [data-theme="light"] .tab-btn {
-  color: #4b5563;
+  color: #111111;
 }
 
 [data-theme="light"] .tab-btn:hover {
-  color: #1f2937;
+  color: #000000;
   background: rgba(0, 0, 0, 0.04);
 }
 
@@ -356,5 +356,52 @@
 [data-theme="light"] .user-profile-badge {
   background: rgba(0, 0, 0, 0.02);
   border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+/* SQE 負責人 Badge */
+.sqe-profile-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.05);
+  border: 1px solid rgba(99, 102, 241, 0.2);
+  border-radius: 8px;
+  transition: all 0.25s ease;
+}
+
+.sqe-avatar {
+  font-size: 1.15rem;
+}
+
+.sqe-info-text {
+  display: flex;
+  flex-direction: column;
+}
+
+.sqe-label {
+  font-size: 0.68rem;
+  color: #818cf8;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+
+.sqe-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+[data-theme="light"] .sqe-profile-badge {
+  background: rgba(79, 70, 229, 0.05);
+  border-color: rgba(79, 70, 229, 0.25);
+}
+
+[data-theme="light"] .sqe-label {
+  color: #4f46e5;
+}
+
+[data-theme="light"] .sqe-name {
+  color: #000000;
 }
 

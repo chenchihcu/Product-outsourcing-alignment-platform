@@ -436,15 +436,35 @@ export default function App() {
       <div className="app-container">
       {/* 頂部 Header */}
       <header className="app-header glass-card">
-        <div className="header-logo">
-          <span className="logo-icon">📊</span>
+        <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <svg className="logo-svg" viewBox="0 0 100 100" style={{ width: '40px', height: '40px', fill: 'none', stroke: 'url(#logoGradient)', strokeWidth: '5' }}>
+            <defs>
+              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                <stop offset="0%" stopColor="#6366f1" />
+                <stop offset="100%" stopColor="#a855f7" />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="42" strokeWidth="4" strokeDasharray="6 6" />
+            <circle cx="50" cy="50" r="34" strokeWidth="2" opacity="0.6" />
+            <path d="M28 65 V35 L50 55 L72 35 V65" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M50 20 V32 M50 68 V80 M20 50 H32 M68 50 H80" strokeWidth="4" strokeLinecap="round" />
+          </svg>
           <div className="logo-text">
-            <h1 className="logo-title">新機種委外加工對齊系統</h1>
-            <p className="logo-subtitle">雙向資訊同步與製程防呆管制平台</p>
+            <h1 className="logo-title" style={{ fontSize: '1.35rem', fontWeight: '750' }}>產品委外加工資訊系統</h1>
+            <p className="logo-subtitle">醫電鼎眾 Mitcorp | 雙向資訊同步與製程防呆管制平台</p>
           </div>
         </div>
 
-        <div className="header-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div className="header-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+          {/* 網頁負責人資訊 */}
+          <div className="sqe-profile-badge" title="網頁負責人: SQE 陳智富">
+            <span className="sqe-avatar">🛠️</span>
+            <div className="sqe-info-text">
+              <span className="sqe-label">網頁負責人</span>
+              <span className="sqe-name">SQE 陳智富</span>
+            </div>
+          </div>
+
           {/* 主題切換按鈕 */}
           <button 
             className="theme-toggle-btn"
@@ -466,7 +486,7 @@ export default function App() {
               transition: 'all 0.25s ease'
             }}
           >
-            {theme === 'dark' ? '☀️ 淺色模式' : '🌙 深色模式'}
+            {theme === 'dark' ? '☀️ 淺色' : '🌙 深色'}
           </button>
 
           {/* 使用者資訊 */}
@@ -483,12 +503,12 @@ export default function App() {
 
           {currentProjectId && (
             <div className="header-file-info animate-fade-in">
-              <div className="file-badge">
+              <div className="file-badge" style={{ padding: '4px 8px' }}>
                 <span className="file-badge-icon">📄</span>
-                <span className="file-name-text" title={fileName}>{fileName}</span>
+                <span className="file-name-text" title={fileName} style={{ maxWidth: '140px' }}>{fileName}</span>
               </div>
               <button className="btn btn-secondary compact-btn" onClick={handleBackToList}>
-                📁 回機種列表
+                📁 回列表
               </button>
             </div>
           )}
@@ -526,15 +546,15 @@ export default function App() {
                 onClick={() => setActiveTab('basicInfo')}
               >
                 <span className="tab-icon">📋</span>
-                <span className="tab-label">A. 產品基本資料</span>
+                <span className="tab-label">基本資料</span>
               </button>
-
+              
               <button 
                 className={`tab-btn ${activeTab === 'processControl' ? 'active' : ''}`}
                 onClick={() => setActiveTab('processControl')}
               >
                 <span className="tab-icon">🔰</span>
-                <span className="tab-label">B. 製程管制/前置作業</span>
+                <span className="tab-label">製程管制</span>
               </button>
 
               <button 
@@ -542,7 +562,7 @@ export default function App() {
                 onClick={() => setActiveTab('trialReport')}
               >
                 <span className="tab-icon">🎯</span>
-                <span className="tab-label">C. 試產報告要求</span>
+                <span className="tab-label">試產要求</span>
               </button>
 
               <button 
@@ -550,7 +570,7 @@ export default function App() {
                 onClick={() => setActiveTab('documents')}
               >
                 <span className="tab-icon">📂</span>
-                <span className="tab-label">E. 工程文件</span>
+                <span className="tab-label">工程文件</span>
               </button>
 
               <button 
@@ -558,7 +578,7 @@ export default function App() {
                 onClick={() => setActiveTab('signOff')}
               >
                 <span className="tab-icon">✍️</span>
-                <span className="tab-label">D. 線上簽章匯出</span>
+                <span className="tab-label">簽章匯出</span>
               </button>
 
               <div className="tab-nav-divider"></div>
@@ -601,7 +621,7 @@ export default function App() {
 
       {/* 頁尾 */}
       <footer className="app-footer">
-        <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
+        <p>© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富</p>
         <p className="footer-meta">Vite + React Premium 製程管制平台</p>
       </footer>
       </div>
