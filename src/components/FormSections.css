@@ -19,6 +19,38 @@
   margin-bottom: 2rem;
 }
 
+/* Card Design System */
+.form-section-card {
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
+  transition: all 0.3s ease;
+}
+
+.form-section-card:hover {
+  border-color: rgba(99, 102, 241, 0.3);
+  box-shadow: 0 8px 32px 0 rgba(99, 102, 241, 0.08);
+}
+
+.form-section-card .card-title {
+  font-family: 'Outfit', sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #f3f4f6;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 0;
+}
+
 .sub-section-title {
   font-family: 'Outfit', sans-serif;
   font-size: 1.1rem;
@@ -32,7 +64,7 @@
   margin-bottom: 1rem;
 }
 
-.form-row-grid {
+.form-row-grid, .form-row-grid-2 {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 1.5rem;
@@ -65,9 +97,27 @@
   gap: 0.75rem;
 }
 
+/* Tablet Responsive Breakpoint */
+@media (min-width: 768px) and (max-width: 1024px) {
+  .form-row-grid-3 {
+    grid-template-columns: 1fr 1fr;
+  }
+  .form-row-grid-4 {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .tooling-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Mobile Responsive Breakpoint */
 @media (max-width: 768px) {
-  .form-row-grid, .form-row-grid-3, .form-row-grid-4, .tooling-grid, .records-grid {
+  .form-row-grid, .form-row-grid-2, .form-row-grid-3, .form-row-grid-4, .tooling-grid, .records-grid {
     grid-template-columns: 1fr !important;
+  }
+  
+  .form-section-card {
+    padding: 1rem;
   }
 }
 
@@ -453,8 +503,23 @@ input:checked + .slider:before {
 [data-theme="light"] .section-title,
 [data-theme="light"] .sub-section-title,
 [data-theme="light"] .tool-name,
-[data-theme="light"] .doc-label {
+[data-theme="light"] .doc-label,
+[data-theme="light"] .form-section-card .card-title {
   color: #000000;
+}
+
+[data-theme="light"] .form-section-card {
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
+}
+
+[data-theme="light"] .form-section-card .card-title {
+  border-bottom-color: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme="light"] .form-section-card:hover {
+  border-color: rgba(99, 102, 241, 0.4);
 }
 
 [data-theme="light"] .section-title {

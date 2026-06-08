@@ -344,398 +344,411 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           <h2 className="section-title">基本資料</h2>
           <p className="section-subtitle">請核對發包方資訊，並請加工廠確實填寫工廠區及治工具資訊。</p>
 
-          <div className="form-row-grid-3">
-            <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
-              <label className="form-label">委外加工廠 <span className="req">*</span></label>
-              <select 
-                className="form-input edit-active" 
-                value={data.basicInfo.factory || ''} 
-                onChange={(e) => handleBasicChange('factory', e.target.value)}
-                disabled={isFieldDisabled('basicInfo.factory')}
-              >
-                <option value="">-- 請選擇委外加工廠 --</option>
-                {(() => {
-                  const currentFac = data.basicInfo.factory;
-                  const list = [...factories];
-                  if (currentFac && !list.includes(currentFac)) {
-                    list.unshift(currentFac);
-                  }
-                  return list.map(fac => (
-                    <option key={fac} value={fac}>{fac}</option>
-                  ));
-                })()}
-              </select>
-            </div>
-            <div className={`form-group ${getFieldHighlightClass('productNo')}`}>
-              <label className="form-label">產品料號</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="請輸入產品料號"
-                value={data.basicInfo.productNo || ''} 
-                onChange={(e) => handleBasicChange('productNo', e.target.value)}
-                disabled={isFieldDisabled('basicInfo.productNo')}
-              />
-            </div>
-            <div className={`form-group ${getFieldHighlightClass('productDesc')}`}>
-              <label className="form-label">產品名稱 / 描述</label>
-              <input 
-                type="text" 
-                className="form-input edit-active" 
-                placeholder="請輸入產品名稱 / 描述"
-                value={data.basicInfo.productDesc || ''} 
-                onChange={(e) => handleBasicChange('productDesc', e.target.value)}
-                disabled={isFieldDisabled('basicInfo.productDesc')}
-              />
-            </div>
-          </div>
-
-          {/* 產品階段、產品類別與 PCBA 類型併排為 3 欄 */}
-          <div className="form-row-grid-3">
-            <div className={`form-group ${getFieldHighlightClass('stage')}`}>
-              <label className="form-label">產品階段</label>
-              <div className="checkbox-flex">
-                {Object.keys(data.basicInfo.stage || {}).map(k => (
-                  <label key={k} className="checkbox-label">
-                    <input 
-                      type="checkbox" 
-                      checked={data.basicInfo.stage[k] || false} 
-                      onChange={(e) => handleStageChange(k, e.target.checked)}
-                      disabled={isFieldDisabled(`stage.${k}`)}
-                    />
-                    <span>{k === 'politRun' ? 'Pilot-run' : k.toUpperCase()}</span>
-                  </label>
-                ))}
+          {/* 卡片 1: 機種基本資訊 */}
+          <div className="form-section-card glass-card">
+            <h3 className="card-title">📄 機種基本資訊</h3>
+            <div className="form-row-grid-3">
+              <div className={`form-group required-highlight ${getFieldHighlightClass('factory')}`}>
+                <label className="form-label">委外加工廠 <span className="req">*</span></label>
+                <select 
+                  className="form-input edit-active" 
+                  value={data.basicInfo.factory || ''} 
+                  onChange={(e) => handleBasicChange('factory', e.target.value)}
+                  disabled={isFieldDisabled('basicInfo.factory')}
+                >
+                  <option value="">-- 請選擇委外加工廠 --</option>
+                  {(() => {
+                    const currentFac = data.basicInfo.factory;
+                    const list = [...factories];
+                    if (currentFac && !list.includes(currentFac)) {
+                      list.unshift(currentFac);
+                    }
+                    return list.map(fac => (
+                      <option key={fac} value={fac}>{fac}</option>
+                    ));
+                  })()}
+                </select>
               </div>
-            </div>
-            <div className={`form-group ${getFieldHighlightClass('category')}`}>
-              <label className="form-label">產品類別</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.category?.general || false} 
-                    onChange={(e) => {
-                      const category = { ...(data.basicInfo.category || {}), general: e.target.checked };
-                      handleBasicChange('category', category);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.category.general')}
-                  />
-                  <span>一般</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.category?.medical || false} 
-                    onChange={(e) => {
-                      const category = { ...(data.basicInfo.category || {}), medical: e.target.checked };
-                      handleBasicChange('category', category);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.category.medical')}
-                  />
-                  <span>醫療</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">PCBA 類型</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.pcbaType?.single || false} 
-                    onChange={(e) => {
-                      const pt = { ...(data.basicInfo.pcbaType || {}), single: e.target.checked };
-                      handleBasicChange('pcbaType', pt);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.pcbaType.single')}
-                  />
-                  <span>單面板</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.pcbaType?.double || false} 
-                    onChange={(e) => {
-                      const pt = { ...(data.basicInfo.pcbaType || {}), double: e.target.checked };
-                      handleBasicChange('pcbaType', pt);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.pcbaType.double')}
-                  />
-                  <span>雙面板</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 材質分類 */}
-          <div className="form-row-grid">
-            <div className="form-group">
-              <label className="form-label">材質分類</label>
-              <div className="checkbox-flex">
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="materialType"
-                    checked={data.basicInfo.materialType === 'pcb'} 
-                    onChange={() => handleBasicChange('materialType', 'pcb')}
-                    disabled={isFieldDisabled('basicInfo.materialType')}
-                  />
-                  <span>PCB硬板</span>
-                </label>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="materialType"
-                    checked={data.basicInfo.materialType === 'fpc'} 
-                    onChange={() => handleBasicChange('materialType', 'fpc')}
-                    disabled={isFieldDisabled('basicInfo.materialType')}
-                  />
-                  <span>FPC軟板</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 品質水準要求、IPC 驗收標準與 AOI 檢驗面併排為 3 欄 */}
-          <div className="form-row-grid-3">
-            <div className="form-group">
-              <label className="form-label">品質水準要求</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.qualityLevel?.class2 || false} 
-                    onChange={(e) => {
-                      const ql = { ...(data.basicInfo.qualityLevel || {}), class2: e.target.checked };
-                      handleBasicChange('qualityLevel', ql);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.qualityLevel.class2')}
-                  />
-                  <span>Class 2</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.qualityLevel?.class3 || false} 
-                    onChange={(e) => {
-                      const ql = { ...(data.basicInfo.qualityLevel || {}), class3: e.target.checked };
-                      handleBasicChange('qualityLevel', ql);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.qualityLevel.class3')}
-                  />
-                  <span>Class 3</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">IPC 驗收標準</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.ipcStandard?.ipcA610 || false} 
-                    onChange={(e) => {
-                      const ipc = { ...(data.basicInfo.ipcStandard || {}), ipcA610: e.target.checked };
-                      handleBasicChange('ipcStandard', ipc);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.ipcStandard.ipcA610')}
-                  />
-                  <span>IPC-A-610</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.ipcStandard?.jStd001 || false} 
-                    onChange={(e) => {
-                      const ipc = { ...(data.basicInfo.ipcStandard || {}), jStd001: e.target.checked };
-                      handleBasicChange('ipcStandard', ipc);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.ipcStandard.jStd001')}
-                  />
-                  <span>J-STD-001</span>
-                </label>
-              </div>
-            </div>
-            <div className={`form-group ${getFieldHighlightClass('aoi')}`}>
-              <label className="form-label">AOI 檢驗面</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.aoi?.top || false} 
-                    onChange={(e) => {
-                      const aoi = { ...(data.basicInfo.aoi || {}), top: e.target.checked };
-                      handleBasicChange('aoi', aoi);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.aoi.top')}
-                  />
-                  <span>Top (頂面)</span>
-                </label>
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.aoi?.bottom || false} 
-                    onChange={(e) => {
-                      const aoi = { ...(data.basicInfo.aoi || {}), bottom: e.target.checked };
-                      handleBasicChange('aoi', aoi);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.aoi.bottom')}
-                  />
-                  <span>Bottom (底面)</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          {/* 點膠工藝、QR Code 掃描需求與序號管控需求併排為 3 欄 */}
-          <div className="form-row-grid-3">
-            <div className="form-group">
-              <label className="form-label">點膠工藝</label>
-              <div className="checkbox-flex">
-                <label className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.glue || false} 
-                    onChange={(e) => handleBasicChange('glue', e.target.checked)}
-                    disabled={isFieldDisabled('basicInfo.glue')}
-                  />
-                  <span>需要點膠</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">QR Code 掃描需求</label>
-              <div className="radio-group" style={{ padding: '4px 0' }}>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="qrCodeScan" 
-                    checked={data.basicInfo.qrCode?.need || false} 
-                    onChange={() => {
-                      const qr = { need: true, noNeed: false };
-                      handleBasicChange('qrCode', qr);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.qrCode.need')}
-                  />
-                  <span>需要</span>
-                </label>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="qrCodeScan" 
-                    checked={data.basicInfo.qrCode?.noNeed || false} 
-                    onChange={() => {
-                      const qr = { need: false, noNeed: true };
-                      handleBasicChange('qrCode', qr);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.qrCode.noNeed')}
-                  />
-                  <span>不需要</span>
-                </label>
-              </div>
-            </div>
-            <div className="form-group">
-              <label className="form-label">序號管控需求</label>
-              <div className="radio-group" style={{ padding: '4px 0' }}>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="snControlReq" 
-                    checked={data.basicInfo.snControl?.need || false} 
-                    onChange={() => {
-                      const sn = { need: true, noNeed: false };
-                      handleBasicChange('snControl', sn);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.snControl.need')}
-                  />
-                  <span>需要</span>
-                </label>
-                <label className="radio-label">
-                  <input 
-                    type="radio" 
-                    name="snControlReq" 
-                    checked={data.basicInfo.snControl?.noNeed || false} 
-                    onChange={() => {
-                      const sn = { need: false, noNeed: true };
-                      handleBasicChange('snControl', sn);
-                    }}
-                    disabled={isFieldDisabled('basicInfo.snControl.noNeed')}
-                  />
-                  <span>不需要</span>
-                </label>
-              </div>
-            </div>
-          </div>
-
-          <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '12px' }}>
-            <label className="form-label">主要加工項目 <span className="req">*</span></label>
-            <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px', alignItems: 'center' }}>
-              {[
-                ['smt', 'SMT'],
-                ['dip', 'DIP'],
-                ['ict', 'In-Circuit Test'],
-                ['assembly', '組裝'],
-                ['coating', '三防膠塗覆'],
-                ['packing', '包裝'],
-                ['fct', 'FCT 功能測試'],
-                ['flyingProbe', '飛針測試'],
-                ['underfillGlue', 'Underfill 塗膠'],
-                ['semiFinishedTest', '半成品測試'],
-                ['finalTest', '成品測試']
-              ].map(([key, label]) => (
-                <label key={key} className="checkbox-label">
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.processItems?.[key] || false} 
-                    onChange={(e) => handleProcessItemsChange(key, e.target.checked)}
-                    disabled={isFieldDisabled(`basicInfo.processItems.${key}`)}
-                  />
-                  <span>{label}</span>
-                </label>
-              ))}
-
-              {/* 其他 (加入空白欄位, 讓使用者填寫) */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <label className="checkbox-label" style={{ margin: 0 }}>
-                  <input 
-                    type="checkbox" 
-                    checked={data.basicInfo.processItems?.otherProcess || false} 
-                    onChange={(e) => {
-                      handleProcessItemsChange('otherProcess', e.target.checked);
-                      if (!e.target.checked) {
-                        const updated = { ...data.basicInfo.processItems, otherProcess: false, otherProcessText: '' };
-                        onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
-                      }
-                    }}
-                    disabled={isFieldDisabled('basicInfo.processItems.otherProcess')}
-                  />
-                  <span>其他:</span>
-                </label>
+              <div className={`form-group ${getFieldHighlightClass('productNo')}`}>
+                <label className="form-label">產品料號</label>
                 <input 
                   type="text" 
-                  className="form-input edit-active compact" 
-                  placeholder="請說明其他加工項目"
-                  value={data.basicInfo.processItems?.otherProcessText || ''} 
-                  onChange={(e) => {
-                    const updated = { ...data.basicInfo.processItems, otherProcessText: e.target.value };
-                    onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
-                  }}
-                  disabled={!data.basicInfo.processItems?.otherProcess || isFieldDisabled('basicInfo.processItems.otherProcessText')}
-                  style={{ width: '160px', padding: '4px 8px', fontSize: '0.82rem' }}
+                  className="form-input edit-active" 
+                  placeholder="請輸入產品料號"
+                  value={data.basicInfo.productNo || ''} 
+                  onChange={(e) => handleBasicChange('productNo', e.target.value)}
+                  disabled={isFieldDisabled('basicInfo.productNo')}
+                />
+              </div>
+              <div className={`form-group ${getFieldHighlightClass('productDesc')}`}>
+                <label className="form-label">產品名稱 / 描述</label>
+                <input 
+                  type="text" 
+                  className="form-input edit-active" 
+                  placeholder="請輸入產品名稱 / 描述"
+                  value={data.basicInfo.productDesc || ''} 
+                  onChange={(e) => handleBasicChange('productDesc', e.target.value)}
+                  disabled={isFieldDisabled('basicInfo.productDesc')}
                 />
               </div>
             </div>
+
+            <div className="form-row-grid-2" style={{ marginTop: '16px' }}>
+              <div className={`form-group ${getFieldHighlightClass('stage')}`}>
+                <label className="form-label">產品階段</label>
+                <div className="checkbox-flex">
+                  {Object.keys(data.basicInfo.stage || {}).map(k => (
+                    <label key={k} className="checkbox-label">
+                      <input 
+                        type="checkbox" 
+                        checked={data.basicInfo.stage[k] || false} 
+                        onChange={(e) => handleStageChange(k, e.target.checked)}
+                        disabled={isFieldDisabled(`stage.${k}`)}
+                      />
+                      <span>{k === 'politRun' ? 'Pilot-run' : k.toUpperCase()}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+              <div className={`form-group ${getFieldHighlightClass('category')}`}>
+                <label className="form-label">產品類別</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.category?.general || false} 
+                      onChange={(e) => {
+                        const category = { ...(data.basicInfo.category || {}), general: e.target.checked };
+                        handleBasicChange('category', category);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.category.general')}
+                    />
+                    <span>一般</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.category?.medical || false} 
+                      onChange={(e) => {
+                        const category = { ...(data.basicInfo.category || {}), medical: e.target.checked };
+                        handleBasicChange('category', category);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.category.medical')}
+                    />
+                    <span>醫療</span>
+                  </label>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div className="divider"></div>
+          {/* 卡片 2: 電路板規格與材質屬性 */}
+          <div className="form-section-card glass-card">
+            <h3 className="card-title">📐 電路板規格與材質屬性</h3>
+            <div className="form-row-grid-3">
+              <div className="form-group">
+                <label className="form-label">材質分類</label>
+                <div className="checkbox-flex">
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="materialType"
+                      checked={data.basicInfo.materialType === 'pcb'} 
+                      onChange={() => handleBasicChange('materialType', 'pcb')}
+                      disabled={isFieldDisabled('basicInfo.materialType')}
+                    />
+                    <span>PCB硬板</span>
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="materialType"
+                      checked={data.basicInfo.materialType === 'fpc'} 
+                      onChange={() => handleBasicChange('materialType', 'fpc')}
+                      disabled={isFieldDisabled('basicInfo.materialType')}
+                    />
+                    <span>FPC軟板</span>
+                  </label>
+                </div>
+              </div>
 
-          {/* 鋼板與治工具一覽表 */}
-          <h3 className="sub-section-title">🔧 鋼板與治工具一覽表</h3>
+              <div className="form-group">
+                <label className="form-label">PCBA 類型</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.pcbaType?.single || false} 
+                      onChange={(e) => {
+                        const pt = { ...(data.basicInfo.pcbaType || {}), single: e.target.checked };
+                        handleBasicChange('pcbaType', pt);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.pcbaType.single')}
+                    />
+                    <span>單面板</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.pcbaType?.double || false} 
+                      onChange={(e) => {
+                        const pt = { ...(data.basicInfo.pcbaType || {}), double: e.target.checked };
+                        handleBasicChange('pcbaType', pt);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.pcbaType.double')}
+                    />
+                    <span>雙面板</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className={`form-group ${getFieldHighlightClass('aoi')}`}>
+                <label className="form-label">AOI 檢驗面</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.aoi?.top || false} 
+                      onChange={(e) => {
+                        const aoi = { ...(data.basicInfo.aoi || {}), top: e.target.checked };
+                        handleBasicChange('aoi', aoi);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.aoi.top')}
+                    />
+                    <span>Top (頂面)</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.aoi?.bottom || false} 
+                      onChange={(e) => {
+                        const aoi = { ...(data.basicInfo.aoi || {}), bottom: e.target.checked };
+                        handleBasicChange('aoi', aoi);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.aoi.bottom')}
+                    />
+                    <span>Bottom (底面)</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 卡片 3: 品質與驗收標準 */}
+          <div className="form-section-card glass-card">
+            <h3 className="card-title">🏅 品質與驗收標準</h3>
+            <div className="form-row-grid-2">
+              <div className="form-group">
+                <label className="form-label">品質水準要求</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.qualityLevel?.class2 || false} 
+                      onChange={(e) => {
+                        const ql = { ...(data.basicInfo.qualityLevel || {}), class2: e.target.checked };
+                        handleBasicChange('qualityLevel', ql);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.qualityLevel.class2')}
+                    />
+                    <span>Class 2</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.qualityLevel?.class3 || false} 
+                      onChange={(e) => {
+                        const ql = { ...(data.basicInfo.qualityLevel || {}), class3: e.target.checked };
+                        handleBasicChange('qualityLevel', ql);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.qualityLevel.class3')}
+                    />
+                    <span>Class 3</span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="form-group">
+                <label className="form-label">IPC 驗收標準</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.ipcStandard?.ipcA610 || false} 
+                      onChange={(e) => {
+                        const ipc = { ...(data.basicInfo.ipcStandard || {}), ipcA610: e.target.checked };
+                        handleBasicChange('ipcStandard', ipc);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.ipcStandard.ipcA610')}
+                    />
+                    <span>IPC-A-610</span>
+                  </label>
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.ipcStandard?.jStd001 || false} 
+                      onChange={(e) => {
+                        const ipc = { ...(data.basicInfo.ipcStandard || {}), jStd001: e.target.checked };
+                        handleBasicChange('ipcStandard', ipc);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.ipcStandard.jStd001')}
+                    />
+                    <span>J-STD-001</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 卡片 4: 加工製程與管制需求 */}
+          <div className="form-section-card glass-card">
+            <h3 className="card-title">⚙️ 加工製程與管制需求</h3>
+            <div className="form-row-grid-3">
+              <div className="form-group">
+                <label className="form-label">點膠工藝</label>
+                <div className="checkbox-flex">
+                  <label className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.glue || false} 
+                      onChange={(e) => handleBasicChange('glue', e.target.checked)}
+                      disabled={isFieldDisabled('basicInfo.glue')}
+                    />
+                    <span>需要點膠</span>
+                  </label>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">QR Code 掃描需求</label>
+                <div className="radio-group" style={{ padding: '4px 0' }}>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="qrCodeScan" 
+                      checked={data.basicInfo.qrCode?.need || false} 
+                      onChange={() => {
+                        const qr = { need: true, noNeed: false };
+                        handleBasicChange('qrCode', qr);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.qrCode.need')}
+                    />
+                    <span>需要</span>
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="qrCodeScan" 
+                      checked={data.basicInfo.qrCode?.noNeed || false} 
+                      onChange={() => {
+                        const qr = { need: false, noNeed: true };
+                        handleBasicChange('qrCode', qr);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.qrCode.noNeed')}
+                    />
+                    <span>不需要</span>
+                  </label>
+                </div>
+              </div>
+              <div className="form-group">
+                <label className="form-label">序號管控需求</label>
+                <div className="radio-group" style={{ padding: '4px 0' }}>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="snControlReq" 
+                      checked={data.basicInfo.snControl?.need || false} 
+                      onChange={() => {
+                        const sn = { need: true, noNeed: false };
+                        handleBasicChange('snControl', sn);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.snControl.need')}
+                    />
+                    <span>需要</span>
+                  </label>
+                  <label className="radio-label">
+                    <input 
+                      type="radio" 
+                      name="snControlReq" 
+                      checked={data.basicInfo.snControl?.noNeed || false} 
+                      onChange={() => {
+                        const sn = { need: false, noNeed: true };
+                        handleBasicChange('snControl', sn);
+                      }}
+                      disabled={isFieldDisabled('basicInfo.snControl.noNeed')}
+                    />
+                    <span>不需要</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <div className={`form-group required-highlight ${getFieldHighlightClass('processItems')}`} style={{ marginTop: '16px' }}>
+              <label className="form-label">主要加工項目 <span className="req">*</span></label>
+              <div className="checkbox-flex" style={{ flexWrap: 'wrap', gap: '12px 18px', alignItems: 'center' }}>
+                {[
+                  ['smt', 'SMT'],
+                  ['dip', 'DIP'],
+                  ['ict', 'In-Circuit Test'],
+                  ['assembly', '組裝'],
+                  ['coating', '三防膠塗覆'],
+                  ['packing', '包裝'],
+                  ['fct', 'FCT 功能測試'],
+                  ['flyingProbe', '飛針測試'],
+                  ['underfillGlue', 'Underfill 塗膠'],
+                  ['semiFinishedTest', '半成品測試'],
+                  ['finalTest', '成品測試']
+                ].map(([key, label]) => (
+                  <label key={key} className="checkbox-label">
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.processItems?.[key] || false} 
+                      onChange={(e) => handleProcessItemsChange(key, e.target.checked)}
+                      disabled={isFieldDisabled(`basicInfo.processItems.${key}`)}
+                    />
+                    <span>{label}</span>
+                  </label>
+                ))}
+
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <label className="checkbox-label" style={{ margin: 0 }}>
+                    <input 
+                      type="checkbox" 
+                      checked={data.basicInfo.processItems?.otherProcess || false} 
+                      onChange={(e) => {
+                        handleProcessItemsChange('otherProcess', e.target.checked);
+                        if (!e.target.checked) {
+                          const updated = { ...data.basicInfo.processItems, otherProcess: false, otherProcessText: '' };
+                          onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
+                        }
+                      }}
+                      disabled={isFieldDisabled('basicInfo.processItems.otherProcess')}
+                    />
+                    <span>其他:</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    className="form-input edit-active compact" 
+                    placeholder="請說明其他加工項目"
+                    value={data.basicInfo.processItems?.otherProcessText || ''} 
+                    onChange={(e) => {
+                      const updated = { ...data.basicInfo.processItems, otherProcessText: e.target.value };
+                      onChange({ ...data, basicInfo: { ...data.basicInfo, processItems: updated } });
+                    }}
+                    disabled={!data.basicInfo.processItems?.otherProcess || isFieldDisabled('basicInfo.processItems.otherProcessText')}
+                    style={{ width: '160px', padding: '4px 8px', fontSize: '0.82rem' }}
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* 卡片 5: 鋼板與治工具一覽表 */}
+          <div className="form-section-card glass-card">
+            <h3 className="card-title">🔧 鋼板與治工具一覽表</h3>
           
           {/* SMT 鋼板規格 */}
-          {data.basicInfo.processItems.smt && (
-            <div className={`tooling-box ${getFieldHighlightClass('stencil')}`}>
+          {data.basicInfo.processItems?.smt && (
+            <div className={`tooling-box ${getFieldHighlightClass('stencil')}`} style={{ marginBottom: '16px' }}>
               <span className="tooling-badge">SMT 鋼板</span>
               
               <div className="tooling-row-align" style={{ marginBottom: '12px', paddingBottom: '8px', borderBottom: '1px dashed rgba(255,255,255,0.05)' }}>
@@ -747,8 +760,13 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       name="stencilNeed" 
                       checked={data.basicInfo.tooling?.stencil?.need || false}
                       onChange={() => {
-                        handleToolingChange('stencil', 'need', true);
-                        handleToolingChange('stencil', 'noNeed', false);
+                        const tool = data.basicInfo.tooling?.stencil || {};
+                        const updatedTool = { ...tool, need: true, noNeed: false };
+                        const updatedTooling = { ...data.basicInfo.tooling, stencil: updatedTool };
+                        const owners = { ...(data._owners || {}) };
+                        owners['basicInfo.tooling.stencil.need'] = currentUser.unit;
+                        delete owners['basicInfo.tooling.stencil.noNeed'];
+                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
                       }} 
                       disabled={isFieldDisabled('basicInfo.tooling.stencil.need')}
                     />
@@ -760,11 +778,16 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                       name="stencilNeed" 
                       checked={data.basicInfo.tooling?.stencil?.noNeed || false}
                       onChange={() => {
-                        handleToolingChange('stencil', 'need', false);
-                        handleToolingChange('stencil', 'noNeed', true);
-                        handleToolingChange('stencil', 'thickness', '');
-                        handleToolingChange('stencil', 'apertureRatio', '');
-                        handleToolingChange('stencil', 'stencilType', '');
+                        const tool = data.basicInfo.tooling?.stencil || {};
+                        const updatedTool = { ...tool, need: false, noNeed: true, thickness: '', apertureRatio: '', stencilType: '' };
+                        const updatedTooling = { ...data.basicInfo.tooling, stencil: updatedTool };
+                        const owners = { ...(data._owners || {}) };
+                        owners['basicInfo.tooling.stencil.noNeed'] = currentUser.unit;
+                        delete owners['basicInfo.tooling.stencil.need'];
+                        delete owners['basicInfo.tooling.stencil.thickness'];
+                        delete owners['basicInfo.tooling.stencil.apertureRatio'];
+                        delete owners['basicInfo.tooling.stencil.stencilType'];
+                        onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling }, _owners: owners });
                       }} 
                       disabled={isFieldDisabled('basicInfo.tooling.stencil.noNeed')}
                     />
@@ -825,7 +848,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                 testFixture: '測試治具',
                 assemblyFixture: '組裝治具'
               };
-              const item = data.basicInfo.tooling[key] || {};
+              const item = data.basicInfo.tooling?.[key] || {};
               return (
                 <div key={key} className={`tooling-row-align required-highlight ${getFieldHighlightClass(key)}`} style={{ margin: 0 }}>
                   <span className="tool-name" style={{ minWidth: '90px' }}>{labelMap[key]}</span>
@@ -836,14 +859,14 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                         name={key} 
                         checked={item.need || false}
                         onChange={() => {
-                          const tool = data.basicInfo.tooling[key] || {};
+                          const tool = data.basicInfo.tooling?.[key] || {};
                           const updatedTool = { ...tool, need: true, noNeed: false };
                           const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
                           onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
                         }} 
                         disabled={isFieldDisabled(`basicInfo.tooling.${key}.need`)}
                       />
-                      <span>需要</span>
+                      <span>Offset / 需要</span>
                     </label>
                     <label className="radio-label">
                       <input 
@@ -851,7 +874,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
                         name={key} 
                         checked={item.noNeed || false}
                         onChange={() => {
-                          const tool = data.basicInfo.tooling[key] || {};
+                          const tool = data.basicInfo.tooling?.[key] || {};
                           const updatedTool = { ...tool, need: false, noNeed: true, qty: '' };
                           const updatedTooling = { ...data.basicInfo.tooling, [key]: updatedTool };
                           onChange({ ...data, basicInfo: { ...data.basicInfo, tooling: updatedTooling } });
@@ -881,7 +904,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
           </div>
 
           {/* SMT刷錫載具 與 其他治具併排 */}
-          <div className="tooling-grid">
+          <div className="tooling-grid" style={{ marginTop: '16px' }}>
             <div className={`tooling-row-align required-highlight ${getFieldHighlightClass('smtCarrier')}`} style={{ margin: 0 }}>
               <span className="tool-name" style={{ minWidth: '90px' }}>SMT刷錫載具</span>
               <div className="radio-group" style={{ gap: '0.8rem' }}>
@@ -1014,6 +1037,7 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
               )}
             </div>
           </div>
+        </div>
 
           <div className="action-row">
             <button className="btn btn-primary" onClick={onNext}>

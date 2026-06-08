@@ -448,18 +448,31 @@ export default function App() {
       {/* 頂部 Header */}
       <header className="app-header glass-card">
         <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <svg className="logo-svg" viewBox="0 0 100 100" style={{ width: '40px', height: '40px', fill: 'none', stroke: 'url(#logoGradient)', strokeWidth: '5' }}>
-            <defs>
-              <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#6366f1" />
-                <stop offset="100%" stopColor="#a855f7" />
-              </linearGradient>
-            </defs>
-            <circle cx="50" cy="50" r="42" strokeWidth="4" strokeDasharray="6 6" />
-            <circle cx="50" cy="50" r="34" strokeWidth="2" opacity="0.6" />
-            <path d="M28 65 V35 L50 55 L72 35 V65" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-            <path d="M50 20 V32 M50 68 V80 M20 50 H32 M68 50 H80" strokeWidth="4" strokeLinecap="round" />
-          </svg>
+          <div className="logo-img-wrapper" style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
+            <img 
+              src="https://www.mitcorp.com.tw/wp-content/uploads/logo-n.png" 
+              alt="Mitcorp Logo" 
+              className="logo-img"
+              style={{ height: '36px', objectFit: 'contain', transition: 'all 0.3s ease' }} 
+              onError={(e) => {
+                e.target.style.display = 'none';
+                const fallback = e.target.nextSibling;
+                if (fallback) fallback.style.display = 'block';
+              }}
+            />
+            <svg className="logo-svg fallback-logo" viewBox="0 0 100 100" style={{ width: '36px', height: '36px', fill: 'none', stroke: 'url(#logoGradient)', strokeWidth: '5', display: 'none' }}>
+              <defs>
+                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                  <stop offset="0%" stopColor="#6366f1" />
+                  <stop offset="100%" stopColor="#a855f7" />
+                </linearGradient>
+              </defs>
+              <circle cx="50" cy="50" r="42" strokeWidth="4" strokeDasharray="6 6" />
+              <circle cx="50" cy="50" r="34" strokeWidth="2" opacity="0.6" />
+              <path d="M28 65 V35 L50 55 L72 35 V65" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
+              <path d="M50 20 V32 M50 68 V80 M20 50 H32 H80" strokeWidth="4" strokeLinecap="round" />
+            </svg>
+          </div>
           <div className="logo-text">
             <h1 className="logo-title" style={{ fontSize: '1.35rem', fontWeight: '750' }}>產品委外加工資訊系統</h1>
             <p className="logo-subtitle">醫電鼎眾 Mitcorp | 雙向資訊同步與製程防呆管制平台</p>
