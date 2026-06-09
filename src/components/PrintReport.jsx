@@ -1,6 +1,11 @@
 import React from 'react';
 import './PrintReport.css';
 
+function cleanXrayPart(part) {
+  const value = String(part || '').trim();
+  return /_{2,}/.test(value) ? '' : value;
+}
+
 export default function PrintReport({ data }) {
   if (!data) return null;
 
@@ -351,7 +356,7 @@ export default function PrintReport({ data }) {
           {tr.photoRecords?.map((rec) => {
             let displayName = rec.name;
           if (rec.isXray && rec.parts) {
-            const partsStr = rec.parts.filter(Boolean).join(', ');
+            const partsStr = rec.parts.map(cleanXrayPart).filter(Boolean).join(', ');
             const hasKeyword = String(rec.name).includes('指定零件');
             const baseName = hasKeyword
               ? String(rec.name).split(/指定零件/)[0] + '指定零件:'

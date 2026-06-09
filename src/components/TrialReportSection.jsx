@@ -4,6 +4,11 @@ import { isFieldDisabled, getFieldHighlightClass, updateFieldWithOwner } from '.
 import { sectionSvg } from '../utils/svgIcons';
 import './FormSections.css';
 
+function cleanXrayPart(part) {
+  const value = String(part || '').trim();
+  return /_{2,}/.test(value) ? '' : value;
+}
+
 export default function TrialReportSection({ data, onChange, currentUser, highlightField, onNext }) {
   const { setField } = useFieldOwner(onChange, currentUser);
 
@@ -104,7 +109,7 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
                     <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{pIdx + 1}:</span>
                       <input type="text" className="form-input edit-active compact" placeholder={pIdx === 0 ? '預設空白' : `U${pIdx + 1}`}
-                        value={rec.parts?.[pIdx] || ''}
+                        value={cleanXrayPart(rec.parts?.[pIdx])}
                         onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
                         disabled={isFieldDisabled(data, currentUser, `trialReport.photoRecords.xray.parts.${pIdx}`)}
                         style={{ width: '70px', padding: '2px 4px', fontSize: '0.8rem' }} />
