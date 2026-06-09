@@ -51,6 +51,12 @@ export default function App() {
     return 'ag_projects';
   };
 
+  const getStorageSuffix = (user) => {
+    if (!user) return '';
+    if (user.role === 'admin') return '_admin_test';
+    return '';
+  };
+
   const [projects, setProjects] = useState([]);
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const [data, setData] = useState(null);
@@ -76,14 +82,14 @@ export default function App() {
   });
 
   const [factories, setFactories] = useState(() => {
-    return getJSON('factories', ['富士康', '捷普', '醫電鼎眾']);
+    return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
   });
 
   const defaultAccounts = [
     { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
   ];
   const [accounts, setAccounts] = useState(() => {
-    return getJSON('accounts', defaultAccounts);
+    return getJSON('accounts' + getStorageSuffix(currentUser), defaultAccounts);
   });
 
   const currentAlignmentRate = useMemo(
@@ -203,12 +209,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-    setJSON('factories', factories);
-  }, [factories]);
+    setJSON('factories' + getStorageSuffix(currentUser), factories);
+  }, [factories, currentUser]);
 
   useEffect(() => {
-    setJSON('accounts', accounts);
-  }, [accounts]);
+    setJSON('accounts' + getStorageSuffix(currentUser), accounts);
+  }, [accounts, currentUser]);
 
   useEffect(() => {
     if (currentUser) {
