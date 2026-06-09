@@ -16,6 +16,11 @@ function writeCheckbox(sheet, addr, label, isChecked) {
   writeCell(sheet, addr, `${mark} ${label}`);
 }
 
+function cleanXrayPart(part) {
+  const value = String(part || '').trim();
+  return /_{2,}/.test(value) ? '' : value;
+}
+
 // 套用排版格式（欄寬、合併儲存格、以及簽核區對齊）
 function applyFormatting(sheet) {
   if (!sheet) return;
@@ -477,9 +482,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
         const r = startRow + idx;
         writeCheckbox(sheet3, `C${r}`, '', rec.checked);
         if (rec.isXray && rec.parts) {
-          const filled = rec.parts.filter(Boolean).join(', ');
+          const filled = rec.parts.map(cleanXrayPart).filter(Boolean).join(', ');
           const prefix = "X-Ray 照片 / BGA, QFN 檢驗紀錄表 : BGA、QFN、指定零件:";
-          writeCell(sheet3, `B${r}`, `${prefix} ${filled}`);
+          writeCell(sheet3, `B${r}`, filled ? `${prefix} ${filled}` : prefix);
         }
       });
     };

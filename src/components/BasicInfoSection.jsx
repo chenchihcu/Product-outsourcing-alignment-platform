@@ -50,8 +50,8 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
                 {Object.keys(data.basicInfo.stage || {}).map(k => (
                   <label key={k} className="checkbox-label">
                     <input type="checkbox" checked={data.basicInfo.stage[k] || false}
-                      onChange={(e) => setField(`stage.${k}`, e.target.checked)}
-                      disabled={isFieldDisabled(data, currentUser, `stage.${k}`)} />
+                      onChange={(e) => setField(`basicInfo.stage.${k}`, e.target.checked)}
+                      disabled={isFieldDisabled(data, currentUser, `basicInfo.stage.${k}`)} />
                     <span>{k === 'politRun' ? 'Pilot-run' : k.toUpperCase()}</span>
                   </label>
                 ))}

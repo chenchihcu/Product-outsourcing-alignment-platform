@@ -281,11 +281,19 @@ export function parseRequirementExcel(arrayBuffer) {
     } else {
       data._owners = {};
       // 第一次載入且無 G1 備份時，自動初始化特定角色欄位擁有權
-      if (data.basicInfo.stage?.evt) data._owners['stage.evt'] = '研發單位';
-      if (data.basicInfo.stage?.dvt) data._owners['stage.dvt'] = '研發單位';
-      if (data.basicInfo.stage?.pvt) data._owners['stage.pvt'] = '工程單位';
-      if (data.basicInfo.stage?.politRun) data._owners['stage.politRun'] = '工程單位';
+      if (data.basicInfo.stage?.evt) data._owners['basicInfo.stage.evt'] = '研發單位';
+      if (data.basicInfo.stage?.dvt) data._owners['basicInfo.stage.dvt'] = '研發單位';
+      if (data.basicInfo.stage?.pvt) data._owners['basicInfo.stage.pvt'] = '工程單位';
+      if (data.basicInfo.stage?.politRun) data._owners['basicInfo.stage.politRun'] = '工程單位';
     }
+
+    // 相容舊版：將殘留的 stage.* 擁有者 key 遷移為 basicInfo.stage.*
+    ['evt', 'dvt', 'pvt', 'politRun', 'ecn'].forEach(k => {
+      if (data._owners[`stage.${k}`] !== undefined) {
+        data._owners[`basicInfo.stage.${k}`] = data._owners[`stage.${k}`];
+        delete data._owners[`stage.${k}`];
+      }
+    });
   }
 
   // 2. 解析【製程管制與前置作業】工作表
@@ -489,7 +497,7 @@ export function parseRequirementExcel(arrayBuffer) {
       const str = String(val);
       const match = str.match(/指定零件[:：]\s*(.*)/);
       if (match && match[1]) {
-        const parts = match[1].split(/[,，\s]+/).map(p => p.trim()).filter(Boolean);
+          const parts = match[1].split(/[,，\s]+/).map(p => cleanPlaceholder(p.trim())).filter(Boolean);
         const res = ['', '', '', ''];
         for (let i = 0; i < 4; i++) {
           res[i] = parts[i] || '';

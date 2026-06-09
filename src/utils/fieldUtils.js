@@ -36,15 +36,15 @@ export function isFieldDisabled(data, currentUser, fieldPath) {
   if (currentUser.role === 'qa') return true;
   if (currentUser.role === 'admin') return false;
   if (fieldPath === 'basicInfo.factory') return false;
-  if (fieldPath === 'stage.evt' || fieldPath === 'stage.dvt') {
+  if (fieldPath === 'basicInfo.stage.evt' || fieldPath === 'basicInfo.stage.dvt') {
     return currentUser.role !== 'rd';
   }
-  if (fieldPath === 'stage.pvt' || fieldPath === 'stage.politRun') {
+  if (fieldPath === 'basicInfo.stage.pvt' || fieldPath === 'basicInfo.stage.politRun') {
     return currentUser.role !== 'eng';
   }
-  if (fieldPath === 'stage.ecn') {
+  if (fieldPath === 'basicInfo.stage.ecn') {
     const ecnChecked = data.basicInfo.stage?.ecn;
-    const owner = data._owners?.['stage.ecn'];
+    const owner = data._owners?.['basicInfo.stage.ecn'];
     if (ecnChecked && owner && owner !== currentUser.unit) {
       return true;
     }
