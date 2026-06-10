@@ -1,6 +1,151 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Settings.css';
 import { compressImage } from '../utils/imageCompressor';
+import { isSupabaseEnabled } from '../data/supabaseClient';
+import { inviteUser, listAllProfiles, updateUserProfile } from '../data/auth';
+
+const CLOUD_ROLE_OPTIONS = [
+  { value: 'rd',    label: '研發單位',             unit: '研發單位',             level: 'Engineer' },
+  { value: 'eng',   label: '工程單位',             unit: '工程單位',             level: 'Engineer' },
+  { value: 'qa',    label: '審核單位（品保處）',     unit: '審核單位（品保處）',     level: 'Reviewer' },
+  { value: 'admin', label: '管理處（系統管理員）',   unit: '管理處',               level: 'Administrator' },
+];
+
+function CloudUserManagement({ currentUser }) {
+  const [profiles, setProfiles] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteName, setInviteName] = useState('');
+  const [inviteRoleIdx, setInviteRoleIdx] = useState(0);
+  const [inviting, setBusy] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const reload = () => {
+    setLoading(true);
+    listAllProfiles()
+      .then(setProfiles)
+      .catch((e) => setMsg('載入失敗：' + e.message))
+      .finally(() => setLoading(false));
+  };
+
+  useEffect(() => { reload(); }, []);
+
+  const handleInvite = async (e) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setBusy(true); setMsg('');
+    const r = CLOUD_ROLE_OPTIONS[inviteRoleIdx];
+    try {
+      await inviteUser({ email: inviteEmail.trim(), username: inviteName.trim() || inviteEmail.split('@')[0], unit: r.unit, role: r.value, level: r.level });
+      setMsg(`✅ 邀請郵件已送出至 ${inviteEmail}，對方確認信箱後即可登入。`);
+      setInviteEmail(''); setInviteName(''); setInviteRoleIdx(0);
+      reload();
+    } catch (err) {
+      setMsg('❌ 邀請失敗：' + err.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleRoleChange = async (userId, newRole) => {
+    const r = CLOUD_ROLE_OPTIONS.find((o) => o.value === newRole);
+    if (!r) return;
+    try {
+      await updateUserProfile(userId, { role: r.value, unit: r.unit, level: r.level });
+      setProfiles((prev) => prev.map((p) => p.id === userId ? { ...p, role: r.value, unit: r.unit, level: r.level } : p));
+    } catch (err) {
+      alert('角色更新失敗：' + err.message);
+    }
+  };
+
+  return (
+    <div className="settings-section-card glass-card" style={{ gridColumn: '1 / -1' }}>
+      <h3>☁️ 雲端使用者管理（邀請制）</h3>
+      <p className="card-desc">
+        帳號由管理員統一邀請。對方收到邀請郵件並設定密碼後即可登入；帳號無法自行申請。
+      </p>
+
+      {/* 邀請表單 */}
+      <form onSubmit={handleInvite} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'flex-end', marginTop: '16px' }}>
+        <div className="form-group" style={{ flex: '1 1 200px' }}>
+          <label className="form-label">電子郵件 <span className="req">*</span></label>
+          <input type="email" className="form-input edit-active" placeholder="name@company.com"
+            value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} required />
+        </div>
+        <div className="form-group" style={{ flex: '1 1 160px' }}>
+          <label className="form-label">顯示名稱</label>
+          <input type="text" className="form-input edit-active" placeholder="例：陳小明"
+            value={inviteName} onChange={(e) => setInviteName(e.target.value)} />
+        </div>
+        <div className="form-group" style={{ flex: '1 1 200px' }}>
+          <label className="form-label">單位 / 角色</label>
+          <select className="form-input edit-active" value={inviteRoleIdx}
+            onChange={(e) => setInviteRoleIdx(Number(e.target.value))}>
+            {CLOUD_ROLE_OPTIONS.map((r, i) => (
+              <option key={r.value} value={i}>{r.label}</option>
+            ))}
+          </select>
+        </div>
+        <div style={{ paddingBottom: '2px' }}>
+          <button type="submit" className="btn btn-primary" disabled={inviting}>
+            {inviting ? '發送中…' : '📨 發送邀請'}
+          </button>
+        </div>
+      </form>
+
+      {msg && <p style={{ marginTop: '10px', fontSize: '0.85rem', color: msg.startsWith('✅') ? '#4ade80' : '#f87171' }}>{msg}</p>}
+
+      {/* 使用者清單 */}
+      <h4 style={{ marginTop: '24px', marginBottom: '8px' }}>現有使用者（{profiles.length}）</h4>
+      {loading ? (
+        <p style={{ color: '#9ca3af', fontSize: '0.85rem' }}>載入中…</p>
+      ) : (
+        <div className="accounts-table-container">
+          <table className="settings-table">
+            <thead>
+              <tr>
+                <th>顯示名稱</th>
+                <th>單位</th>
+                <th>角色</th>
+                <th>建立時間</th>
+                <th>動作</th>
+              </tr>
+            </thead>
+            <tbody>
+              {profiles.map((p) => (
+                <tr key={p.id} className={currentUser.id === p.id ? 'current-user-row' : ''}>
+                  <td>{p.username}{currentUser.id === p.id && ' (您)'}</td>
+                  <td>{p.unit || '—'}</td>
+                  <td>
+                    <select
+                      className="table-select-level"
+                      value={p.role}
+                      onChange={(e) => handleRoleChange(p.id, e.target.value)}
+                      disabled={currentUser.id === p.id}
+                      title={currentUser.id === p.id ? '無法修改自己的角色' : ''}
+                    >
+                      {CLOUD_ROLE_OPTIONS.map((r) => (
+                        <option key={r.value} value={r.value}>{r.label}</option>
+                      ))}
+                    </select>
+                  </td>
+                  <td style={{ fontSize: '0.78rem', color: '#9ca3af' }}>
+                    {p.created_at ? new Date(p.created_at).toLocaleDateString('zh-TW') : '—'}
+                  </td>
+                  <td>
+                    <span style={{ fontSize: '0.75rem', color: '#6b7280' }}>
+                      {currentUser.id === p.id ? '（當前登入）' : '可於 Supabase Dashboard 停用'}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Settings({
   factories,
@@ -14,11 +159,10 @@ export default function Settings({
   currentUser
 }) {
   const [newFactory, setNewFactory] = useState('');
-  
-  // 新增帳號表單 State
+
+  // 本機模式帳號表單 State
   const [newUsername, setNewUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
-  // 帳號清單密碼遮罩：預設隱藏，可逐列切換顯示
   const [revealedPasswords, setRevealedPasswords] = useState({});
   const [newUnit, setNewUnit] = useState('研發單位');
   const [newLevel, setNewLevel] = useState('Standard');
@@ -68,6 +212,11 @@ export default function Settings({
       </p>
 
       <div className="settings-grid">
+        {/* 雲端模式：Admin 使用者管理（取代本機帳號管理） */}
+        {isSupabaseEnabled && currentUser.role === 'admin' && (
+          <CloudUserManagement currentUser={currentUser} />
+        )}
+
         {/* 0. 個人電子簽章設定 */}
         <div className="settings-section-card glass-card" style={{ gridColumn: '1 / -1' }}>
           <h3>🖋️ 個人電子簽章設定</h3>
@@ -178,8 +327,8 @@ export default function Settings({
           </div>
         </div>
 
-        {/* 2. 帳號權限設定 */}
-        <div className="settings-section-card glass-card">
+        {/* 2. 帳號權限設定（僅本機離線模式顯示） */}
+        {!isSupabaseEnabled && <div className="settings-section-card glass-card">
           <h3>👥 系統使用者與權限等級設定</h3>
           <p className="card-desc">管理各單位的使用者帳號、密碼及對應的填寫審核權限。</p>
 
@@ -310,7 +459,7 @@ export default function Settings({
               </div>
             </div>
           </div>
-        </div>
+        </div>}
       </div>
     </div>
   );

@@ -1,15 +1,39 @@
-import React, { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { validateAlignment } from '../utils/validator';
 import './Dashboard.css';
 
-export default function Dashboard({ data, onGoToSection }) {
+const STEP_KEYS = ['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'];
+
+/* 責任歸屬:本需求一覽表由「發包方(研發/工程)」填寫全部項目;
+   供應商(委外加工廠)不負責填寫任何一項。電子簽章為獨立的簽核階段。 */
+const partyOf = (msg) => (msg.includes('電子簽章') ? 'sign' : 'oem');
+
+const PARTY_META = {
+  oem: { label: '發包方（研發 / 工程）', icon: '🧪', desc: '需由發包方填寫' },
+  sign: { label: '簽章', icon: '✍️', desc: '待上傳電子簽章' },
+};
+
+export default function Dashboard({ data, onGoToSection, sectionStatus = {} }) {
   const report = useMemo(() => validateAlignment(data), [data]);
-  const { warnings } = report;
+  const { warnings, alignmentRate } = report;
 
-  const errors = useMemo(() => warnings.filter(w => w.type === 'error'), [warnings]);
-  const warns = useMemo(() => warnings.filter(w => w.type === 'warning'), [warnings]);
+  const errors = useMemo(() => warnings.filter((w) => w.type === 'error'), [warnings]);
+  const warns = useMemo(() => warnings.filter((w) => w.type === 'warning'), [warnings]);
+  const doneSteps = STEP_KEYS.filter((k) => sectionStatus[k]).length;
 
-  // 對應警示訊息的導航按鈕 (擴充關鍵字以涵蓋所有 validator 訊息)
+  const byParty = useMemo(() => {
+    const g = { oem: [], sign: [] };
+    warnings.forEach((w) => { g[partyOf(w.message)].push(w); });
+    return g;
+  }, [warnings]);
+
+  // 下一步最優先:先異常後警告
+  const nextItem = errors[0] || warns[0] || null;
+
+  const [showAll, setShowAll] = useState(false);
+  const [filterParty, setFilterParty] = useState(null);
+
+  // 對應警示訊息的導航(沿用原關鍵字對應表)
   const handleWarningClick = (msg) => {
     let tab = 'basicInfo';
     if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具') || msg.includes('委外加工廠')) {
@@ -18,83 +42,112 @@ export default function Dashboard({ data, onGoToSection }) {
       tab = 'processControl';
     } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('翹曲') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
       tab = 'trialReport';
+    } else if (msg.includes('簽章')) {
+      tab = 'signOff';
     }
     onGoToSection(tab, msg);
   };
 
+  const visibleTodos = filterParty
+    ? warnings.filter((w) => partyOf(w.message) === filterParty)
+    : warnings;
+
   return (
-    <div className="dashboard-grid">
-      {/* 防呆警告面板 */}
-      <div className="dashboard-card glass-card warning-panel">
-        <h3 className="card-title flex-title">
-          <span>防呆與漏失提醒</span>
-          <span className="badge-wrapper">
-            {errors.length > 0 && <span className="badge error">{errors.length} 異常</span>}
-            {warns.length > 0 && <span className="badge warning">{warns.length} 警告</span>}
-            {warnings.length === 0 && <span className="badge success">已完美對齊</span>}
-          </span>
-        </h3>
-
-        {warnings.length === 0 ? (
-          <div className="all-clear">
-            <svg className="clear-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-            <p className="clear-title">兩端資訊已完全同步！</p>
-            <p className="clear-desc">無任何漏失項目，可以進行線上雙向簽章並下載 Excel。</p>
+    <div className="dashboard-v2">
+      {/* ===== 進度 Hero ===== */}
+      <div className="dash-hero glass-card">
+        <div className="hero-rate" data-ok={alignmentRate === 100}>
+          <span className="rate-num">{alignmentRate}<small>%</small></span>
+          <span className="rate-label">雙向資訊對齊率</span>
+        </div>
+        <div className="hero-main">
+          <div className="hero-bar">
+            <div className="hero-bar-fill" data-ok={alignmentRate === 100} style={{ width: `${alignmentRate}%` }} />
           </div>
-        ) : (
-          <div className="warning-lists-grid">
-            {/* 異常項目 */}
-            <div className="warning-column">
-              <h4 className="column-subtitle error-title">
-                🛑 異常項目 ({errors.length})
-              </h4>
-              <div className="column-list">
-                {errors.length === 0 ? (
-                  <div className="column-empty success">✓ 無任何異常項目</div>
-                ) : (
-                  errors.map((w, idx) => (
-                    <div 
-                      key={`err-${idx}`} 
-                      className="warning-item error"
-                      onClick={() => handleWarningClick(w.message)}
-                      title="點擊前往該填寫區塊"
-                    >
-                      <span className="warning-text">{w.message}</span>
-                      <span className="go-fill-arrow">→</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* 警告項目 */}
-            <div className="warning-column">
-              <h4 className="column-subtitle warning-title">
-                ⚠️ 警告項目 ({warns.length})
-              </h4>
-              <div className="column-list">
-                {warns.length === 0 ? (
-                  <div className="column-empty warning">✓ 無任何警告項目</div>
-                ) : (
-                  warns.map((w, idx) => (
-                    <div 
-                      key={`warn-${idx}`} 
-                      className="warning-item warning"
-                      onClick={() => handleWarningClick(w.message)}
-                      title="點擊前往該填寫區塊"
-                    >
-                      <span className="warning-text">{w.message}</span>
-                      <span className="go-fill-arrow">→</span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
+          <div className="hero-stats">
+            <span className="stat"><b>{doneSteps}</b>/5 步驟完成</span>
+            {errors.length > 0 && <span className="stat stat-error">● {errors.length} 異常</span>}
+            {warns.length > 0 && <span className="stat stat-warn">● {warns.length} 警告</span>}
+            {warnings.length === 0 && <span className="stat stat-ok">✓ 已完美對齊</span>}
           </div>
-        )}
+        </div>
       </div>
+
+      {warnings.length === 0 ? (
+        <div className="dash-clear glass-card">
+          <svg className="clear-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <p className="clear-title">兩端資訊已完全同步！</p>
+            <p className="clear-desc">無任何漏失項目，可進行線上雙向簽章並下載 Excel。</p>
+          </div>
+        </div>
+      ) : (
+        <>
+          {/* ===== 下一步:最優先一件事 ===== */}
+          {nextItem && (
+            <button className="dash-next glass-card" onClick={() => handleWarningClick(nextItem.message)}>
+              <span className="next-left">
+                <span className="next-kicker">
+                  <span className={`next-dot ${nextItem.type}`} />下一步 · 最優先
+                </span>
+                <span className="next-msg">{nextItem.message}</span>
+              </span>
+              <span className="next-cta">前往填寫 →</span>
+            </button>
+          )}
+
+          {/* ===== 輪到誰:依責任方分組 ===== */}
+          <div className="dash-parties">
+            {['oem', 'sign'].map((p) => byParty[p].length > 0 && (
+              <button
+                key={p}
+                className={`party-card ${filterParty === p ? 'active' : ''}`}
+                onClick={() => { setFilterParty(filterParty === p ? null : p); setShowAll(true); }}
+                title={`點擊篩選 ${PARTY_META[p].label} 的待辦`}
+              >
+                <span className="party-icon">{PARTY_META[p].icon}</span>
+                <span className="party-text">
+                  <span className="party-label">{PARTY_META[p].label}</span>
+                  <span className="party-desc">{PARTY_META[p].desc}</span>
+                </span>
+                <span className="party-count">{byParty[p].length}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* ===== 全部待辦(可收合) ===== */}
+          <div className="dash-all glass-card">
+            <button className="all-toggle" onClick={() => setShowAll((s) => !s)}>
+              <span>
+                全部待辦（{warnings.length}）
+                {filterParty && <span className="all-filter">· 篩選：{PARTY_META[filterParty].label}</span>}
+              </span>
+              <span className="all-chevron">{showAll ? '收合 ▲' : '展開 ▼'}</span>
+            </button>
+            {filterParty && (
+              <button className="all-clear-filter" onClick={() => setFilterParty(null)}>清除篩選</button>
+            )}
+            {showAll && (
+              <div className="all-list">
+                {visibleTodos.map((w, i) => (
+                  <div
+                    key={`${w.type}-${i}`}
+                    className={`todo-row ${w.type}`}
+                    onClick={() => handleWarningClick(w.message)}
+                    title="點擊前往該填寫區塊"
+                  >
+                    <span className={`todo-tag ${w.type}`}>{w.type === 'error' ? '異常' : '警告'}</span>
+                    <span className="todo-msg">{w.message}</span>
+                    <span className="todo-arrow">→</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 }

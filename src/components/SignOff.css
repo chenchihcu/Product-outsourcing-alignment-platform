@@ -238,5 +238,44 @@
   background: rgba(239, 68, 68, 0.25) !important;
 }
 
+/* ===== 品保退件流程 ===== */
+.reject-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-4, 16px);
+  flex-wrap: wrap;
+  margin: 0 0 16px;
+  padding: 14px 18px;
+  background: var(--c-error-weak, #fdeaea);
+  border: 1px solid var(--c-error, #dc2626);
+  border-left: 4px solid var(--c-error, #dc2626);
+  border-radius: var(--r-md, 8px);
+}
+.reject-banner-main { display: flex; align-items: flex-start; gap: 12px; min-width: 0; }
+.reject-icon { font-size: 1.5rem; line-height: 1.2; flex-shrink: 0; }
+.reject-title { font-weight: 700; color: var(--c-error, #dc2626); font-size: 0.98rem; }
+.reject-reason { color: var(--c-text-1, #1a1d21); font-size: 0.9rem; margin-top: 3px; white-space: pre-wrap; }
+.reject-meta { color: var(--c-text-3, #889099); font-size: 0.78rem; margin-top: 3px; }
+.reject-resubmit { flex-shrink: 0; }
+
+/* QA 退件控制:常駐的「退件原因」欄位 */
+.qa-reject-control { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--c-border, #e6e8ec); }
+.reject-label { display: block; margin-bottom: 6px; font-size: 0.8rem; color: var(--c-text-2, #565d68); }
+.reject-label .req { color: var(--c-error, #dc2626); }
+.reject-textarea { font-size: 0.85rem; }
+.reject-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 8px; }
+.reject-confirm {
+  background: var(--c-error, #dc2626) !important;
+  color: #fff !important;
+  border-color: var(--c-error, #dc2626) !important;
+}
+.reject-confirm:hover { background: #b91c1c !important; }
+
+.export-warning.reject-locked {
+  background: var(--c-error-weak, #fdeaea);
+  border-color: var(--c-error, #dc2626);
+}
+
 /* Light theme defaults */
 

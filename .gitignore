@@ -23,5 +23,20 @@ dist-ssr
 *.sln
 *.sw?
 
+# Supabase 憑證(勿提交)
+.env
+.env.local
+.env.*.local
+
 .playwright-mcp/
 stage-eng-verify.png
+# P0–P4 重設計驗證截圖
+p0-*.png
+p1-*.png
+p2-*.png
+p3-*.png
+p4-*.png
+e2e-*.png
+cloud-*.png
+fix-*.png
+reject-*.png

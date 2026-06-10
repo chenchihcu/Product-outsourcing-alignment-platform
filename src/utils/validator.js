@@ -22,22 +22,22 @@ export function validateAlignment(data) {
   // --- 發包方 (研發/工程) 填寫檢核 ---
   const bi = data.basicInfo || {};
   const pi = bi.processItems || {};
-  check(!!bi.productNo, '發包方未填寫「產品料號」', 'error');
-  check(!!bi.productDesc, '發包方未填寫「產品名稱 / 描述」', 'warning');
+  check(!!bi.productNo, '未填寫「產品料號」', 'error');
+  check(!!bi.productDesc, '未填寫「產品名稱 / 描述」', 'warning');
 
   // 產品階段至少勾選一個 (mpSmall 改為 politRun)
   const stage = bi.stage || {};
   const hasStage = stage.evt || stage.dvt || stage.pvt || stage.politRun || stage.ecn;
-  check(hasStage, '發包方未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）', 'error');
+  check(hasStage, '未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）', 'error');
 
   // --- 委外加工廠回填檢核 ---
-  check(!!bi.factory, '加工廠未填寫「委外加工廠」名稱', 'error');
+  check(!!bi.factory, '未填寫「委外加工廠」名稱', 'error');
 
   // 烘烤參數確認
   const pc = data.processControl || {};
   const bake = pc.bakeRequired || {};
   const hasBakeSelect = bake.need || bake.noNeed;
-  check(hasBakeSelect, '加工廠未確認是否需要「PCB / FPCA 烘烤」', 'error');
+  check(hasBakeSelect, '未確認是否需要「PCB / FPCA 烘烤」', 'error');
   
   if (bake.need) {
     const pcbValid = !!bake.pcbBakeTemp && !!bake.pcbBakeTol && !!bake.pcbBakeHr;
@@ -50,16 +50,16 @@ export function validateAlignment(data) {
   if (pi.smt && tooling.stencil?.need) {
     const thickStr = String(tooling.stencil.thickness || '');
     const apertStr = String(tooling.stencil.apertureRatio || '');
-    check(!!tooling.stencil.thickness && !thickStr.includes('____'), '加工廠未填寫鋼板「厚度」', 'error');
-    check(!!tooling.stencil.apertureRatio && !apertStr.includes('____'), '加工廠未填寫鋼板「開口比」', 'error');
+    check(!!tooling.stencil.thickness && !thickStr.includes('____'), '未填寫鋼板「厚度」', 'error');
+    check(!!tooling.stencil.apertureRatio && !apertStr.includes('____'), '未填寫鋼板「開口比」', 'error');
     const hasType = ['general', 'step'].includes(tooling.stencil.style);
-    check(hasType, '加工廠未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
+    check(hasType, '未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
   }
 
   // 治具對齊：若加工項目需要，應確認治具
   const checkFixture = (fixture, name) => {
     const hasFixtureConfirm = fixture?.need || fixture?.noNeed;
-    check(hasFixtureConfirm, `加工廠未確認「${name}」是否需要或提供`, 'error');
+    check(hasFixtureConfirm, `未確認「${name}」是否需要或提供`, 'error');
     if (fixture?.need) {
       const qtyStr = String(fixture.qty || '');
       check(!!fixture.qty && !qtyStr.includes('__'), `已確認需要「${name}」，但未填寫數量`, 'error');
@@ -73,7 +73,7 @@ export function validateAlignment(data) {
   // 新增治具校驗
   const smtCarrier = tooling.smtCarrier || {};
   const hasCarrierConfirm = smtCarrier.need || smtCarrier.noNeed;
-  check(hasCarrierConfirm, '加工廠未確認「SMT 刷錫載具」是否需要', 'error');
+  check(hasCarrierConfirm, '未確認「SMT 刷錫載具」是否需要', 'error');
   if (smtCarrier.need) {
     const hasCarrierOption = smtCarrier.upper || smtCarrier.lower;
     check(hasCarrierOption, '已勾選需要「SMT 刷錫載具」，但未選擇「上載板」或「下載板」', 'error');
@@ -81,7 +81,7 @@ export function validateAlignment(data) {
 
   const otherFixture = tooling.otherFixture || {};
   const hasOtherConfirm = otherFixture.need || otherFixture.noNeed;
-  check(hasOtherConfirm, '加工廠未確認「其他治具」是否需要', 'error');
+  check(hasOtherConfirm, '未確認「其他治具」是否需要', 'error');
     if (otherFixture.need) {
       const otherNameStr = String(otherFixture.name || '');
       const otherQtyStr = String(otherFixture.qty || '');
@@ -91,21 +91,21 @@ export function validateAlignment(data) {
 
   // SMT/DIP 首件檢查與樣品提供
   const hasSample = pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart;
-  check(hasSample, '加工廠未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
+  check(hasSample, '未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
 
   const smtFirst = pc.smtFirstPiece || {};
   if (pi.smt) {
     const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi || smtFirst.steelTension || (smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no') || smtFirst.pcbReflow || smtFirst.solderability;
-    check(hasSmtFirst, '加工廠未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI / 鋼板張力量測 / LED點亮測試 / PCB外觀檢查 / 濕潤性檢查）', 'error');
+    check(hasSmtFirst, '未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI / 鋼板張力量測 / LED點亮測試 / PCB外觀檢查 / 濕潤性檢查）', 'error');
 
     const hasLedTest = smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no';
-    check(hasLedTest, '加工廠未確認 SMT「LED點亮測試」為「有」或「無 (不適用)」', 'error');
+    check(hasLedTest, '未確認 SMT「LED點亮測試」為「有」或「無 (不適用)」', 'error');
   }
 
   // 新增: DIP 首件校驗 (如果加工項目包含 DIP)
   if (pi.dip) {
     const dipFirst = pc.dipFirstPiece || {};
-    check(dipFirst.cutLead, '加工廠未勾選 DIP 首件「剪腳前置作業」', 'error');
+    check(dipFirst.cutLead, '未勾選 DIP 首件「剪腳前置作業」', 'error');
     if (dipFirst.memo) {
       check(dipFirst.memo.length <= 50, 'DIP 注意事項字數不得超過 50 字', 'error');
     }
@@ -114,12 +114,12 @@ export function validateAlignment(data) {
   // SMT/DIP 焊接順序
   const smtOrder = pc.smtOrder || {};
   const hasSmtOrder = smtOrder.bToT || smtOrder.tToB;
-  check(hasSmtOrder, '加工廠未確認「SMT 焊接順序」（先焊底面 / 先焊頂面）', 'error');
+  check(hasSmtOrder, '未確認「SMT 焊接順序」（先焊底面 / 先焊頂面）', 'error');
 
   if (pi.dip) {
     const dipOrder = pc.dipOrder || {};
     const hasDipOrder = dipOrder.bToT || dipOrder.tToB;
-    check(hasDipOrder, '加工廠未確認「DIP 焊接順序」', 'error');
+    check(hasDipOrder, '未確認「DIP 焊接順序」', 'error');
   }
 
   // 測溫點配置：如果有關鍵零件，最少要有 6 個位置
@@ -133,11 +133,11 @@ export function validateAlignment(data) {
   // 包材種類 (PCBA 與 FPCA 各需確認至少一項)
   const pcbaPkg = pc.pcbaPackaging || {};
   const hasPcbaPkg = pcbaPkg.staticBag || pcbaPkg.honeycomb || pcbaPkg.tray || pcbaPkg.sensorCover || pcbaPkg.cameraCover;
-  check(hasPcbaPkg, '加工廠未確認「PCBA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+  check(hasPcbaPkg, '未確認「PCBA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
 
   const fpcaPkg = pc.fpcaPackaging || {};
   const hasFpcaPkg = fpcaPkg.staticBag || fpcaPkg.honeycomb || fpcaPkg.tray || fpcaPkg.sensorCover || fpcaPkg.cameraCover;
-  check(hasFpcaPkg, '加工廠未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+  check(hasFpcaPkg, '未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
 
   // 簽核欄對齊（檢查電子簽章圖片）
   const sign = bi.signOff || {};

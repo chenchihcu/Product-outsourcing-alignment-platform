@@ -1,15 +1,20 @@
-import { Component } from 'react';
+import { Component, lazy, Suspense } from 'react';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import AppShell from './components/AppShell';
 import ProjectList from './components/ProjectList';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
 import SignOff from './components/SignOff';
-import PrintReport from './components/PrintReport';
+const PrintReport = lazy(() => import('./components/PrintReport'));
 import Settings from './components/Settings';
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
 import { parseRequirementExcel } from './utils/excelParser';
 import { getJSON, setJSON, removeKey } from './utils/storage';
+import { isSupabaseEnabled } from './data/supabaseClient';
+import { pullProjects, pushProject, deleteProjectRemote, subscribeProjects, subscribePresence } from './data/cloudSync';
+import { migrateLocalProjects } from './data/migrateLocal';
+import { getCurrentUser, onAuthChange, signOut } from './data/auth';
 import * as XLSX from 'xlsx';
 import './App.css';
 
@@ -57,14 +62,30 @@ export default function App() {
     return '';
   };
 
+  // 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
+  const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
+
   const [projects, setProjects] = useState([]);
+  const projectsRef = useRef([]);
+  useEffect(() => { projectsRef.current = projects; }, [projects]);
   const [currentProjectId, setCurrentProjectId] = useState(null);
+  const currentProjectIdRef = useRef(null);
+  useEffect(() => { currentProjectIdRef.current = currentProjectId; }, [currentProjectId]);
   const [data, setData] = useState(null);
   const [originalWb, setOriginalWb] = useState(null);
   const [fileName, setFileName] = useState('');
   const [activeTab, setActiveTab] = useState('dashboard');
   const [showSuccessOverlay, setShowSuccessOverlay] = useState(false);
   const [highlightField, setHighlightField] = useState('');
+
+  // 儲存狀態提示(信任訊號):idle | saving | saved
+  const [saveState, setSaveState] = useState('idle');
+  const [savedAt, setSavedAt] = useState(null);
+  const editedSinceLoadRef = useRef(false); // 區分「載入機種」與「使用者編輯」,避免開啟時誤顯示儲存中
+
+  // P3 即時協作:對方更新提示 + 在線使用者
+  const [remoteUpdate, setRemoteUpdate] = useState(null);
+  const [onlineUsers, setOnlineUsers] = useState([]);
 
   const handleGoToSection = (tab, msg) => {
     setActiveTab(tab);
@@ -80,6 +101,8 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(() => {
     return getJSON('current_user', null);
   });
+  const currentUserRef = useRef(null);
+  useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
 
   const [factories, setFactories] = useState(() => {
     return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
@@ -156,15 +179,79 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // 1b. 雲端同步(僅在 Supabase 啟用時):登入後拉取雲端機種;雲端為空則把本機資料遷移上去
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const ws = getWorkspace(currentUser);
+        const localKey = getProjectsKey(currentUser).replace('ag_', '');
+        const cloud = await pullProjects(ws);
+        if (cancelled || !cloud) return;
+        if (cloud.length > 0) {
+          setProjects(cloud);
+          setJSON(localKey, cloud); // 同時更新本機離線快取
+        } else {
+          const local = getJSON(localKey, []);
+          if (local.length > 0) await migrateLocalProjects(ws, local);
+        }
+      } catch (e) {
+        console.warn('[cloud] 雲端同步失敗,改用本機資料', e);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [currentUser]);
+
+  // 3a. 即時同步(P3):訂閱雲端機種變更 → 更新清單;目前開啟中且為「他人」更新則提示,不直接覆蓋
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    const ws = getWorkspace(currentUser);
+    const myId = currentUser.id;
+    const unsub = subscribeProjects(ws, ({ eventType, new: row, old }) => {
+      if (eventType === 'DELETE') {
+        if (old?.id) setProjects(prev => prev.filter(p => p.id !== old.id));
+        return;
+      }
+      if (!row || (row.updatedBy && row.updatedBy === myId)) return; // 略過自己造成的回音
+      setProjects(prev => (prev.some(p => p.id === row.id)
+        ? prev.map(p => (p.id === row.id ? row : p))
+        : [...prev, row]));
+      if (row.id === currentProjectIdRef.current) setRemoteUpdate(row);
+    });
+    return unsub;
+  }, [currentUser]);
+
+  // 3b. 在線狀態(P3):同一機種有誰正在檢視
+  useEffect(() => {
+    if (!currentUser || !currentProjectId || !isSupabaseEnabled) return;
+    const unsub = subscribePresence(
+      `presence:proj:${currentProjectId}`,
+      { key: currentUser.id || currentUser.username, username: currentUser.username, unit: currentUser.unit },
+      (users) => setOnlineUsers(users),
+    );
+    return () => { unsub(); setOnlineUsers([]); };
+  }, [currentUser, currentProjectId]);
+
   // 2. 自動存檔功能 (提供即時與 Debounce 800ms 機制)
   const saveProjectData = useCallback((projId, name, projData) => {
     if (!projId || !projData) return;
     const report = validateAlignment(projData);
+    const updatedAt = new Date().toISOString();
     setProjects(prev => prev.map(p =>
       p.id === projId
-        ? { ...p, name, data: projData, alignmentRate: report.alignmentRate, updatedAt: new Date().toISOString() }
+        ? { ...p, name, data: projData, alignmentRate: report.alignmentRate, updatedAt }
         : p
     ));
+    // 雲端同步(關閉時 pushProject 為 no-op)
+    if (isSupabaseEnabled) {
+      const base = projectsRef.current.find(p => p.id === projId);
+      if (base) {
+        pushProject(getWorkspace(currentUserRef.current), {
+          ...base, name, data: projData, alignmentRate: report.alignmentRate, updatedAt,
+        }, currentUserRef.current?.id).catch(e => console.warn('[cloud] 上推失敗', e));
+      }
+    }
   }, []);
 
   const debounceRef = useRef(null);
@@ -183,14 +270,22 @@ export default function App() {
   }, [saveProjectData]);
 
   const flushPendingSaveRef = useRef(flushPendingSave);
-  flushPendingSaveRef.current = flushPendingSave;
+  useEffect(() => { flushPendingSaveRef.current = flushPendingSave; }, [flushPendingSave]);
 
   useEffect(() => {
     if (currentProjectId && data) {
+      // 機種「載入」時的第一次 data 設定不算編輯,不顯示儲存中
+      if (!editedSinceLoadRef.current) {
+        editedSinceLoadRef.current = true;
+        return;
+      }
+      setSaveState('saving');
       pendingSaveRef.current = { projId: currentProjectId, name: fileName, projData: data };
       debounceRef.current = setTimeout(() => {
         saveProjectData(currentProjectId, fileName, data);
         pendingSaveRef.current = null;
+        setSaveState('saved');
+        setSavedAt(Date.now());
       }, 800);
 
       return () => clearTimeout(debounceRef.current);
@@ -224,6 +319,18 @@ export default function App() {
     }
   }, [currentUser]);
 
+  // Supabase:啟動時以既有 session 還原登入,並監聽登入/登出狀態
+  useEffect(() => {
+    if (!isSupabaseEnabled) return;
+    let cancelled = false;
+    getCurrentUser().then((u) => { if (!cancelled && u) setCurrentUser(u); }).catch(() => {});
+    const unsub = onAuthChange(async () => {
+      const u = await getCurrentUser();
+      if (!cancelled) setCurrentUser(u);
+    });
+    return () => { cancelled = true; unsub(); };
+  }, []);
+
   useEffect(() => {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
@@ -239,6 +346,9 @@ export default function App() {
       lastIdRef.current = lastId;
       const project = projects.find(p => p.id === lastId);
       if (project) {
+        editedSinceLoadRef.current = false;
+        setSaveState('saved');
+        setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
         setData(project.data);
         setFileName(project.name);
         if (project.originalWbBase64) {
@@ -275,6 +385,10 @@ export default function App() {
   const handleSelectProject = (id, currentList = projects) => {
     const project = currentList.find(p => p.id === id);
     if (project) {
+      editedSinceLoadRef.current = false;
+      setRemoteUpdate(null);
+      setSaveState('saved');
+      setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
       setData(project.data);
       setFileName(project.name);
 
@@ -344,7 +458,8 @@ export default function App() {
       const newList = [...projects, newProj];
       setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
-      
+      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => console.warn('[cloud] 新增上推失敗', e));
+
       handleSelectProject(newProj.id, newList);
     } catch (err) {
       console.error(err);
@@ -388,7 +503,8 @@ export default function App() {
       const newList = [...projects, newProj];
       setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
-      
+      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => console.warn('[cloud] 匯入上推失敗', e));
+
       handleSelectProject(newProj.id, newList);
     } catch (err) {
       console.error(err);
@@ -401,6 +517,7 @@ export default function App() {
     const newList = projects.filter(p => p.id !== id);
     setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
     setProjects(newList);
+    if (isSupabaseEnabled) deleteProjectRemote(id).catch(e => console.warn('[cloud] 刪除失敗', e));
 
     if (currentProjectId === id) {
       handleBackToList();
@@ -418,6 +535,26 @@ export default function App() {
     setCurrentProjectId(null);
     setActiveTab('dashboard');
     setShowSuccessOverlay(false);
+    setRemoteUpdate(null);
+  };
+
+  // P3:把對方的最新版本載入編輯器(使用者主動確認,避免靜默覆蓋編輯中內容)
+  const handleLoadRemote = () => {
+    if (!remoteUpdate) return;
+    editedSinceLoadRef.current = false;
+    setData(remoteUpdate.data);
+    setFileName(remoteUpdate.name);
+    if (remoteUpdate.originalWbBase64) {
+      try {
+        const bin = atob(remoteUpdate.originalWbBase64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+      } catch { /* 還原失敗忽略 */ }
+    }
+    setSaveState('saved');
+    setSavedAt(remoteUpdate.updatedAt ? Date.parse(remoteUpdate.updatedAt) : Date.now());
+    setRemoteUpdate(null);
   };
 
   const handleExportComplete = () => {
@@ -445,7 +582,7 @@ export default function App() {
     
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard data={data} onGoToSection={handleGoToSection} />;
+        return <Dashboard data={data} onGoToSection={handleGoToSection} sectionStatus={sectionStatus} />;
       case 'basicInfo':
         return (
           <FormSections 
@@ -534,82 +671,27 @@ export default function App() {
   return (
     <>
       <ErrorBoundary>
-      {data && <PrintReport data={data} />}
-      <div className="app-container">
-      {/* 頂部 Header */}
-      <header className="app-header glass-card">
-        <div className="header-logo" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <div className="logo-img-wrapper" style={{ display: 'flex', alignItems: 'center', height: '40px' }}>
-            <img 
-              src="https://www.mitcorp.com.tw/wp-content/uploads/logo-n.png" 
-              alt="Mitcorp Logo" 
-              className="logo-img"
-              style={{ height: '36px', objectFit: 'contain', transition: 'all 0.3s ease' }} 
-              onError={(e) => {
-                e.target.style.display = 'none';
-                const fallback = e.target.nextSibling;
-                if (fallback) fallback.style.display = 'block';
-              }}
-            />
-            <svg className="logo-svg fallback-logo" viewBox="0 0 100 100" style={{ width: '36px', height: '36px', fill: 'none', stroke: 'url(#logoGradient)', strokeWidth: '5', display: 'none' }}>
-              <defs>
-                <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#6366f1" />
-                  <stop offset="100%" stopColor="#a855f7" />
-                </linearGradient>
-              </defs>
-              <circle cx="50" cy="50" r="42" strokeWidth="4" strokeDasharray="6 6" />
-              <circle cx="50" cy="50" r="34" strokeWidth="2" opacity="0.6" />
-              <path d="M28 65 V35 L50 55 L72 35 V65" strokeWidth="6" strokeLinecap="round" strokeLinejoin="round" />
-              <path d="M50 20 V32 M50 68 V80 M20 50 H32 H80" strokeWidth="4" strokeLinecap="round" />
-            </svg>
-          </div>
-          <div className="logo-text">
-            <h1 className="logo-title" style={{ fontSize: '1.35rem', fontWeight: '750' }}>產品委外加工資訊系統</h1>
-            <p className="logo-subtitle">醫電鼎眾 Mitcorp | 雙向資訊同步與製程防呆管制平台</p>
-          </div>
-        </div>
-
-        <div className="header-right-controls" style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-          {/* 網頁負責人資訊 */}
-          <div className="sqe-profile-badge" title="網頁負責人: SQE 陳智富">
-            <span className="sqe-avatar">🛠️</span>
-            <div className="sqe-info-text">
-              <span className="sqe-label">網頁負責人</span>
-              <span className="sqe-name">SQE 陳智富</span>
-            </div>
-          </div>
-
-          {/* 使用者資訊 */}
-          <div className="user-profile-badge">
-            <span className="user-avatar">👤</span>
-            <div className="user-info-text">
-              <span className="user-name">{currentUser.username}</span>
-              <span className="user-role-desc">{currentUser.unit} · {currentUser.level}</span>
-            </div>
-            <button className="btn-logout" onClick={() => { setCurrentUser(null); handleBackToList(); }} title="登出系統">
-              🚪 登出
-            </button>
-          </div>
-
-          {currentProjectId && (
-            <div className="header-file-info animate-fade-in">
-              <div className="file-badge" style={{ padding: '4px 8px' }}>
-                <span className="file-badge-icon">📄</span>
-                <span className="file-name-text" title={fileName} style={{ maxWidth: '140px' }}>{fileName}</span>
-              </div>
-              <button className="btn btn-secondary compact-btn" onClick={handleBackToList}>
-                📁 回列表
-              </button>
-            </div>
-          )}
-        </div>
-      </header>
-
-      {/* 主畫面排版 */}
-      <main className="app-main">
+      {data && (
+        <Suspense fallback={null}>
+          <PrintReport data={data} />
+        </Suspense>
+      )}
+      <AppShell
+        currentUser={currentUser}
+        onLogout={() => { signOut(); setCurrentUser(null); handleBackToList(); }}
+        inProject={!!currentProjectId}
+        projectName={fileName}
+        onBackToList={handleBackToList}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        sectionStatus={sectionStatus}
+        alignmentRate={currentAlignmentRate}
+        saveState={saveState}
+        savedAt={savedAt}
+        onlineCount={onlineUsers.length}
+      >
         {!currentProjectId ? (
-          <ProjectList 
+          <ProjectList
             projects={projects}
             onSelectProject={handleSelectProject}
             onCreateProject={handleCreateProject}
@@ -617,56 +699,28 @@ export default function App() {
             onImportExcel={handleImportExcel}
           />
         ) : (
-          <div className="editor-layout animate-fade-in">
-            {/* 分頁導覽 */}
-            <nav className="tab-navigation glass-card">
-              <button 
-                className={`tab-btn ${activeTab === 'dashboard' ? 'active' : ''}`}
-                onClick={() => setActiveTab('dashboard')}
-              >
-                <span className="tab-icon">📈</span>
-                <span className="tab-label">儀表板</span>
-                <span className={`tab-indicator ${currentAlignmentRate === 100 ? 'aligned' : ''}`}>
-                  {currentAlignmentRate}%
+          <>
+            {remoteUpdate && (
+              <div className="remote-update-banner animate-fade-in">
+                <span className="rub-text">☁ 協作者剛更新了此機種的資料</span>
+                <span className="rub-actions">
+                  <button className="btn btn-primary btn-xs" onClick={handleLoadRemote}>載入最新</button>
+                  <button className="rub-dismiss" onClick={() => setRemoteUpdate(null)}>稍後</button>
                 </span>
-              </button>
-              <div className="tab-nav-divider"></div>
-              
-              {['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'].map(tab => {
-                const labels = { basicInfo: '基本資料', processControl: '製程管制', trialReport: '試產要求', documents: '工程文件', signOff: '簽章匯出' };
-                const icons = { basicInfo: '📋', processControl: '🔰', trialReport: '🎯', documents: '📂', signOff: '✍️' };
-                const done = sectionStatus[tab];
-                return (
-                  <button key={tab}
-                    className={`tab-btn ${activeTab === tab ? 'active' : ''}`}
-                    onClick={() => setActiveTab(tab)}
-                    title={`${done ? '✓ 已完成' : '○ 進行中'} — 點擊直接跳轉`}
-                  >
-                    <span className="tab-icon">{done ? '✅' : icons[tab]}</span>
-                    <span className="tab-label">{labels[tab]}</span>
-                    {done && <span className="tab-check">✓</span>}
-                  </button>
-                );
-              })}
-
-              <div className="tab-nav-divider"></div>
-              
-              <button 
-                className={`tab-btn ${activeTab === 'settings' ? 'active' : ''}`}
-                onClick={() => setActiveTab('settings')}
-              >
-                <span className="tab-icon">⚙️</span>
-                <span className="tab-label">系統設定</span>
-              </button>
-            </nav>
-
-            {/* 主要內容區 */}
-            <div className="tab-content">
+              </div>
+            )}
+            <div className="tab-content animate-fade-in">
               {renderTabContent()}
             </div>
-          </div>
+          </>
         )}
-      </main>
+
+        {/* 頁尾(瘦身,credit 移出黃金區) */}
+        <footer className="app-footer">
+          <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
+          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React 製程管制平台</p>
+        </footer>
+      </AppShell>
 
       {/* 簽核成功慶祝 Overlay */}
       {showSuccessOverlay && (
@@ -686,13 +740,6 @@ export default function App() {
           </div>
         </div>
       )}
-
-      {/* 頁尾 */}
-      <footer className="app-footer">
-        <p>© 2026 醫電鼎眾股份有限公司. All rights reserved. | 網頁負責人: SQE 陳智富</p>
-        <p className="footer-meta">Vite + React Premium 製程管制平台</p>
-      </footer>
-      </div>
       </ErrorBoundary>
     </>
   );

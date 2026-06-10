@@ -1,3 +1,21 @@
+.login-mode-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--c-text-2, #565d68);
+  background: var(--c-surface-2, #f1f3f5);
+  border: 1px solid var(--c-border, #e6e8ec);
+  border-radius: 999px;
+}
+.login-contact-hint {
+  margin-top: 12px;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
+}
+
 .login-overlay {
   position: fixed;
   top: 0;
