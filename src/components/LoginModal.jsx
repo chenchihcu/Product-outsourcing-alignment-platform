@@ -1,23 +1,13 @@
 import { useState } from 'react';
 import './LoginModal.css';
 import { isSupabaseEnabled } from '../data/supabaseClient';
-import { signIn, signUp } from '../data/auth';
-
-const ROLE_OPTIONS = [
-  { role: 'rd', unit: '研發單位', level: 'Engineer' },
-  { role: 'eng', unit: '工程單位', level: 'Engineer' },
-  { role: 'qa', unit: '審核單位（品保處）', level: 'Reviewer' },
-  { role: 'admin', unit: '管理處', level: 'Administrator' },
-];
+import { signIn } from '../data/auth';
 
 export default function LoginModal({ onLogin, defaultAccounts }) {
-  const [username, setUsername] = useState(''); // Supabase 模式下為電子郵件
+  const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
-  const [mode, setMode] = useState('login'); // login | register(僅雲端)
-  const [regName, setRegName] = useState('');
-  const [regRoleIdx, setRegRoleIdx] = useState(0);
 
   const performLocalLogin = (uname, pw) => {
     const account = defaultAccounts.find((a) => a.username === uname && a.password === pw);
@@ -32,15 +22,11 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
 
     setBusy(true); setError('');
     try {
-      if (mode === 'register') {
-        const r = ROLE_OPTIONS[regRoleIdx];
-        await signUp({ email: username, password, username: regName || username, unit: r.unit, role: r.role, level: r.level });
-      }
       const user = await signIn(username, password);
       if (user) onLogin(user);
-      else setError('登入失敗。若剛註冊,請先完成信箱驗證(或於 Supabase 關閉 email 驗證)。');
+      else setError('登入失敗，請確認帳號與密碼。');
     } catch (err) {
-      setError(err?.message || '操作失敗,請稍後再試。');
+      setError(err?.message || '操作失敗，請稍後再試。');
     } finally {
       setBusy(false);
     }
@@ -67,23 +53,6 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
         <form onSubmit={handleSubmit} className="login-form">
           {error && <div className="login-error-msg">{error}</div>}
 
-          {isSupabaseEnabled && mode === 'register' && (
-            <>
-              <div className="form-group">
-                <label className="form-label">顯示名稱</label>
-                <input className="form-input edit-active" value={regName}
-                  onChange={(e) => setRegName(e.target.value)} placeholder="例:陳小明" required />
-              </div>
-              <div className="form-group">
-                <label className="form-label">單位 / 角色</label>
-                <select className="form-input edit-active" value={regRoleIdx}
-                  onChange={(e) => setRegRoleIdx(Number(e.target.value))}>
-                  {ROLE_OPTIONS.map((r, i) => <option key={r.role} value={i}>{r.unit}（{r.role}）</option>)}
-                </select>
-              </div>
-            </>
-          )}
-
           <div className="form-group">
             <label className="form-label">{isSupabaseEnabled ? '電子郵件(帳號)' : '使用者帳號'}</label>
             <input
@@ -109,14 +78,13 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
           </div>
 
           <button type="submit" className="btn btn-primary btn-block" style={{ marginTop: '16px' }} disabled={busy}>
-            {busy ? '處理中…' : (isSupabaseEnabled && mode === 'register' ? '註冊並登入' : '確認登入')}
+            {busy ? '驗證中…' : '確認登入'}
           </button>
 
           {isSupabaseEnabled && (
-            <button type="button" className="login-switch-mode"
-              onClick={() => { setMode(mode === 'login' ? 'register' : 'login'); setError(''); }}>
-              {mode === 'login' ? '沒有帳號?註冊新帳號' : '已有帳號?返回登入'}
-            </button>
+            <p className="login-contact-hint">
+              尚無帳號？請聯絡系統管理員開通。
+            </p>
           )}
         </form>
 

@@ -63,3 +63,51 @@ export function onAuthChange(cb) {
   const { data } = supabase.auth.onAuthStateChange(() => { cb(); });
   return () => data.subscription.unsubscribe();
 }
+
+// =========================================================================
+// Admin 專用：使用者管理（須搭配 invite-user Edge Function + admin RLS）
+// =========================================================================
+
+/** 以 Edge Function 邀請新使用者（service_role 隔在伺服器端） */
+export async function inviteUser({ email, username, unit, role, level }) {
+  if (!isSupabaseEnabled) throw new Error('雲端模式未啟用');
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('請先登入');
+
+  const res = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/invite-user`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${session.access_token}`,
+        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ email, username, unit, role, level }),
+    },
+  );
+  const payload = await res.json();
+  if (!res.ok) throw new Error(payload.error || '邀請失敗');
+  return payload;
+}
+
+/** 取得所有使用者的 profile（admin RLS 允許讀取） */
+export async function listAllProfiles() {
+  if (!isSupabaseEnabled) return [];
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .order('created_at');
+  if (error) throw error;
+  return data ?? [];
+}
+
+/** 更新指定使用者的 profile 欄位（須 admin RLS） */
+export async function updateUserProfile(userId, updates) {
+  if (!isSupabaseEnabled) return;
+  const { error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', userId);
+  if (error) throw error;
+}

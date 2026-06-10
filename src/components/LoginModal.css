@@ -9,16 +9,11 @@
   border: 1px solid var(--c-border, #e6e8ec);
   border-radius: 999px;
 }
-.login-switch-mode {
-  display: block;
-  width: 100%;
+.login-contact-hint {
   margin-top: 12px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-size: 0.82rem;
-  color: var(--c-accent, #4f46e5);
-  text-decoration: underline;
+  text-align: center;
+  font-size: 0.8rem;
+  color: #9ca3af;
 }
 
 .login-overlay {
