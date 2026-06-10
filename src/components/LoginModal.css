@@ -1,3 +1,26 @@
+.login-mode-tag {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--c-text-2, #565d68);
+  background: var(--c-surface-2, #f1f3f5);
+  border: 1px solid var(--c-border, #e6e8ec);
+  border-radius: 999px;
+}
+.login-switch-mode {
+  display: block;
+  width: 100%;
+  margin-top: 12px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--c-accent, #4f46e5);
+  text-decoration: underline;
+}
+
 .login-overlay {
   position: fixed;
   top: 0;

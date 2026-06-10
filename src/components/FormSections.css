@@ -21,44 +21,47 @@
 
 /* Card Design System */
 .form-section-card {
-  background: rgba(255, 255, 255, 0.8);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  border-radius: 12px;
+  background: var(--c-surface);
+  border: 1px solid var(--c-border);
+  border-radius: var(--r-lg);
   padding: 0;
-  margin-bottom: 1rem;
-  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.04);
-  transition: all 0.3s ease;
+  margin-bottom: var(--sp-4);
+  box-shadow: var(--sh-1);
+  transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease);
   overflow: hidden;
 }
 
 .form-section-card:hover {
-  border-color: rgba(79, 70, 229, 0.2);
-  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.08);
-  transform: translateY(-2px);
+  border-color: var(--c-border-strong);
+  box-shadow: var(--sh-2);
 }
 
 .card-header {
   font-family: 'Outfit', sans-serif;
-  font-size: 1rem;
-  font-weight: 600;
-  color: #ffffff;
-  padding: 0.85rem 1.25rem;
+  font-size: var(--fs-md);
+  font-weight: 650;
+  color: var(--c-text-1);
+  background: var(--c-surface-2);
+  border-bottom: 1px solid var(--c-border);
+  padding: 0.75rem 1.25rem;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .card-header .card-icon-circle {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
+  background: var(--c-accent-weak);
+  color: var(--c-accent);
 }
 
-.card-header[data-accent="indigo"] { background: linear-gradient(135deg, #4f46e5, #6366f1); }
-.card-header[data-accent="emerald"] { background: linear-gradient(135deg, #059669, #10b981); }
-.card-header[data-accent="amber"] { background: linear-gradient(135deg, #d97706, #f59e0b); }
-.card-header[data-accent="slate"] { background: linear-gradient(135deg, #475569, #64748b); }
+/* 低調色彩識別:左側細邊條 + 圖示著色(取代原本搶眼的整條漸層) */
+.form-section-card[data-accent="indigo"] { border-left: 3px solid var(--c-accent); }
+.form-section-card[data-accent="emerald"] { border-left: 3px solid var(--c-success); }
+.form-section-card[data-accent="emerald"] .card-icon-circle { background: var(--c-success-weak); color: var(--c-success); }
+.form-section-card[data-accent="amber"] { border-left: 3px solid var(--c-warning); }
+.form-section-card[data-accent="amber"] .card-icon-circle { background: var(--c-warning-weak); color: var(--c-warning); }
+.form-section-card[data-accent="slate"] { border-left: 3px solid #64748b; }
+.form-section-card[data-accent="slate"] .card-icon-circle { background: #eef1f5; color: #475569; }
 
 .card-body {
   padding: 1.25rem;
@@ -186,6 +189,21 @@
   width: 16px;
   height: 16px;
   cursor: pointer;
+}
+
+/* 觸控人因:平板/手機放大勾選元件與可點區域(≥44px) */
+@media (max-width: 1024px) {
+  .checkbox-label input[type="checkbox"], .radio-label input[type="radio"] {
+    width: 20px;
+    height: 20px;
+  }
+  .checkbox-label, .radio-label {
+    min-height: var(--touch-target);
+    padding: 0.5rem 0.65rem;
+    gap: 10px;
+  }
+  .checkbox-flex { gap: 0.5rem; padding: 0.6rem; }
+  .radio-group { gap: 1rem; }
 }
 
 /* Radio Group */
@@ -628,9 +646,6 @@ input:checked + .slider:before {
 }
 
 /* ===== 卡片 hover 強化 ===== */
-.form-section-card {
-  border-left: none;
-}
 
 /* ===== 製程管制區塊色條 ===== */
 .form-row-grid[data-accent="indigo"] .form-label .card-icon-circle {

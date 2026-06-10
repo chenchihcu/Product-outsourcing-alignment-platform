@@ -85,6 +85,31 @@
   border-radius: 8px;
 }
 
+/* P3:協作者更新提示橫幅 */
+.remote-update-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--sp-3, 12px);
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: var(--c-info-weak, #e8f0fe);
+  border: 1px solid var(--c-info, #2563eb);
+  border-radius: var(--r-md, 8px);
+  color: var(--c-info, #2563eb);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+.rub-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.rub-dismiss {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--c-text-2, #565d68);
+  font-size: 0.82rem;
+  text-decoration: underline;
+}
+
 /* App Main Welcome Layout */
 .app-main {
   flex: 1;
