@@ -78,7 +78,10 @@ export function subscribePresence(channelName, meta, onSync) {
       onSync(Object.values(state).flat());
     })
     .subscribe(async (status) => {
-      if (status === 'SUBSCRIBED') await channel.track(meta);
+      if (status === 'SUBSCRIBED') {
+        try { await channel.track(meta); }
+        catch (e) { if (import.meta.env.DEV) console.warn('[presence] track 失敗', e); }
+      }
     });
   return () => { supabase.removeChannel(channel); };
 }

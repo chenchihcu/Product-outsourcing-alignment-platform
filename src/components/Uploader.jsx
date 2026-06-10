@@ -19,10 +19,17 @@ export default function Uploader({ onDataLoaded }) {
     }
   };
 
+  const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+
   const processFile = async (file) => {
     if (!file) return;
-    if (!file.name.endsWith('.xlsx')) {
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
       setError('請上傳 .xlsx 格式的 Excel 檔案！');
+      return;
+    }
+    // D3 — 檔案大小限制
+    if (file.size > MAX_FILE_SIZE) {
+      setError(`檔案過大（${(file.size / 1024 / 1024).toFixed(1)} MB），上限為 10 MB。`);
       return;
     }
 
@@ -34,19 +41,29 @@ export default function Uploader({ onDataLoaded }) {
       reader.onload = (e) => {
         try {
           const ab = e.target.result;
+          // D3 — 驗證 XLSX 魔術字節 (PK 0x50 0x4B)
+          const header = new Uint8Array(ab).slice(0, 4);
+          if (header[0] !== 0x50 || header[1] !== 0x4B) {
+            setError('檔案格式無效，請確認上傳的是真正的 .xlsx 格式 Excel 檔案。');
+            setLoading(false);
+            return;
+          }
           // 解析出 JSON 資料
           const parsedData = parseRequirementExcel(ab);
-          
           // 保留原始的 workbook 物件，以利後續修改與匯出
           const originalWb = XLSX.read(ab, { type: 'array' });
-          
           onDataLoaded(parsedData, originalWb, file.name);
         } catch (err) {
-          console.error(err);
-          setError('解析 Excel 檔案失敗，請確保此檔案符合「新機種製作需求一覽表2026 v2」格式。');
+          if (import.meta.env.DEV) console.error(err);
+          setError(`解析 Excel 失敗：${err?.message || '請確認檔案符合「新機種製作需求一覽表2026 v2」格式。'}`);
         } finally {
           setLoading(false);
         }
+      };
+      // D3 — FileReader 錯誤處理
+      reader.onerror = () => {
+        setError('讀取檔案失敗，請重試。');
+        setLoading(false);
       };
       reader.readAsArrayBuffer(file);
     } catch (err) {

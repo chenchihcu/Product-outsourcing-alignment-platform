@@ -12,6 +12,11 @@ import { createClient } from '@supabase/supabase-js';
 const url = import.meta.env.VITE_SUPABASE_URL;
 const anonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
+// E5 — 環境變數不完整時提示
+if ((url && !anonKey) || (!url && anonKey)) {
+  console.error('[supabase] 設定不完整：VITE_SUPABASE_URL 與 VITE_SUPABASE_ANON_KEY 必須同時設定或同時留空。');
+}
+
 export const isSupabaseEnabled = Boolean(url && anonKey);
 
 export const supabase = isSupabaseEnabled

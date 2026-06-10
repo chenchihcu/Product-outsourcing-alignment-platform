@@ -87,6 +87,9 @@ export default function App() {
   const [remoteUpdate, setRemoteUpdate] = useState(null);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
+  // E1/E2 — 雲端同步錯誤橫幅
+  const [syncError, setSyncError] = useState(null);
+
   const handleGoToSection = (tab, msg) => {
     setActiveTab(tab);
     if (msg) {
@@ -108,9 +111,10 @@ export default function App() {
     return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
   });
 
-  const defaultAccounts = [
+  // S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
+  const defaultAccounts = import.meta.env.DEV ? [
     { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
-  ];
+  ] : [];
   const [accounts, setAccounts] = useState(() => {
     return getJSON('accounts' + getStorageSuffix(currentUser), defaultAccounts);
   });
@@ -167,7 +171,8 @@ export default function App() {
           setJSON(key.replace('ag_', ''), newList);
           setProjects(newList);
         } catch (err) {
-          console.error('載入預設範本失敗:', err);
+          if (import.meta.env.DEV) console.error('載入預設範本失敗:', err);
+          setSyncError('載入預設範本失敗，請重新整理頁面。若持續發生，請確認網路連線。');
         }
       } else {
         setProjects(list);
@@ -194,10 +199,15 @@ export default function App() {
           setJSON(localKey, cloud); // 同時更新本機離線快取
         } else {
           const local = getJSON(localKey, []);
-          if (local.length > 0) await migrateLocalProjects(ws, local);
+          if (local.length > 0) {
+            await migrateLocalProjects(ws, local);
+            if (cancelled) return; // E6 — 遷移後再次檢查
+          }
         }
       } catch (e) {
-        console.warn('[cloud] 雲端同步失敗,改用本機資料', e);
+        if (import.meta.env.DEV) console.warn('[cloud] 雲端同步失敗,改用本機資料', e);
+        // E2 — 同步失敗時顯示可見橫幅
+        if (!cancelled) setSyncError('雲端同步失敗，目前使用本機資料。請確認網路連線。');
       }
     })();
     return () => { cancelled = true; };
@@ -249,7 +259,7 @@ export default function App() {
       if (base) {
         pushProject(getWorkspace(currentUserRef.current), {
           ...base, name, data: projData, alignmentRate: report.alignmentRate, updatedAt,
-        }, currentUserRef.current?.id).catch(e => console.warn('[cloud] 上推失敗', e));
+        }, currentUserRef.current?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 上推失敗', e); });
       }
     }
   }, []);
@@ -293,15 +303,42 @@ export default function App() {
   }, [data, currentProjectId, fileName, saveProjectData]);
 
   useEffect(() => {
-    const handleBeforeUnload = () => {
-      const flush = flushPendingSaveRef.current;
-      flush();
+    const handleBeforeUnload = (e) => {
+      flushPendingSaveRef.current();
+      // U1 — 尚有未儲存變更時警告使用者
+      if (saveState === 'saving') {
+        e.preventDefault();
+        e.returnValue = '';
+      }
     };
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => {
       window.removeEventListener('beforeunload', handleBeforeUnload);
     };
-  }, []);
+  }, [saveState]);
+
+  // I3 — 30 分鐘無操作自動登出(保護共用工作站)
+  useEffect(() => {
+    if (!currentUser) return;
+    const TIMEOUT_MS = 30 * 60 * 1000;
+    let timerId;
+    const reset = () => {
+      clearTimeout(timerId);
+      timerId = setTimeout(() => {
+        signOut();
+        setCurrentUser(null);
+        handleBackToList();
+        alert('因長時間無操作，已自動登出，請重新登入。');
+      }, TIMEOUT_MS);
+    };
+    const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
+    events.forEach(ev => window.addEventListener(ev, reset, { passive: true }));
+    reset();
+    return () => {
+      clearTimeout(timerId);
+      events.forEach(ev => window.removeEventListener(ev, reset));
+    };
+  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     setJSON('factories' + getStorageSuffix(currentUser), factories);
@@ -323,7 +360,10 @@ export default function App() {
   useEffect(() => {
     if (!isSupabaseEnabled) return;
     let cancelled = false;
-    getCurrentUser().then((u) => { if (!cancelled && u) setCurrentUser(u); }).catch(() => {});
+    getCurrentUser().then((u) => { if (!cancelled && u) setCurrentUser(u); }).catch((err) => {
+      if (import.meta.env.DEV) console.error('[auth] 工作階段還原失敗', err);
+      if (!cancelled) setSyncError('雲端驗證失敗，已切換為本機模式。');
+    });
     const unsub = onAuthChange(async () => {
       const u = await getCurrentUser();
       if (!cancelled) setCurrentUser(u);
@@ -334,7 +374,9 @@ export default function App() {
   useEffect(() => {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
-    setJSON(key.replace('ag_', ''), projects);
+    // U10 — 偵測 localStorage 容量滿
+    const ok = setJSON(key.replace('ag_', ''), projects);
+    if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。');
   }, [projects, currentUser]);
 
   // 自動恢復上次編輯的機種
@@ -352,10 +394,12 @@ export default function App() {
         setData(project.data);
         setFileName(project.name);
         if (project.originalWbBase64) {
-          const binaryString = atob(project.originalWbBase64);
-          const bytes = new Uint8Array(binaryString.length);
-          for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
-          setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+          try {
+            const binaryString = atob(project.originalWbBase64);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) bytes[i] = binaryString.charCodeAt(i);
+            setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+          } catch { setOriginalWb(null); } // D10 — 損毀的 base64 不讓整個載入失敗
         }
         setCurrentProjectId(lastId);
         setActiveTab('dashboard');
@@ -394,14 +438,15 @@ export default function App() {
 
       // 解析原始 Excel 二進位資料為 Workbook 物件
       if (project.originalWbBase64) {
-        const binaryString = atob(project.originalWbBase64);
-        const len = binaryString.length;
-        const bytes = new Uint8Array(len);
-        for (let i = 0; i < len; i++) {
-          bytes[i] = binaryString.charCodeAt(i);
-        }
-        const wb = XLSX.read(bytes.buffer, { type: 'array' });
-        setOriginalWb(wb);
+        try { // D10 — 損毀的 base64 不讓選取失敗
+          const binaryString = atob(project.originalWbBase64);
+          const len = binaryString.length;
+          const bytes = new Uint8Array(len);
+          for (let i = 0; i < len; i++) {
+            bytes[i] = binaryString.charCodeAt(i);
+          }
+          setOriginalWb(XLSX.read(bytes.buffer, { type: 'array' }));
+        } catch { setOriginalWb(null); }
       } else {
         // 若無 base64 備份，先設為 null，由 SignOff 處理
         setOriginalWb(null);
@@ -458,7 +503,7 @@ export default function App() {
       const newList = [...projects, newProj];
       setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
-      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => console.warn('[cloud] 新增上推失敗', e));
+      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 新增上推失敗', e); });
 
       handleSelectProject(newProj.id, newList);
     } catch (err) {
@@ -503,7 +548,7 @@ export default function App() {
       const newList = [...projects, newProj];
       setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
       setProjects(newList);
-      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => console.warn('[cloud] 匯入上推失敗', e));
+      if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 匯入上推失敗', e); });
 
       handleSelectProject(newProj.id, newList);
     } catch (err) {
@@ -513,14 +558,31 @@ export default function App() {
   };
 
   // 6. 刪除機種
-  const handleDeleteProject = (id) => {
+  const handleDeleteProject = async (id) => {
+    const proj = projects.find(p => p.id === id);
+    if (!proj) return;
+    // D2 — 刪除前確認
+    if (!window.confirm(`確定要刪除「${proj.name}」嗎？此操作無法還原。`)) return;
+
+    const snapshot = projects; // D2 — 保留快照供雲端失敗時還原
     const newList = projects.filter(p => p.id !== id);
     setJSON(getProjectsKey(currentUser).replace('ag_', ''), newList);
     setProjects(newList);
-    if (isSupabaseEnabled) deleteProjectRemote(id).catch(e => console.warn('[cloud] 刪除失敗', e));
 
     if (currentProjectId === id) {
       handleBackToList();
+    }
+
+    if (isSupabaseEnabled) {
+      try {
+        await deleteProjectRemote(id);
+      } catch (e) {
+        if (import.meta.env.DEV) console.error('[cloud] 刪除失敗', e);
+        // D2 — 雲端刪除失敗時還原本機清單
+        setProjects(snapshot);
+        setJSON(getProjectsKey(currentUser).replace('ag_', ''), snapshot);
+        alert('雲端刪除失敗，機種已恢復。請確認網路連線後再試。');
+      }
     }
   };
 
@@ -541,6 +603,10 @@ export default function App() {
   // P3:把對方的最新版本載入編輯器(使用者主動確認,避免靜默覆蓋編輯中內容)
   const handleLoadRemote = () => {
     if (!remoteUpdate) return;
+    // D1 — 本地有未儲存修改時警告
+    if (saveState === 'saving') {
+      if (!window.confirm('您有尚未儲存的修改，載入遠端版本後本地變更將被覆蓋。確定繼續？')) return;
+    }
     editedSinceLoadRef.current = false;
     setData(remoteUpdate.data);
     setFileName(remoteUpdate.name);
@@ -582,7 +648,7 @@ export default function App() {
     
     switch (activeTab) {
       case 'dashboard':
-        return <Dashboard data={data} onGoToSection={handleGoToSection} sectionStatus={sectionStatus} />;
+        return <Dashboard data={data} onGoToSection={handleGoToSection} sectionStatus={sectionStatus} currentUser={currentUser} />;
       case 'basicInfo':
         return (
           <FormSections 
@@ -690,6 +756,14 @@ export default function App() {
         savedAt={savedAt}
         onlineCount={onlineUsers.length}
       >
+        {/* E1/E2/U10 — 雲端同步或儲存錯誤橫幅 */}
+        {syncError && (
+          <div style={{ background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)', borderRadius: '6px', padding: '8px 14px', margin: '8px 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.85rem', color: '#fbbf24', gap: '12px' }}>
+            <span>⚠️ {syncError}</span>
+            <button type="button" onClick={() => setSyncError(null)} style={{ background: 'none', border: 'none', color: '#fbbf24', cursor: 'pointer', fontSize: '1rem', lineHeight: 1 }} aria-label="關閉">✕</button>
+          </div>
+        )}
+
         {!currentProjectId ? (
           <ProjectList
             projects={projects}

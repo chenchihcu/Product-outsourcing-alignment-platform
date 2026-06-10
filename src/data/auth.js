@@ -81,7 +81,6 @@ export async function inviteUser({ email, username, unit, role, level }) {
       headers: {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${session.access_token}`,
-        apikey: import.meta.env.VITE_SUPABASE_ANON_KEY,
       },
       body: JSON.stringify({ email, username, unit, role, level }),
     },

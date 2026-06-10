@@ -48,6 +48,8 @@ function CloudUserManagement({ currentUser }) {
   };
 
   const handleRoleChange = async (userId, newRole) => {
+    // U6 — 僅 admin 可修改角色
+    if (currentUser.role !== 'admin') { alert('無權限修改使用者角色。'); return; }
     const r = CLOUD_ROLE_OPTIONS.find((o) => o.value === newRole);
     if (!r) return;
     try {
@@ -176,13 +178,24 @@ export default function Settings({
 
   const handleAddAccountSubmit = (e) => {
     e.preventDefault();
-    if (!newUsername.trim() || !newPassword.trim()) {
+    const trimUser = newUsername.trim();
+    const trimPass = newPassword.trim();
+    if (!trimUser || !trimPass) {
       alert('請填寫所有必要欄位！');
       return;
     }
-
-    if (accounts.some(a => a.username === newUsername.trim())) {
-      alert('該帳號已存在！');
+    // U8 — 密碼長度與帳號格式驗證
+    if (trimPass.length < 6) {
+      alert('密碼至少需要 6 個字元。');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_@.\-]+$/.test(trimUser)) {
+      alert('帳號只能包含英數字、底線、@、點與連字符。');
+      return;
+    }
+    // U8 — 大小寫不分的重複帳號檢查
+    if (accounts.some(a => a.username.toLowerCase() === trimUser.toLowerCase())) {
+      alert('該帳號已存在（帳號不區分大小寫）！');
       return;
     }
 
@@ -440,7 +453,12 @@ export default function Settings({
                           <button
                             className="btn-delete-account"
                             disabled={currentUser.username === acc.username || acc.role === 'admin'}
-                            onClick={() => onRemoveAccount(acc.username)}
+                            onClick={() => {
+                              // U7 — 刪除確認
+                              if (window.confirm(`確定要刪除帳號「${acc.username}」？此操作無法還原。`)) {
+                                onRemoveAccount(acc.username);
+                              }
+                            }}
                             title={
                               currentUser.username === acc.username
                                 ? '無法刪除目前登入的帳號'

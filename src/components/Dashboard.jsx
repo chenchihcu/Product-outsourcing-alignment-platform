@@ -13,7 +13,7 @@ const PARTY_META = {
   sign: { label: '簽章', icon: '✍️', desc: '待上傳電子簽章' },
 };
 
-export default function Dashboard({ data, onGoToSection, sectionStatus = {} }) {
+export default function Dashboard({ data, onGoToSection, sectionStatus = {}, currentUser }) {
   const report = useMemo(() => validateAlignment(data), [data]);
   const { warnings, alignmentRate } = report;
 
@@ -27,8 +27,16 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {} }) {
     return g;
   }, [warnings]);
 
-  // 下一步最優先:先異常後警告
-  const nextItem = errors[0] || warns[0] || null;
+  // U5 — 「下一步」只顯示目前角色能處理的項目
+  // QA 與 Admin 只負責審核，不需被提示填寫欄位；簽章項目對所有角色均可見
+  const isQaOrAdmin = currentUser?.role === 'qa' || currentUser?.role === 'admin';
+  const actionableWarnings = useMemo(() => {
+    if (!isQaOrAdmin) return warnings;
+    return warnings.filter((w) => partyOf(w.message) === 'sign');
+  }, [warnings, isQaOrAdmin]);
+  const nextItem = actionableWarnings.filter(w => w.type === 'error')[0]
+    || actionableWarnings.filter(w => w.type === 'warning')[0]
+    || null;
 
   const [showAll, setShowAll] = useState(false);
   const [filterParty, setFilterParty] = useState(null);
