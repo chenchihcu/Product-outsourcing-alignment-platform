@@ -24,7 +24,6 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   const isRejected = !!rejection;
   const isQA = currentUser.role === 'qa' || currentUser.role === 'admin';
   const canResubmit = currentUser.role === 'rd' || currentUser.role === 'eng' || currentUser.role === 'admin';
-  const [rejectMode, setRejectMode] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
   const fmtDateTime = (iso) => {
@@ -49,7 +48,6 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
     delete owners['basicInfo.signOff.engineeringReviewSignature'];
     delete owners['basicInfo.signOff.qaSignature'];
     onChange({ ...data, basicInfo: { ...data.basicInfo, signOff: updatedSign }, _owners: owners });
-    setRejectMode(false);
     setRejectReason('');
   };
 
@@ -381,28 +379,22 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
               <p className="sign-terms">本簽章確認：兩端資訊與防呆管制點皆已完成填寫與覆核，符合量產試產要求。</p>
             )}
 
-            {/* QA 退件控制(僅品保、且尚未退件時) */}
+            {/* QA 退件控制(僅品保、且尚未退件時):常駐的「退件原因」欄位 */}
             {isQA && !isRejected && (
               <div className="qa-reject-control">
-                {!rejectMode ? (
-                  <button type="button" className="btn btn-secondary btn-xs reject-trigger" onClick={() => setRejectMode(true)}>
-                    ⛔ 退件 / 要求修正
+                <label className="form-label reject-label">退件原因 <span className="req">*</span>（如需退件，請於下方說明原由）</label>
+                <textarea
+                  className="form-textarea reject-textarea"
+                  rows={3}
+                  placeholder="例：製程管制分頁的 SMT 焊接順序與測溫點配置尚未填寫，請補齊後重新送審。"
+                  value={rejectReason}
+                  onChange={(e) => setRejectReason(e.target.value)}
+                />
+                <div className="reject-form-actions">
+                  <button type="button" className="btn btn-xs reject-confirm" onClick={handleReject}>
+                    ⛔ 退件並要求修正
                   </button>
-                ) : (
-                  <div className="reject-form">
-                    <textarea
-                      className="form-textarea reject-textarea"
-                      rows={2}
-                      placeholder="請說明退件原因（必填）…"
-                      value={rejectReason}
-                      onChange={(e) => setRejectReason(e.target.value)}
-                    />
-                    <div className="reject-form-actions">
-                      <button type="button" className="btn btn-secondary btn-xs" onClick={() => { setRejectMode(false); setRejectReason(''); }}>取消</button>
-                      <button type="button" className="btn btn-xs reject-confirm" onClick={handleReject}>確認退件</button>
-                    </div>
-                  </div>
-                )}
+                </div>
               </div>
             )}
           </div>
