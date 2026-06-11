@@ -1,5 +1,14 @@
 import { supabase, isSupabaseEnabled } from './supabaseClient';
 
+/* 帳號登入用的固定內部網域:使用者只需打帳號(例 pe),系統自動補成 pe@mitcorp.local */
+export const LOGIN_DOMAIN = 'mitcorp.local';
+
+/** 帳號 → 登入 email:已含 @ 視為完整 email;否則補上固定網域 */
+export function toLoginEmail(identifier) {
+  const id = (identifier || '').trim();
+  return id.includes('@') ? id : `${id}@${LOGIN_DOMAIN}`;
+}
+
 /* Supabase session + profile → App 的 currentUser 形狀 */
 function toCurrentUser(profile, user) {
   return {
@@ -13,8 +22,9 @@ function toCurrentUser(profile, user) {
   };
 }
 
-/** 以 email/密碼登入,回傳 currentUser */
-export async function signIn(email, password) {
+/** 以帳號(或 email)+密碼登入。帳號會自動補上固定網域;回傳 currentUser */
+export async function signIn(account, password) {
+  const email = toLoginEmail(account);
   const { error } = await supabase.auth.signInWithPassword({ email, password });
   if (error) throw error;
   return getCurrentUser();
