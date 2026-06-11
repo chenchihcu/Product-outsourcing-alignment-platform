@@ -44,7 +44,19 @@ function cleanPlaceholder(val) {
  */
 export function parseRequirementExcel(arrayBuffer) {
   const workbook = XLSX.read(arrayBuffer, { type: 'array' });
-  
+
+  // D4 — 驗證必要工作表是否存在
+  const requiredSheets = ['產品基本資料', '製程管制與前置作業', '試產報告要求'];
+  const missingSheets = requiredSheets.filter(s => !workbook.SheetNames.includes(s));
+  if (missingSheets.length > 0) {
+    throw new Error(`此檔案不符合需求一覽表模板格式（缺少工作表：${missingSheets.join('、')}）`);
+  }
+  // D4 — 驗證標題列
+  const titleCell = workbook.Sheets['產品基本資料']?.['A1'];
+  if (titleCell && !String(titleCell.v || '').includes('新機種')) {
+    throw new Error('此檔案不符合需求一覽表模板格式（A1 標題不符）');
+  }
+
   const data = {
     basicInfo: {},
     processControl: {},
@@ -276,6 +288,8 @@ export function parseRequirementExcel(arrayBuffer) {
           data._owners = {};
         }
       } catch (e) {
+        // V4 — G1 損毀時給出可見警告
+        console.warn('[parser] G1 欄位擁有者資料損毀，已重設為預設值，請確認填寫權限是否正確。', e);
         data._owners = {};
       }
     } else {
@@ -311,8 +325,9 @@ export function parseRequirementExcel(arrayBuffer) {
     const pcbCondVal = getVal('D6') || '';
     const fpcaCondVal = getVal('D7') || '';
     
-    // 解析 PCB 烘烤條件
-    const pcbMatch = String(pcbCondVal).match(/PCB 烘烤:\s*([_\d]+)\s*°C\s*±\s*([_\d]+)\s*°C\s*×\s*([_\d]+)\s*hr[（(]依 PCB 廠建議[）)]/);
+    // 解析 PCB 烘烤條件 (V3 — 支援全形 ℃ 與多餘空白)
+    const pcbNorm = String(pcbCondVal).replace(/℃/g, '°C').replace(/\s+/g, ' ');
+    const pcbMatch = pcbNorm.match(/PCB 烘烤:\s*([_\d]+)\s*°C\s*±\s*([_\d]+)\s*°C\s*×\s*([_\d]+)\s*hr[（(]依 PCB 廠建議[）)]/);
     let pcbBakeTemp = '', pcbBakeTol = '', pcbBakeHr = '';
     if (pcbMatch) {
       pcbBakeTemp = pcbMatch[1].replace(/_/g, '').trim();
@@ -327,8 +342,9 @@ export function parseRequirementExcel(arrayBuffer) {
       }
     }
 
-    // 解析 FPCA 烘烤條件
-    const fpcaMatch = String(fpcaCondVal).match(/FPCA 烘烤:\s*依原物料規格書，若無規格則\s*_*([_\d]+)_*\s*°C\s*×\s*_*([_\d]+)_*\s*hr/);
+    // 解析 FPCA 烘烤條件 (V3 — 支援全形 ℃ 與多餘空白)
+    const fpcaNorm = String(fpcaCondVal).replace(/℃/g, '°C').replace(/\s+/g, ' ');
+    const fpcaMatch = fpcaNorm.match(/FPCA 烘烤:\s*依原物料規格書，若無規格則\s*_*([_\d]+)_*\s*°C\s*×\s*_*([_\d]+)_*\s*hr/);
     let fpcaBakeTemp = '', fpcaBakeHr = '';
     if (fpcaMatch) {
       fpcaBakeTemp = fpcaMatch[1].replace(/_/g, '').trim();

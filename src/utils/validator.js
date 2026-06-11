@@ -31,7 +31,7 @@ export function validateAlignment(data) {
   check(hasStage, '未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）', 'error');
 
   // --- 委外加工廠回填檢核 ---
-  check(!!bi.factory, '未填寫「委外加工廠」名稱', 'error');
+  check(!!(bi.factory || '').trim(), '未填寫「委外加工廠」名稱', 'error');
 
   // 烘烤參數確認
   const pc = data.processControl || {};
@@ -142,7 +142,7 @@ export function validateAlignment(data) {
   // 簽核欄對齊（檢查電子簽章圖片）
   const sign = bi.signOff || {};
   check(!!sign.rdSignature, '「研發」電子簽章未上傳', 'error');
-  check(!!sign.engineeringReviewSignature, '「工程」電子簽章未上傳', 'warning');
+  check(!!sign.engineeringReviewSignature, '「工程」電子簽章未上傳', 'error');
   check(!!sign.qaSignature, '「品保處」電子簽章未上傳', 'error');
 
   // 計算對齊率

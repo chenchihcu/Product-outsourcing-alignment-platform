@@ -13,3 +13,12 @@
 
 # 提醒:VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY 請於
 # Netlify Site settings → Environment variables 設定(勿寫在此檔)。
+
+# I2 — 安全標頭
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"
+    Permissions-Policy = "camera=(), microphone=(), geolocation=()"

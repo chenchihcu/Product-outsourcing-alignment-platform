@@ -448,3 +448,16 @@
   }
 }
 
+
+
+/* I4 — 列印時隱藏導覽列，保留主內容 */
+@media print {
+  .shell-sidebar,
+  .shell-header,
+  .tab-navigation,
+  .remote-update-banner,
+  .export-action-row,
+  footer.app-footer { display: none !important; }
+  .app-main { margin: 0 !important; padding: 0 !important; }
+  body { background: #fff !important; color: #000 !important; }
+}

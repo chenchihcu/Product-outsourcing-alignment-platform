@@ -25,6 +25,8 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   const isQA = currentUser.role === 'qa' || currentUser.role === 'admin';
   const canResubmit = currentUser.role === 'rd' || currentUser.role === 'eng' || currentUser.role === 'admin';
   const [rejectReason, setRejectReason] = useState('');
+  const [resubmitNote, setResubmitNote] = useState('');
+  const [rejectionRead, setRejectionRead] = useState(false);
 
   const fmtDateTime = (iso) => {
     if (!iso) return '';
@@ -36,6 +38,8 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   const handleReject = () => {
     const reason = rejectReason.trim();
     if (!reason) { alert('請填寫退件原因。'); return; }
+    // U2 — 退件前確認
+    if (!window.confirm('此操作將清除三方簽章並鎖定機種，要求重新簽核。確定退件？')) return;
     const updatedSign = {
       ...data.basicInfo.signOff,
       rejection: { reason, by: currentUser.username, byUnit: currentUser.unit, at: new Date().toISOString() },
@@ -53,9 +57,18 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
 
   // 發包方修正後重新送審:解除退件鎖定
   const handleResubmit = () => {
+    // D5 — 防呆：退件資訊遺失時中止
+    if (!rejection) { alert('退件資訊遺失，無法執行重新送審。'); return; }
+    // D6 — 必須填寫修正說明
+    if (!resubmitNote.trim()) { alert('請填寫「修正說明」，說明本次修正了哪些內容。'); return; }
+    // D6 — 必須勾選已閱讀確認
+    if (!rejectionRead) { alert('請勾選「已閱讀退件原因並完成修正」後才可重新送審。'); return; }
     const updatedSign = { ...data.basicInfo.signOff };
     delete updatedSign.rejection;
+    updatedSign.rejectionResponse = { note: resubmitNote.trim(), by: currentUser.username, at: new Date().toISOString() };
     onChange({ ...data, basicInfo: { ...data.basicInfo, signOff: updatedSign } });
+    setResubmitNote('');
+    setRejectionRead(false);
   };
 
   const handleSignChange = (field, val) => {
@@ -72,9 +85,19 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   };
 
   const handleExport = () => {
+    // U4 — 防止重複點擊
+    if (exportLoading) return;
     if (!originalWb) {
       alert('無法匯出：缺少原始 Excel 範本資料。請重新載入機種或從範本重新建立。');
       return;
+    }
+    // D8 — 匯出前驗證簽章圖片格式
+    const sigs = data.basicInfo?.signOff || {};
+    for (const k of ['rdSignature', 'engineeringReviewSignature', 'qaSignature']) {
+      if (sigs[k] && !String(sigs[k]).startsWith('data:image/')) {
+        alert(`匯出失敗：${k} 簽章圖片格式無效，請重新上傳簽章。`);
+        return;
+      }
     }
     setExportLoading(true);
 
@@ -128,9 +151,34 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
             </div>
           </div>
           {canResubmit && (
-            <button type="button" className="btn btn-primary reject-resubmit" onClick={handleResubmit}>
-              ✅ 已修正，重新送審
-            </button>
+            <div className="resubmit-section">
+              <textarea
+                className="form-input edit-active resubmit-note"
+                placeholder="修正說明（必填）：請說明本次修正了哪些內容…"
+                value={resubmitNote}
+                onChange={(e) => setResubmitNote(e.target.value)}
+                rows={2}
+                style={{ width: '100%', marginTop: '8px', resize: 'vertical' }}
+              />
+              <label className="resubmit-ack-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '6px', fontSize: '0.85rem', cursor: 'pointer' }}>
+                <input
+                  type="checkbox"
+                  checked={rejectionRead}
+                  onChange={(e) => setRejectionRead(e.target.checked)}
+                  style={{ width: '16px', height: '16px' }}
+                />
+                已閱讀退件原因並完成修正
+              </label>
+              <button
+                type="button"
+                className="btn btn-primary reject-resubmit"
+                onClick={handleResubmit}
+                disabled={!resubmitNote.trim() || !rejectionRead}
+                style={{ marginTop: '8px', opacity: (!resubmitNote.trim() || !rejectionRead) ? 0.5 : 1 }}
+              >
+                ✅ 已修正，重新送審
+              </button>
+            </div>
           )}
         </div>
       )}
@@ -433,7 +481,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
         <button
           className="btn btn-primary btn-large"
           onClick={() => window.print()}
-          disabled={isRejected}
+          disabled={isRejected || exportLoading}
           style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
         >
           <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }}>

@@ -5,7 +5,10 @@ export function useFieldOwner(onChange, currentUser) {
   const unit = currentUser?.unit;
 
   const setField = useCallback((dataPath, value) => {
-    if (!unit) return;
+    if (!unit) {
+      if (import.meta.env.DEV) console.warn('[fieldOwner] unit 未設定，欄位儲存已略過：', dataPath);
+      return;
+    }
     onChange(prev => updateFieldWithOwner(prev, dataPath, value, unit));
   }, [onChange, unit]);
 

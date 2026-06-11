@@ -32,12 +32,19 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     setShowCreateModal(false);
   };
 
+  const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10 MB
+
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.name.endsWith('.xlsx')) {
+    if (!file.name.toLowerCase().endsWith('.xlsx')) {
       alert('請選擇有效的 .xlsx 格式檔案！');
+      return;
+    }
+    // D3 — 檔案大小限制
+    if (file.size > MAX_IMPORT_SIZE) {
+      alert(`檔案過大（${(file.size / 1024 / 1024).toFixed(1)} MB），上限為 10 MB。`);
       return;
     }
 
@@ -47,21 +54,33 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       reader.onload = async (event) => {
         try {
           const arrayBuffer = event.target.result;
+          // D3 — 驗證 XLSX 魔術字節 (PK 0x50 0x4B)
+          const header = new Uint8Array(arrayBuffer).slice(0, 4);
+          if (header[0] !== 0x50 || header[1] !== 0x4B) {
+            alert('檔案格式無效，請確認上傳的是真正的 .xlsx 格式 Excel 檔案。');
+            setIsImporting(false);
+            return;
+          }
           const base64 = btoa(
             new Uint8Array(arrayBuffer)
               .reduce((data, byte) => data + String.fromCharCode(byte), '')
           );
           await onImportExcel(file.name, base64);
         } catch (err) {
-          console.error(err);
-          alert('解析或傳送 Excel 檔案失敗，請確認檔案格式是否正確。');
+          if (import.meta.env.DEV) console.error(err);
+          alert(`解析或傳送 Excel 檔案失敗：${err?.message || '請確認檔案格式是否正確。'}`);
         } finally {
           setIsImporting(false);
         }
       };
+      // D3 — FileReader 錯誤處理
+      reader.onerror = () => {
+        alert('讀取檔案失敗，請重試。');
+        setIsImporting(false);
+      };
       reader.readAsArrayBuffer(file);
     } catch (err) {
-      console.error(err);
+      if (import.meta.env.DEV) console.error(err);
       alert('讀取檔案時出錯！');
       setIsImporting(false);
     }

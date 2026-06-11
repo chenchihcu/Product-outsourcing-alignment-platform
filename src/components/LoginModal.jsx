@@ -54,13 +54,15 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
           {error && <div className="login-error-msg">{error}</div>}
 
           <div className="form-group">
-            <label className="form-label">{isSupabaseEnabled ? '電子郵件(帳號)' : '使用者帳號'}</label>
+            <label className="form-label">帳號</label>
             <input
-              type={isSupabaseEnabled ? 'email' : 'text'}
+              type="text"
               className="form-input edit-active"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder={isSupabaseEnabled ? 'name@company.com' : '請輸入帳號'}
+              placeholder="請輸入帳號(例:pe)"
+              autoCapitalize="none"
+              autoCorrect="off"
               required
             />
           </div>
