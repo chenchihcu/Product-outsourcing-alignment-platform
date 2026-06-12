@@ -35,7 +35,8 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
   const handleQuickLogin = (acc) => {
     setUsername(acc.username);
     setPassword(acc.password);
-    performLocalLogin(acc.username, acc.password);
+    // 先讓 state 更新 flush 到輸入欄位，再執行登入
+    setTimeout(() => performLocalLogin(acc.username, acc.password), 0);
   };
 
   return (
@@ -60,7 +61,8 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
               className="form-input edit-active"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder="請輸入帳號(例:pe)"
+              placeholder="請輸入帳號(例:pe)" name="username"
+              autoComplete="username"
               autoCapitalize="none"
               autoCorrect="off"
               required
@@ -74,7 +76,8 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
               className="form-input edit-active"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="請輸入密碼"
+              placeholder="請輸入密碼" name="password"
+              autoComplete="current-password"
               required
             />
           </div>
@@ -111,3 +114,4 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
     </div>
   );
 }
+

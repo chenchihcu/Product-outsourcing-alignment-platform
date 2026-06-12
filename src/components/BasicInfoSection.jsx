@@ -32,13 +32,13 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
             </div>
             <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'productNo')}`}>
               <label className="form-label">產品料號 <span className="req">*</span></label>
-              <input type="text" className="form-input edit-active" placeholder="請輸入產品料號" value={data.basicInfo.productNo || ''}
+              <input type="text" className="form-input edit-active" placeholder="請輸入產品料號" name="basicInfo.productNo" value={data.basicInfo.productNo || ''}
                 onChange={(e) => setField('basicInfo.productNo', e.target.value)}
                 disabled={isFieldDisabled(data, currentUser, 'basicInfo.productNo')} />
             </div>
             <div className={`form-group ${getFieldHighlightClass(highlightField, 'productDesc')}`}>
               <label className="form-label">產品名稱 / 描述</label>
-              <input type="text" className="form-input edit-active" placeholder="請輸入產品名稱 / 描述" value={data.basicInfo.productDesc || ''}
+              <input type="text" className="form-input edit-active" placeholder="請輸入產品名稱 / 描述" name="basicInfo.productDesc" value={data.basicInfo.productDesc || ''}
                 onChange={(e) => setField('basicInfo.productDesc', e.target.value)}
                 disabled={isFieldDisabled(data, currentUser, 'basicInfo.productDesc')} />
             </div>
@@ -168,7 +168,7 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.processItems.otherProcess')} />
                   <span>其他:</span>
                 </label>
-                <input type="text" className="form-input edit-active compact" placeholder="請說明其他加工項目"
+                <input type="text" className="form-input edit-active compact" placeholder="請說明其他加工項目" name="basicInfo.processItems.otherProcessText"
                   value={data.basicInfo.processItems?.otherProcessText || ''}
                   onChange={(e) => setField('basicInfo.processItems.otherProcessText', e.target.value)}
                   disabled={!data.basicInfo.processItems?.otherProcess || isFieldDisabled(data, currentUser, 'basicInfo.processItems.otherProcessText')}
@@ -188,13 +188,13 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
               <div className="form-row-grid-3 animate-fade-in" style={{ marginTop: '8px' }}>
                 <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'stencil')}`}>
                   <label className="form-label">鋼板厚度 (mm) <span className="req">*</span></label>
-                  <input type="text" className="form-input edit-active" placeholder="例如: 0.12" value={data.basicInfo.tooling?.stencil?.thickness || ''}
+                  <input type="text" className="form-input edit-active" placeholder="例如: 0.12" name="basicInfo.tooling.stencil.thickness" value={data.basicInfo.tooling?.stencil?.thickness || ''}
                     onChange={(e) => setField('basicInfo.tooling.stencil.thickness', e.target.value)}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.stencil.thickness')} />
                 </div>
                 <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'stencil')}`}>
                   <label className="form-label">開口比例 (%) <span className="req">*</span></label>
-                  <input type="text" className="form-input edit-active" placeholder="例如: 100" value={data.basicInfo.tooling?.stencil?.apertureRatio || ''}
+                  <input type="text" className="form-input edit-active" placeholder="例如: 100" name="basicInfo.tooling.stencil.apertureRatio" value={data.basicInfo.tooling?.stencil?.apertureRatio || ''}
                     onChange={(e) => setField('basicInfo.tooling.stencil.apertureRatio', e.target.value)}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.stencil.apertureRatio')} />
                 </div>
@@ -252,7 +252,7 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
                   {item.need && (
                     <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '6px', maxWidth: '140px' }}>
                       <span style={{ fontSize: '0.78rem', color: '#6b7280', whiteSpace: 'nowrap' }}>數量:</span>
-                      <input type="text" className="form-input edit-active compact" placeholder="例: 2 SETs" value={item.qty || ''}
+                      <input type="text" className="form-input edit-active compact" placeholder="例: 2 SETs" name={`basicInfo.tooling.${key}.qty`} value={item.qty || ''}
                         onChange={(e) => setField(`basicInfo.tooling.${key}.qty`, e.target.value)}
                         disabled={isFieldDisabled(data, currentUser, `basicInfo.tooling.${key}.qty`)} style={{ padding: '4px 6px', fontSize: '0.8rem' }} />
                     </div>
@@ -301,10 +301,10 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
               </div>
               {data.basicInfo.tooling?.otherFixture?.need && (
                 <div className="fixture-qty-input animate-fade-in" style={{ display: 'flex', alignItems: 'center', gap: '6px', flex: 1, maxWidth: '200px' }}>
-                  <input type="text" className="form-input edit-active compact" placeholder="治具名稱" value={data.basicInfo.tooling?.otherFixture?.name || ''}
+                  <input type="text" className="form-input edit-active compact" placeholder="治具名稱" name="basicInfo.tooling.otherFixture.name" value={data.basicInfo.tooling?.otherFixture?.name || ''}
                     onChange={(e) => setField('basicInfo.tooling.otherFixture.name', e.target.value)}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.otherFixture.name')} style={{ flex: 2, padding: '4px 6px', fontSize: '0.8rem' }} />
-                  <input type="text" className="form-input edit-active compact" placeholder="數量" value={data.basicInfo.tooling?.otherFixture?.qty || ''}
+                  <input type="text" className="form-input edit-active compact" placeholder="數量" name="basicInfo.tooling.otherFixture.qty" value={data.basicInfo.tooling?.otherFixture?.qty || ''}
                     onChange={(e) => setField('basicInfo.tooling.otherFixture.qty', e.target.value)}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.otherFixture.qty')} style={{ flex: 1, padding: '4px 6px', fontSize: '0.8rem' }} />
                 </div>
@@ -315,8 +315,11 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
       </div>
 
       <div className="action-row">
-        <button className="btn btn-primary" onClick={onNext}>下一步：製程管制與前置作業</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：製程管制與前置作業</button>
       </div>
     </div>
   );
 }
+
+
+

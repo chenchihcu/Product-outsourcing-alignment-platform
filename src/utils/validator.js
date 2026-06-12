@@ -47,7 +47,7 @@ export function validateAlignment(data) {
   }
 
   const tooling = bi.tooling || {};
-  if (pi.smt && tooling.stencil?.need) {
+  if (pi.smt) {
     const thickStr = String(tooling.stencil.thickness || '');
     const apertStr = String(tooling.stencil.apertureRatio || '');
     check(!!tooling.stencil.thickness && !thickStr.includes('____'), '未填寫鋼板「厚度」', 'error');

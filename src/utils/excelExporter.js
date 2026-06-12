@@ -332,7 +332,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
         qaSignature: sign.qaSignature || ''
       }
     };
-    writeCell(sheet1, 'G1', JSON.stringify(exportMetadata));
+    try {
+      writeCell(sheet1, 'G1', JSON.stringify(exportMetadata));
+    } catch (e) {
+      writeCell(sheet1, 'G1', '{}');
+    }
   }
 
   // 2. 更新【製程管制與前置作業】
@@ -515,3 +519,4 @@ export function exportRequirementExcel(originalWorkbook, data) {
   const out = XLSX.write(wb, wopts);
   return out;
 }
+

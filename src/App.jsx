@@ -5,7 +5,9 @@ import ProjectList from './components/ProjectList';
 import Dashboard from './components/Dashboard';
 import FormSections from './components/FormSections';
 import SignOff from './components/SignOff';
-const PrintReport = lazy(() => import('./components/PrintReport'));
+const PrintReport = lazy(() =>
+  import('./components/PrintReport').catch(() => ({ default: () => null }))
+);
 import Settings from './components/Settings';
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
@@ -36,7 +38,7 @@ class ErrorBoundary extends Component {
           <div className="glass-card" style={{ padding: '40px', maxWidth: '500px' }}>
             <h2 style={{ color: '#ef4444', marginBottom: '16px' }}>系統發生錯誤</h2>
             <p style={{ marginBottom: '24px', color: '#6b7280' }}>請重新整理頁面或回到機種列表重新載入。</p>
-            <button className="btn btn-primary" onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}>
+            <button type="button" className="btn btn-primary" onClick={() => { this.setState({ hasError: false }); window.location.reload(); }}>
               重新整理
             </button>
           </div>
@@ -480,7 +482,11 @@ export default function App() {
       
       if (template) {
         base64 = template.originalWbBase64;
-        parsedData = JSON.parse(JSON.stringify(template.data)); // 深拷貝
+        try {
+          parsedData = JSON.parse(JSON.stringify(template.data));
+        } catch {
+          parsedData = null;
+        }
       } else {
         const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
         if (!response.ok) throw new Error('無法載入範本');
@@ -591,6 +597,7 @@ export default function App() {
     if (currentProjectId && data) {
       saveProjectData(currentProjectId, fileName, data);
     }
+    setSaveState('saved');
     setData(null);
     setOriginalWb(null);
     setFileName('');
@@ -736,13 +743,13 @@ export default function App() {
 
   return (
     <>
-      <ErrorBoundary>
       {data && (
         <Suspense fallback={null}>
           <PrintReport data={data} />
         </Suspense>
       )}
-      <AppShell
+      <ErrorBoundary>
+        <AppShell
         currentUser={currentUser}
         onLogout={() => { signOut(); setCurrentUser(null); handleBackToList(); }}
         inProject={!!currentProjectId}
@@ -778,8 +785,8 @@ export default function App() {
               <div className="remote-update-banner animate-fade-in">
                 <span className="rub-text">☁ 協作者剛更新了此機種的資料</span>
                 <span className="rub-actions">
-                  <button className="btn btn-primary btn-xs" onClick={handleLoadRemote}>載入最新</button>
-                  <button className="rub-dismiss" onClick={() => setRemoteUpdate(null)}>稍後</button>
+                  <button type="button" className="btn btn-primary btn-xs" onClick={handleLoadRemote}>載入最新</button>
+                  <button type="button" className="rub-dismiss" onClick={() => setRemoteUpdate(null)}>稍後</button>
                 </span>
               </div>
             )}
@@ -795,26 +802,34 @@ export default function App() {
           <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React 製程管制平台</p>
         </footer>
       </AppShell>
+      </ErrorBoundary>
 
       {/* 簽核成功慶祝 Overlay */}
       {showSuccessOverlay && (
-        <div className="success-overlay animate-fade-in" onClick={() => setShowSuccessOverlay(false)}>
+        <div className="success-overlay animate-fade-in" onClick={() => setShowSuccessOverlay(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowSuccessOverlay(false); } }}>
           <div className="success-card glass-card text-center" onClick={(e) => e.stopPropagation()}>
             <span className="big-check-icon">✓</span>
             <h2>Excel 匯出下載成功！</h2>
             <p>對齊簽核版確認表已成功匯出。雙向資訊與防呆管制點皆已正確填入！</p>
             <div className="success-actions">
-              <button className="btn btn-primary" onClick={() => setShowSuccessOverlay(false)}>
+              <button type="button" className="btn btn-primary" onClick={() => setShowSuccessOverlay(false)}>
                 確定
               </button>
-              <button className="btn btn-secondary" onClick={handleBackToList}>
+              <button type="button" className="btn btn-secondary" onClick={handleBackToList}>
                 回到機種列表
               </button>
             </div>
           </div>
         </div>
       )}
-      </ErrorBoundary>
     </>
   );
 }
+
+
+
+
+
+
+
+
