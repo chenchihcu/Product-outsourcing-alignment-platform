@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import './AppShell.css';
 
-/* 對齊流程的五個步驟(順序固定) */
+/* 確認流程的五個步驟(順序固定) */
 const STEPS = [
   { key: 'basicInfo', label: '基本資料', icon: '📋' },
   { key: 'preparation', label: '前置作業', icon: '🔧' },
@@ -111,7 +111,7 @@ export default function AppShell({
               <NavItem {...navShared} tab="dashboard" icon="📈" label="儀表板" badge={`${alignmentRate}%`} />
 
               <div className="nav-group-label">
-                對齊流程
+                確認流程
                 <span className="nav-group-count">{completedSteps}/{STEPS.length}</span>
               </div>
               {STEPS.map((s, i) => (

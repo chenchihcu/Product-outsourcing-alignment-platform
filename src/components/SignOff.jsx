@@ -162,8 +162,8 @@ export default function SignOff({
 
   return (
     <div className="signoff-container glass-card animate-fade-in">
-      <h2 className="section-title">D. 雙向線上簽核與 Excel 匯出</h2>
-      <p className="section-subtitle">兩端資訊對齊無誤後，請於下方進行線上簽章並下載匯出檔案。</p>
+      <h2 className="section-title">D. 簽章與匯出</h2>
+      <p className="section-subtitle">完成前置確認後，請於下方簽章並下載文件。</p>
 
       {/* 品保退件提示(硬性鎖定:簽章與匯出皆已封鎖) */}
       {isRejected && (
@@ -213,7 +213,7 @@ export default function SignOff({
       <div className="status-banner">
         <div className="status-progress-bar-wrapper">
           <div className="status-progress-info">
-            <span className="status-label">當前對齊率</span>
+            <span className="status-label">完成率</span>
             <span className="status-percentage">{alignmentRate}%</span>
           </div>
           <div className="status-bar-bg">
@@ -456,7 +456,7 @@ export default function SignOff({
                 ⚠️ 建議等研發與工程完成簽章後再進行最終審核，但目前不強制阻擋。
               </p>
             ) : (
-              <p className="sign-terms">本簽章確認：兩端資訊與防呆管制點皆已完成填寫與覆核，符合量產試產要求。</p>
+              <p className="sign-terms">本簽章確認：確認項目已完成填寫與覆核，符合試產要求。</p>
             )}
 
             {/* QA 退件控制(僅品保、且尚未退件時):常駐的「退件原因」欄位 */}
@@ -495,15 +495,15 @@ export default function SignOff({
           <span className="warning-emoji">⚠️</span>
           <div className="warning-desc">
             <p className="warning-title">注意：尚有必填的防呆檢查未完成！</p>
-            <p className="warning-detail">為了避免委外加工廠遺漏正確訊息，建議先前往前述分頁完成對齊。如果您仍要強行簽章並匯出文件，請點擊下方按鈕。</p>
+            <p className="warning-detail">為了避免供應商取得不完整資訊，建議先前往前述分頁補齊。若仍需簽章並匯出，請點擊下方按鈕。</p>
           </div>
         </div>
       ) : (
         <div className="export-success">
           <span className="success-emoji">🎉</span>
           <div className="success-desc">
-            <p className="success-title">完美！兩端資訊已完全同步！</p>
-            <p className="success-detail">恭喜！所有必填與關鍵管制點皆已完成填寫與對齊。點擊下方按鈕即可匯出最終簽章版文件。</p>
+            <p className="success-title">確認項目已完成</p>
+            <p className="success-detail">所有必填與關鍵管制點皆已填寫，可匯出最終簽章版文件。</p>
           </div>
         </div>
       )}
@@ -544,7 +544,7 @@ export default function SignOff({
           <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
-          <span>列印 / 儲存為 PDF 報告 (A4直式)</span>
+          <span>列印 / 儲存 PDF (A4直式)</span>
         </button>
 
         <button type="button"

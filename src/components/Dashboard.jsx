@@ -68,7 +68,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
       <div className="dash-hero glass-card">
         <div className="hero-rate" data-ok={alignmentRate === 100}>
           <span className="rate-num">{alignmentRate}<small>%</small></span>
-          <span className="rate-label">雙向資訊對齊率</span>
+          <span className="rate-label">完成率</span>
         </div>
         <div className="hero-main">
           <div className="hero-bar">
@@ -78,7 +78,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
             <span className="stat"><b>{doneSteps}</b>/6 步驟完成</span>
             {errors.length > 0 && <span className="stat stat-error">● {errors.length} 異常</span>}
             {warns.length > 0 && <span className="stat stat-warn">● {warns.length} 警告</span>}
-            {warnings.length === 0 && <span className="stat stat-ok">✓ 已完美對齊</span>}
+            {warnings.length === 0 && <span className="stat stat-ok">✓ 已完成</span>}
           </div>
         </div>
       </div>
@@ -89,8 +89,8 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <p className="clear-title">兩端資訊已完全同步！</p>
-            <p className="clear-desc">無任何漏失項目，可進行線上雙向簽章並下載 Excel。</p>
+            <p className="clear-title">確認項目已完成</p>
+            <p className="clear-desc">無漏失項目，可進行簽章並下載 Excel。</p>
           </div>
         </div>
       ) : (

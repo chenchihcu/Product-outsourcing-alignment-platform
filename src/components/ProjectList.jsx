@@ -117,7 +117,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     proj.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 2. 根據對齊進度過濾
+  // 2. 根據完成進度過濾
   const filteredProjects = searchedProjects.filter(proj => {
     if (filterMode === 'in-progress') {
       return proj.alignmentRate < 100;
@@ -142,7 +142,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       <div className="project-list-header glass-card">
         <div className="header-info">
           <h2>機種管理中心</h2>
-          <p>線上直接管理多個機種對齊進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
+          <p>線上管理多個機種的前置確認進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
         </div>
         <div className="header-actions">
           <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
@@ -276,8 +276,8 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <thead>
             <tr>
               <th>📁 機種與一覽表名稱</th>
-              <th>📊 雙向資訊對齊率</th>
-              <th className="hide-on-mobile">🏷️ 對齊狀態</th>
+              <th>📊 完成率</th>
+              <th className="hide-on-mobile">🏷️ 狀態</th>
               <th className="hide-on-mobile">🕒 更新時間</th>
               <th className="text-center">⚙️ 動作</th>
             </tr>
@@ -322,7 +322,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     </td>
                     <td className="hide-on-mobile">
                       <span className={`status-badge ${proj.alignmentRate === 100 ? 'aligned' : 'in-progress'}`}>
-                        {proj.alignmentRate === 100 ? '已對齊 ✓' : '進行中 ⏳'}
+                        {proj.alignmentRate === 100 ? '已完成 ✓' : '進行中 ⏳'}
                       </span>
                     </td>
                     <td className="table-date-cell hide-on-mobile">{dateStr}</td>
@@ -405,7 +405,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     required
                     autoFocus
                   />
-                  <p className="form-help">系統將自動以此名稱複製預設範本，建立包含基本與防呆管制的全新機種表單。</p>
+                  <p className="form-help">系統將自動以此名稱複製預設範本，建立包含基本資料與確認項目的新機種表單。</p>
                 </div>
               </div>
               <div className="modal-footer">
@@ -423,7 +423,6 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     </div>
   );
 }
-
 
 
 

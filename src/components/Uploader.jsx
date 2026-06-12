@@ -111,7 +111,7 @@ export default function Uploader({ onDataLoaded }) {
           <div className="loader-wrapper">
             <div className="pulse-loader"></div>
             <p className="upload-title">正在解析 Excel 資料表...</p>
-            <p className="upload-subtitle">正在建構資訊對齊結構與防呆規則</p>
+            <p className="upload-subtitle">正在載入表單結構與檢查規則</p>
           </div>
         ) : (
           <div className="upload-prompt">
@@ -147,7 +147,7 @@ export default function Uploader({ onDataLoaded }) {
         </div>
         <div className="footer-item">
           <span className="dot warning"></span>
-          <span>線上雙向對齊</span>
+          <span>線上確認流程</span>
         </div>
       </div>
     </div>

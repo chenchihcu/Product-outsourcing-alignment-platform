@@ -67,7 +67,7 @@
     font-weight: 800;
     margin: 0 0 6px 0;
     color: #1e3a8a !important; /* Tech Blue Title */
-    letter-spacing: 1px;
+    letter-spacing: 0;
   }
 
   .print-subtitle {
@@ -94,6 +94,11 @@
     margin: 12px 0 6px 0;
     color: #1e293b !important;
     page-break-after: avoid;
+  }
+
+  .print-subsection-block {
+    margin-top: 12px;
+    page-break-inside: avoid;
   }
 
   .print-table {
@@ -134,6 +139,30 @@
 
   .cell-bold {
     font-weight: bold;
+    color: #1e293b !important;
+  }
+
+  .cell-subhead {
+    background: #f1f5f9 !important;
+    color: #1e293b !important;
+    font-weight: 800;
+  }
+
+  .delivery-item {
+    padding-left: 20px !important;
+  }
+
+  .print-field-note {
+    margin-top: 6px;
+    font-size: 8.8pt;
+    color: #334155 !important;
+    font-weight: 550;
+    line-height: 1.45;
+  }
+
+  .print-inline-title {
+    font-weight: 700;
+    margin-bottom: 4px;
     color: #1e293b !important;
   }
 
@@ -243,6 +272,10 @@
     white-space: nowrap !important;
   }
 
+  .text-center {
+    text-align: center !important;
+  }
+
   /* 備註對話框 */
   .print-memo-box {
     border: 1px solid #cbd5e1 !important;
@@ -260,6 +293,15 @@
     background: #fffbeb !important;
     color: #92400e !important;
     min-height: auto;
+  }
+
+  .print-pending-table {
+    page-break-inside: avoid;
+  }
+
+  .print-pending-table .badge-danger {
+    white-space: normal;
+    line-height: 1.35;
   }
 
   /* 雙向線上簽核區 */
@@ -321,6 +363,9 @@
   .print-sign-body {
     padding: 12px;
     font-size: 9pt;
+    display: flex;
+    flex-direction: column;
+    min-height: 110px;
   }
 
   .print-sign-name {
@@ -333,6 +378,7 @@
     align-items: center;
     gap: 8px;
     height: 42px;
+    flex: 1;
   }
 
   .print-sign-name img {
@@ -365,6 +411,10 @@
     color: #334155 !important;
     font-size: 8.3pt;
     font-weight: 700;
+  }
+
+  .sign-section-title {
+    margin-top: 24px;
   }
 
   /* 分頁控制 */

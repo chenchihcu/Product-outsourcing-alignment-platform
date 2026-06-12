@@ -1040,7 +1040,7 @@ export default function App() {
         {/* 頁尾(瘦身,credit 移出黃金區) */}
         <footer className="app-footer">
           <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
-          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React 製程管制平台</p>
+          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React</p>
         </footer>
       </AppShell>
       </ErrorBoundary>
@@ -1050,8 +1050,8 @@ export default function App() {
         <div className="success-overlay animate-fade-in" onClick={() => setShowSuccessOverlay(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowSuccessOverlay(false); } }}>
           <div className="success-card glass-card text-center" onClick={(e) => e.stopPropagation()}>
             <span className="big-check-icon">✓</span>
-            <h2>Excel 匯出下載成功！</h2>
-            <p>對齊簽核版確認表已成功匯出。雙向資訊與防呆管制點皆已正確填入！</p>
+            <h2>Excel 已匯出</h2>
+            <p>簽核版文件已完成下載。</p>
             <div className="success-actions">
               <button type="button" className="btn btn-primary" onClick={() => setShowSuccessOverlay(false)}>
                 確定
