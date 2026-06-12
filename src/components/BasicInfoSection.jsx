@@ -47,14 +47,39 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
             <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'stage')}`}>
               <label className="form-label">產品階段 <span className="req">*</span></label>
               <div className="checkbox-flex">
-                {Object.keys(data.basicInfo.stage || {}).map(k => (
+                {Object.keys(data.basicInfo.stage || {}).filter(k => k !== 'ecn').map(k => (
                   <label key={k} className="checkbox-label">
                     <input type="checkbox" checked={data.basicInfo.stage[k] || false}
                       onChange={(e) => setField(`basicInfo.stage.${k}`, e.target.checked)}
                       disabled={isFieldDisabled(data, currentUser, `basicInfo.stage.${k}`)} />
-                    <span>{k === 'politRun' ? 'Pilot-run' : k.toUpperCase()}</span>
+                    <span>{k === 'politRun' ? 'Pilot-run' : k === 'mp' ? 'MP' : k.toUpperCase()}</span>
                   </label>
                 ))}
+                {!Object.keys(data.basicInfo.stage || {}).includes('mp') && (
+                  <label key="mp" className="checkbox-label">
+                    <input type="checkbox" checked={data.basicInfo.stage?.mp || false}
+                      onChange={(e) => setField('basicInfo.stage.mp', e.target.checked)}
+                      disabled={isFieldDisabled(data, currentUser, 'basicInfo.stage.mp')} />
+                    <span>MP</span>
+                  </label>
+                )}
+              </div>
+            </div>
+            <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'ecnChange')}`}>
+              <label className="form-label">工程變更 <span className="req">*</span></label>
+              <div className="radio-group">
+                <label className="radio-label">
+                  <input type="radio" name="ecnChange" checked={data.basicInfo.ecnChange?.has || false}
+                    onChange={() => setField('basicInfo.ecnChange', { has: true, no: false })}
+                    disabled={isFieldDisabled(data, currentUser, 'basicInfo.ecnChange.has')} />
+                  <span>有</span>
+                </label>
+                <label className="radio-label">
+                  <input type="radio" name="ecnChange" checked={data.basicInfo.ecnChange?.no || false}
+                    onChange={() => setField('basicInfo.ecnChange', { has: false, no: true })}
+                    disabled={isFieldDisabled(data, currentUser, 'basicInfo.ecnChange.no')} />
+                  <span>沒有</span>
+                </label>
               </div>
             </div>
           </div>
@@ -266,7 +291,7 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
               <span className="tool-name tool-name-sm">SMT刷錫載具</span>
               <div className="radio-group">
                 <label className="radio-label"><input type="radio" name="smtCarrierNeed" checked={data.basicInfo.tooling?.smtCarrier?.need || false}
-                  onChange={() => setField('basicInfo.tooling.smtCarrier.need', true)}
+                  onChange={() => { setField('basicInfo.tooling.smtCarrier.need', true); setField('basicInfo.tooling.smtCarrier.noNeed', false); }}
                   disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.smtCarrier.need')} /><span>需要</span></label>
                 <label className="radio-label"><input type="radio" name="smtCarrierNeed" checked={data.basicInfo.tooling?.smtCarrier?.noNeed || false}
                   onChange={() => { setField('basicInfo.tooling.smtCarrier.need', false); setField('basicInfo.tooling.smtCarrier.noNeed', true); setField('basicInfo.tooling.smtCarrier.upper', false); setField('basicInfo.tooling.smtCarrier.lower', false); }}
@@ -293,7 +318,7 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
               <span className="tool-name tool-name-sm">其他治具</span>
               <div className="radio-group">
                 <label className="radio-label"><input type="radio" name="otherFixtureNeed" checked={data.basicInfo.tooling?.otherFixture?.need || false}
-                  onChange={() => setField('basicInfo.tooling.otherFixture.need', true)}
+                  onChange={() => { setField('basicInfo.tooling.otherFixture.need', true); setField('basicInfo.tooling.otherFixture.noNeed', false); }}
                   disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.otherFixture.need')} /><span>需要</span></label>
                 <label className="radio-label"><input type="radio" name="otherFixtureNeed" checked={data.basicInfo.tooling?.otherFixture?.noNeed || false}
                   onChange={() => { setField('basicInfo.tooling.otherFixture.need', false); setField('basicInfo.tooling.otherFixture.noNeed', true); setField('basicInfo.tooling.otherFixture.name', ''); setField('basicInfo.tooling.otherFixture.qty', ''); }}

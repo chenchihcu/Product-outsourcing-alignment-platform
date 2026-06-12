@@ -39,7 +39,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
     const reason = rejectReason.trim();
     if (!reason) { alert('請填寫退件原因。'); return; }
     // U2 — 退件前確認
-    if (!window.confirm('此操作將清除三方簽章並鎖定機種，要求重新簽核。確定退件？')) return;
+    if (!window.confirm('此操作將清除三方簽章，並鎖定「簽章與匯出」功能；表單內容仍可由發包方(研發/工程)依退件原因修正後重新送審。確定退件？')) return;
     const updatedSign = {
       ...data.basicInfo.signOff,
       rejection: { reason, by: currentUser.username, byUnit: currentUser.unit, at: new Date().toISOString() },
@@ -243,6 +243,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {
@@ -317,6 +318,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {
@@ -391,6 +393,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {

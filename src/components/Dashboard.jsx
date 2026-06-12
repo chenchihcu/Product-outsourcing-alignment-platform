@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { validateAlignment } from '../utils/validator';
 import './Dashboard.css';
 
-const STEP_KEYS = ['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'];
+const STEP_KEYS = ['basicInfo', 'preparation', 'processControl', 'trialReport', 'documents', 'signOff'];
 
 /* 責任歸屬:本需求一覽表由「發包方(研發/工程)」填寫全部項目;
    供應商(委外加工廠)不負責填寫任何一項。電子簽章為獨立的簽核階段。 */
@@ -46,7 +46,9 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
     let tab = 'basicInfo';
     if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具') || msg.includes('委外加工廠')) {
       tab = 'basicInfo';
-    } else if (msg.includes('烘烤') || msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('樣品') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('包材') || msg.includes('包裝') || msg.includes('維修記號') || msg.includes('備註')) {
+    } else if (msg.includes('烘烤') || msg.includes('樣品') || msg.includes('包材') || msg.includes('包裝')) {
+      tab = 'preparation';
+    } else if (msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('維修記號') || msg.includes('備註')) {
       tab = 'processControl';
     } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('翹曲') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
       tab = 'trialReport';
@@ -73,7 +75,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
             <div className="hero-bar-fill" data-ok={alignmentRate === 100} style={{ width: `${alignmentRate}%` }} />
           </div>
           <div className="hero-stats">
-            <span className="stat"><b>{doneSteps}</b>/5 步驟完成</span>
+            <span className="stat"><b>{doneSteps}</b>/6 步驟完成</span>
             {errors.length > 0 && <span className="stat stat-error">● {errors.length} 異常</span>}
             {warns.length > 0 && <span className="stat stat-warn">● {warns.length} 警告</span>}
             {warnings.length === 0 && <span className="stat stat-ok">✓ 已完美對齊</span>}

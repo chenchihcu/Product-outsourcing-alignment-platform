@@ -82,8 +82,10 @@ export function parseRequirementExcel(arrayBuffer) {
       dvt: parseCheckbox(getVal('C5')),
       pvt: parseCheckbox(getVal('E5')), 
       politRun: parseCheckbox(getVal('F5')),
-      ecn: parseCheckbox(getVal('G5'))
+      mp: parseCheckbox(getVal('H5'))
     };
+    // 舊版 ecn 欄位保留解析供 sanitizeProjectData 遷移
+    data.basicInfo._legacyEcn = parseCheckbox(getVal('G5'));
     
     // 烘烤參數 (發包方預填/加工廠參考)
     data.basicInfo.pcbBake = getVal('D5') || '';
@@ -303,7 +305,7 @@ export function parseRequirementExcel(arrayBuffer) {
     }
 
     // 相容舊版：將殘留的 stage.* 擁有者 key 遷移為 basicInfo.stage.*
-    ['evt', 'dvt', 'pvt', 'politRun', 'ecn'].forEach(k => {
+    ['evt', 'dvt', 'pvt', 'politRun', 'mp'].forEach(k => {
       if (data._owners[`stage.${k}`] !== undefined) {
         data._owners[`basicInfo.stage.${k}`] = data._owners[`stage.${k}`];
         delete data._owners[`stage.${k}`];

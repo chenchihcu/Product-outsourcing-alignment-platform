@@ -165,13 +165,14 @@ export function exportRequirementExcel(originalWorkbook, data) {
     // 基本欄位
     writeCell(sheet1, 'B4', bi.factory || '');
 
-    // 產品階段 Checkbox (mpSmall 改為 politRun)
+    // 產品階段 Checkbox
     const stage = bi.stage || {};
     writeCheckbox(sheet1, 'B5', 'EVT', stage.evt);
     writeCheckbox(sheet1, 'C5', 'DVT', stage.dvt);
     writeCheckbox(sheet1, 'E5', '量產', stage.pvt); 
     writeCheckbox(sheet1, 'F5', 'Pilot-run', stage.politRun);
-    writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
+    writeCheckbox(sheet1, 'G5', 'ECN改版', !!bi.ecnChange?.has);
+    writeCheckbox(sheet1, 'H5', 'MP', stage.mp);
 
     // 烘烤 (優先使用製程管制頁填寫的詳細條件，同步避免 sheet1 殘留範本預設值)
     const bake = data.processControl?.bakeRequired || {};

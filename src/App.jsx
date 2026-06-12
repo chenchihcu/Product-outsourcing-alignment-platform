@@ -9,6 +9,7 @@ const PrintReport = lazy(() =>
   import('./components/PrintReport').catch(() => ({ default: () => null }))
 );
 import Settings from './components/Settings';
+
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
 import { parseRequirementExcel } from './utils/excelParser';
@@ -16,13 +17,32 @@ import { getJSON, setJSON, removeKey } from './utils/storage';
 import { isSupabaseEnabled } from './data/supabaseClient';
 import { pullProjects, pushProject, deleteProjectRemote, subscribeProjects, subscribePresence } from './data/cloudSync';
 import { migrateLocalProjects } from './data/migrateLocal';
-import { getCurrentUser, onAuthChange, signOut } from './data/auth';
+import { getCurrentUser, onAuthChange, signOut, updateMySignature } from './data/auth';
 import * as XLSX from 'xlsx';
 import './App.css';
 
 function sanitizeProjectData(data) {
   if (!data) return data;
   const clone = { ...data };
+  
+  // 產品階段：確保 mp 存在，遷移舊版 ecn 至新結構
+  if (clone.basicInfo) {
+    clone.basicInfo = { ...clone.basicInfo };
+    const stage = clone.basicInfo.stage || {};
+    const legacyEcn = clone.basicInfo._legacyEcn;
+    if (stage.ecn !== undefined) {
+      clone.basicInfo.ecnChange = { has: !!stage.ecn, no: !stage.ecn };
+      delete stage.ecn;
+    } else if (legacyEcn !== undefined) {
+      clone.basicInfo.ecnChange = { has: !!legacyEcn, no: !legacyEcn };
+    }
+    delete clone.basicInfo._legacyEcn;
+    if (clone.basicInfo.ecnChange === undefined) {
+      clone.basicInfo.ecnChange = { has: false, no: true };
+    }
+    stage.mp = stage.mp ?? false;
+    clone.basicInfo.stage = { ...stage };
+  }
   
   if (clone.processControl) {
     clone.processControl = { ...clone.processControl };
@@ -158,6 +178,11 @@ function sanitizeProjects(list) {
   });
 }
 
+// S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
+const DEFAULT_ACCOUNTS = import.meta.env.DEV ? [
+  { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
+] : [];
+
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -208,6 +233,8 @@ export default function App() {
   const [projects, setProjects] = useState([]);
   const projectsRef = useRef([]);
   useEffect(() => { projectsRef.current = projects; }, [projects]);
+  // projects 目前內容所屬的 localStorage key(身分切換時用來擋住交叉寫入)
+  const projectsKeyRef = useRef(null);
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const currentProjectIdRef = useRef(null);
   useEffect(() => { currentProjectIdRef.current = currentProjectId; }, [currentProjectId]);
@@ -251,12 +278,8 @@ export default function App() {
     return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
   });
 
-  // S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
-  const defaultAccounts = import.meta.env.DEV ? [
-    { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
-  ] : [];
   const [accounts, setAccounts] = useState(() => {
-    return getJSON('accounts' + getStorageSuffix(currentUser), defaultAccounts);
+    return getJSON('accounts' + getStorageSuffix(currentUser), DEFAULT_ACCOUNTS);
   });
 
   const currentAlignmentRate = useMemo(
@@ -272,9 +295,10 @@ export default function App() {
     const sign = bi.signOff || {};
     return {
       basicInfo: !!(bi.factory && bi.productNo && Object.values(bi.stage || {}).some(v => v)),
-      processControl: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
+      preparation: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
         (pc.bakeRequired?.need || pc.bakeRequired?.noNeed) &&
-        (pc.smtOrder?.bToT || pc.smtOrder?.tToB)),
+        !!pc.packagingType),
+      processControl: !!(pc.smtOrder?.bToT || pc.smtOrder?.tToB),
       trialReport: !!(tr.printRecords?.some(r => r.checked) || tr.inspectRecords?.some(r => r.checked) || tr.photoRecords?.some(r => r.checked)),
       documents: !!Object.values(bi.documents || {}).some(v => v),
       signOff: !!(sign.rdSignature || sign.engineeringReviewSignature || sign.qaSignature)
@@ -309,12 +333,14 @@ export default function App() {
 
           const newList = [defaultProj];
           setJSON(key.replace('ag_', ''), newList);
+          projectsKeyRef.current = key;
           setProjects(newList);
         } catch (err) {
           if (import.meta.env.DEV) console.error('載入預設範本失敗:', err);
           setSyncError('載入預設範本失敗，請重新整理頁面。若持續發生，請確認網路連線。');
         }
       } else {
+        projectsKeyRef.current = key;
         setProjects(sanitizeProjects(list));
       }
     };
@@ -336,6 +362,7 @@ export default function App() {
         if (cancelled || !cloud) return;
         if (cloud.length > 0) {
           const sanitizedCloud = sanitizeProjects(cloud);
+          projectsKeyRef.current = getProjectsKey(currentUser);
           setProjects(sanitizedCloud);
           setJSON(localKey, sanitizedCloud); // 同時更新本機離線快取
         } else {
@@ -389,18 +416,25 @@ export default function App() {
     if (!projId || !projData) return;
     const report = validateAlignment(projData);
     const updatedAt = new Date().toISOString();
-    setProjects(prev => prev.map(p =>
+    const next = projectsRef.current.map(p =>
       p.id === projId
         ? { ...p, name, data: projData, alignmentRate: report.alignmentRate, updatedAt }
         : p
-    ));
+    );
+    projectsRef.current = next;
+    setProjects(next);
+    // 同步落盤:beforeunload / 登出等時機 setState 不會再 commit,persist effect 不會執行
+    const user = currentUserRef.current;
+    if (user) setJSON(getProjectsKey(user).replace('ag_', ''), sanitizeProjects(next));
     // 雲端同步(關閉時 pushProject 為 no-op)
     if (isSupabaseEnabled) {
-      const base = projectsRef.current.find(p => p.id === projId);
+      const base = next.find(p => p.id === projId);
       if (base) {
-        pushProject(getWorkspace(currentUserRef.current), {
-          ...base, name, data: projData, alignmentRate: report.alignmentRate, updatedAt,
-        }, currentUserRef.current?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 上推失敗', e); });
+        pushProject(getWorkspace(user), base, user?.id).catch(e => {
+          if (import.meta.env.DEV) console.warn('[cloud] 上推失敗', e);
+          // E2 — 上推失敗不能無聲:儲存指示仍顯示已儲存,需以橫幅告知僅存於本機
+          setSyncError('雲端同步失敗，此筆變更目前僅儲存於本機。請確認網路連線。');
+        });
       }
     }
   }, []);
@@ -458,6 +492,30 @@ export default function App() {
     };
   }, [saveState]);
 
+  // 共用登出流程:先儲存當前編輯(write-through 落盤+上雲),再清除登入狀態與
+  // 「上次開啟機種」記錄,避免共用工作站上下一位登入者自動開啟上一位的機種
+  const handleLogout = () => {
+    flushPendingSaveRef.current();
+    if (currentProjectId && data) {
+      saveProjectData(currentProjectId, fileName, data);
+    }
+    signOut();
+    setCurrentUser(null);
+    setData(null);
+    setOriginalWb(null);
+    setFileName('');
+    setCurrentProjectId(null);
+    setActiveTab('dashboard');
+    setShowSuccessOverlay(false);
+    setRemoteUpdate(null);
+    setSaveState('idle');
+    removeKey('last_project_id');
+    lastIdRef.current = null;
+    setProjects([]);
+  };
+  const handleLogoutRef = useRef(handleLogout);
+  useEffect(() => { handleLogoutRef.current = handleLogout; });
+
   // I3 — 30 分鐘無操作自動登出(保護共用工作站)
   useEffect(() => {
     if (!currentUser) return;
@@ -466,9 +524,8 @@ export default function App() {
     const reset = () => {
       clearTimeout(timerId);
       timerId = setTimeout(() => {
-        signOut();
-        setCurrentUser(null);
-        handleBackToList();
+        // 透過 ref 取最新版本,避免 30 分鐘前的 stale closure 漏存當前編輯
+        handleLogoutRef.current();
         alert('因長時間無操作，已自動登出，請重新登入。');
       }, TIMEOUT_MS);
     };
@@ -479,15 +536,22 @@ export default function App() {
       clearTimeout(timerId);
       events.forEach(ev => window.removeEventListener(ev, reset));
     };
-  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
+  // 身分命名空間(admin 測試庫)切換時:改為從新命名空間「載入」,
+  // 避免把上一個身分的 in-memory 狀態寫進新身分的 key(互相汙染)
+  const settingsSuffixRef = useRef(getStorageSuffix(currentUser));
   useEffect(() => {
-    setJSON('factories' + getStorageSuffix(currentUser), factories);
-  }, [factories, currentUser]);
-
-  useEffect(() => {
-    setJSON('accounts' + getStorageSuffix(currentUser), accounts);
-  }, [accounts, currentUser]);
+    const suffix = getStorageSuffix(currentUser);
+    if (suffix !== settingsSuffixRef.current) {
+      settingsSuffixRef.current = suffix;
+      setFactories(getJSON('factories' + suffix, ['富士康', '捷普', '醫電鼎眾']));
+      setAccounts(getJSON('accounts' + suffix, DEFAULT_ACCOUNTS));
+      return;
+    }
+    setJSON('factories' + suffix, factories);
+    setJSON('accounts' + suffix, accounts);
+  }, [factories, accounts, currentUser]);
 
   useEffect(() => {
     if (currentUser) {
@@ -515,6 +579,8 @@ export default function App() {
   useEffect(() => {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
+    // 身分切換期間,projects 仍是上一個命名空間的內容,寫入會汙染新身分的資料
+    if (projectsKeyRef.current !== key) return;
     // U10 — 偵測 localStorage 容量滿
     const ok = setJSON(key.replace('ag_', ''), sanitizeProjects(projects));
     if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。');
@@ -568,6 +634,8 @@ export default function App() {
 
   // 3. 選取機種並載入詳細資料
   const handleSelectProject = (id, currentList = projects) => {
+    // 上一個機種還有未儲存的編輯(debounce 未觸發)時,先強制存檔,避免切換造成資料遺失
+    flushPendingSaveRef.current();
     const project = currentList.find(p => p.id === id);
     if (project) {
       editedSinceLoadRef.current = false;
@@ -601,16 +669,16 @@ export default function App() {
     }
   };
 
-  // 4. 線上直接新增機種 (複製預設範本)
+  // 4. 線上直接新增機種 (複製預設範本);回傳是否成功,失敗時呼叫端保留 Modal 讓使用者修正
   const handleCreateProject = async (name) => {
-    if (!name || !name.trim()) return;
+    if (!name || !name.trim()) return false;
     const trimmedName = name.trim();
-    
+
     // 防呆設計：防範重複機種名稱
     const isDuplicate = projects.some(p => p.name.toLowerCase() === trimmedName.toLowerCase());
     if (isDuplicate) {
       alert(`已存在名稱為「${trimmedName}」的機種，請使用其他名稱！`);
-      return;
+      return false;
     }
 
     try {
@@ -651,9 +719,11 @@ export default function App() {
       if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 新增上推失敗', e); });
 
       handleSelectProject(newProj.id, newList);
+      return true;
     } catch (err) {
       console.error(err);
       alert('建立新機種失敗！');
+      return false;
     }
   };
 
@@ -785,6 +855,13 @@ export default function App() {
     ));
     if (currentUser && currentUser.username === uname) {
       setCurrentUser(prev => ({ ...prev, signature }));
+      // 雲端模式:寫回 Supabase profile;否則 token 刷新或重新登入後簽章會遺失
+      if (isSupabaseEnabled) {
+        updateMySignature(signature).catch((e) => {
+          if (import.meta.env.DEV) console.warn('[auth] 簽章雲端同步失敗', e);
+          setSyncError('簽章已套用，但雲端同步失敗；重新登入後可能需要重新上傳簽章。');
+        });
+      }
     }
   };
 
@@ -800,6 +877,18 @@ export default function App() {
           <FormSections 
             data={data} 
             activeSection="basicInfo" 
+            onChange={setData} 
+            onNext={() => setActiveTab('preparation')} 
+            currentUser={currentUser}
+            factories={factories}
+            highlightField={highlightField}
+          />
+        );
+      case 'preparation':
+        return (
+          <FormSections 
+            data={data} 
+            activeSection="preparation" 
             onChange={setData} 
             onNext={() => setActiveTab('processControl')} 
             currentUser={currentUser}
@@ -890,7 +979,7 @@ export default function App() {
       <ErrorBoundary>
         <AppShell
         currentUser={currentUser}
-        onLogout={() => { signOut(); setCurrentUser(null); handleBackToList(); }}
+        onLogout={handleLogout}
         inProject={!!currentProjectId}
         projectName={fileName}
         onBackToList={handleBackToList}

@@ -52,7 +52,8 @@ export default function PrintReport({ data }) {
               {renderCheck(bi.stage?.dvt, 'DVT')}
               {renderCheck(bi.stage?.pvt, 'PVT')}
               {renderCheck(bi.stage?.politRun, 'Pilot-run')}
-              {renderCheck(bi.stage?.ecn, 'ECN')}
+              {renderCheck(bi.stage?.mp, 'MP')}
+              {bi.ecnChange?.has && <span className="print-checkbox-item is-checked"><span className="checkbox-square">✓</span><span className="checkbox-label">工程變更</span></span>}
             </td>
           </tr>
         </tbody>
@@ -247,29 +248,35 @@ export default function PrintReport({ data }) {
               {pc.underfill?.glueModel || '—'}
             </td>
           </tr>
-          {/* PCBA/FPCA 包材 */}
+          {/* 包材種類 (PCBA 或 FPCA 擇一) */}
           <tr>
-            <td className="cell-label">PCBA 包材種類</td>
+            <td className="cell-label">包材種類</td>
             <td className="cell-value" colSpan={3}>
-              <div className="print-checkbox-grid">
-                {renderCheck(pc.pcbaPackaging?.staticBag, '靜電袋')}
-                {renderCheck(pc.pcbaPackaging?.honeycomb, '蜂巢式抗靜電隔板')}
-                {renderCheck(pc.pcbaPackaging?.tray, 'Tray 抗靜電脆盤')}
-                {renderCheck(pc.pcbaPackaging?.sensorCover, 'Sensor 保護貼')}
-                {renderCheck(pc.pcbaPackaging?.cameraCover, 'Camera 保護貼')}
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td className="cell-label">FPCA 包材種類</td>
-            <td className="cell-value" colSpan={3}>
-              <div className="print-checkbox-grid">
-                {renderCheck(pc.fpcaPackaging?.staticBag, '靜電袋')}
-                {renderCheck(pc.fpcaPackaging?.honeycomb, '蜂巢式抗靜電隔板')}
-                {renderCheck(pc.fpcaPackaging?.tray, 'Tray 抗靜電脆盤')}
-                {renderCheck(pc.fpcaPackaging?.sensorCover, 'Sensor 保護貼')}
-                {renderCheck(pc.fpcaPackaging?.cameraCover, 'Camera 保護貼')}
-              </div>
+              {pc.packagingType === 'pcba' && (
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: '4px' }}>PCBA 包材</div>
+                  <div className="print-checkbox-grid">
+                    {renderCheck(pc.pcbaPackaging?.staticBag, '靜電袋')}
+                    {renderCheck(pc.pcbaPackaging?.honeycomb, '蜂巢式抗靜電隔板')}
+                    {renderCheck(pc.pcbaPackaging?.tray, 'Tray 抗靜電脆盤')}
+                    {renderCheck(pc.pcbaPackaging?.sensorCover, 'Sensor 保護貼')}
+                    {renderCheck(pc.pcbaPackaging?.cameraCover, 'Camera 保護貼')}
+                  </div>
+                </div>
+              )}
+              {pc.packagingType === 'fpca' && (
+                <div>
+                  <div style={{ fontWeight: 600, marginBottom: '4px' }}>FPCA 包材</div>
+                  <div className="print-checkbox-grid">
+                    {renderCheck(pc.fpcaPackaging?.staticBag, '靜電袋')}
+                    {renderCheck(pc.fpcaPackaging?.honeycomb, '蜂巢式抗靜電隔板')}
+                    {renderCheck(pc.fpcaPackaging?.tray, 'Tray 抗靜電脆盤')}
+                    {renderCheck(pc.fpcaPackaging?.sensorCover, 'Sensor 保護貼')}
+                    {renderCheck(pc.fpcaPackaging?.cameraCover, 'Camera 保護貼')}
+                  </div>
+                </div>
+              )}
+              {!pc.packagingType && <span style={{ color: '#ef4444' }}>未選擇</span>}
             </td>
           </tr>
         </tbody>
