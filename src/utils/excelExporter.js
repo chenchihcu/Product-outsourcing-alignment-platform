@@ -64,7 +64,7 @@ function applyFormatting(sheet) {
     sheet['!merges'].push({ s: { r: 39, c: 1 }, e: { r: 39, c: 2 } });
     sheet['!merges'].push({ s: { r: 39, c: 3 }, e: { r: 39, c: 4 } });
     sheet['!merges'].push({ s: { r: 39, c: 5 }, e: { r: 39, c: 6 } });
-  } catch (e) {
+  } catch {
     // ignore merge errors
   }
 
@@ -87,7 +87,7 @@ function applyFormatting(sheet) {
       sheet['!rows'][0] = sheet['!rows'][0] || {};
       sheet['!rows'][0].hpt = 22; // height in points
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -97,7 +97,7 @@ function applyFormatting(sheet) {
     sheet['!pageSetup'].orientation = 'landscape';
     sheet['!pageSetup'].paperSize = 9; // A4
     sheet['!pageSetup'].fitToPage = true;
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -117,7 +117,9 @@ function applyFormatting(sheet) {
   try {
     const headerAddrs = ['A1','B1','C1','D1','E1','F1','G1'];
     headerAddrs.forEach(a => setThinBorder(sheet[a]));
-  } catch (e) {}
+  } catch {
+    // ignore border styling errors
+  }
 
   // 為簽核合併區設定邊框與列高
   try {
@@ -130,7 +132,9 @@ function applyFormatting(sheet) {
     setThinBorder(sheet['B40']);
     setThinBorder(sheet['D40']);
     setThinBorder(sheet['F40']);
-  } catch (e) {}
+  } catch {
+    // ignore sign area styling errors
+  }
 
   // 將簽核儲存格置中對齊（如果存在）
   const setAlign = (addr) => {
@@ -279,9 +283,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 治工具
     const tool = bi.tooling || {};
+    const smtFirst = data.processControl?.smtFirstPiece || {};
+    const stencilApertureRatio = smtFirst.stencilApertureRatio || tool.stencil?.apertureRatio || '';
     writeCheckbox(sheet1, 'A33', '鋼板規格', true); // 強制勾選需要，因為 SMT 鋼板需求為 100%
     writeCell(sheet1, 'B33', tool.stencil?.thickness || '');
-    writeCell(sheet1, 'C33', tool.stencil?.apertureRatio || '');
+    writeCell(sheet1, 'C33', stencilApertureRatio);
     
     // 鋼板樣式與奈米塗層雙向對齊回寫 D33
     const isGeneral = (tool.stencil?.style || 'general') === 'general';
@@ -348,7 +354,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     };
     try {
       writeCell(sheet1, 'G1', JSON.stringify(exportMetadata));
-    } catch (e) {
+    } catch {
       writeCell(sheet1, 'G1', '{}');
     }
   }
@@ -395,6 +401,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 首件
     const smtFirst = pc.smtFirstPiece || {};
+    const stencilApertureRatio = smtFirst.stencilApertureRatio || bi.tooling?.stencil?.apertureRatio || '';
     writeCheckbox(sheet2, 'B8', '極性方向', smtFirst.polarity);
     writeCheckbox(sheet2, 'D8', '量測電容、電阻、電感', smtFirst.measureLcr);
     writeCheckbox(sheet2, 'C8', 'SPI錫膏厚度測試', smtFirst.spi);
@@ -403,6 +410,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet2, 'G8', 'LED點亮測試:無(不適用)', smtFirst.ledTest === 'no');
     writeCheckbox(sheet2, 'H8', 'PCB外觀檢查(reflow)', smtFirst.pcbReflow);
     writeCheckbox(sheet2, 'I8', '濕潤性檢查 (試錫板)', smtFirst.solderability);
+    writeCell(sheet2, 'J8', stencilApertureRatio ? `鋼板開孔比例（錫膏印刷）: ${stencilApertureRatio}%` : '');
 
     // 新增: DIP 首件
     const dipFirst = pc.dipFirstPiece || {};

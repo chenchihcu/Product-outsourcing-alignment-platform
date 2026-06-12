@@ -1,4 +1,3 @@
-import React from 'react';
 import './PrintReport.css';
 
 function cleanXrayPart(part) {
@@ -34,6 +33,7 @@ export default function PrintReport({ data }) {
   const photoRecords = Array.isArray(tr.photoRecords) ? tr.photoRecords : [];
   const tooling = bi.tooling || {};
   const sign = bi.signOff || {};
+  const stencilApertureRatio = pc.smtFirstPiece?.stencilApertureRatio || tooling.stencil?.apertureRatio || '';
   const filledTempPoints = Array.isArray(pc.tempPoints)
     ? pc.tempPoints.filter((pt) => hasText(pt?.pos) || hasText(pt?.desc) || hasText(pt?.memo))
     : [];
@@ -76,6 +76,11 @@ export default function PrintReport({ data }) {
               {renderCheck(bi.stage?.politRun, 'Pilot-run')}
               {renderCheck(bi.stage?.mp, 'MP')}
               {bi.ecnChange?.has && <span className="print-checkbox-item is-checked"><span className="checkbox-square">✓</span><span className="checkbox-label">工程變更</span></span>}
+              {bi.ecnChange?.has && bi.ecnChange?.verificationItem && (
+                <div style={{ marginTop: '4px', fontSize: '0.85rem', color: '#111827', fontWeight: 550 }}>
+                  驗證項目: {bi.ecnChange.verificationItem}
+                </div>
+              )}
             </td>
           </tr>
         </tbody>
@@ -102,7 +107,6 @@ export default function PrintReport({ data }) {
                 </div>
                 <div style={{ marginTop: '6px', fontSize: '0.85rem', color: '#475569' }}>
                   厚度: <strong style={{ color: '#0f172a' }}>{tooling.stencil?.thickness || '—'}</strong> mm | 
-                  開口比例: <strong style={{ color: '#0f172a' }}>{tooling.stencil?.apertureRatio || '—'}</strong> % | 
                   樣式: <strong style={{ color: '#0f172a' }}>{(tooling.stencil?.style === 'step' ? '階梯鋼板' : '一般鋼板')}</strong>
                   {tooling.stencil?.nanoCoating && <span className="nano-coating-badge">(表面奈米塗層)</span>}
                 </div>
@@ -222,6 +226,9 @@ export default function PrintReport({ data }) {
                 {renderCheck(pc.smtFirstPiece?.ledTest === 'no', '無 (不適用)')}
                 {renderCheck(pc.smtFirstPiece?.pcbReflow, 'PCB外觀檢查 (reflow)')}
                 {renderCheck(pc.smtFirstPiece?.solderability, '濕潤性檢查 (試錫板)')}
+              </div>
+              <div style={{ marginTop: '6px', fontSize: '0.9rem', color: '#111', fontWeight: 550 }}>
+                鋼板開孔比例（錫膏印刷）: {stencilApertureRatio || '—'} %
               </div>
             </td>
             <td className="cell-label">SMT 焊接順序</td>

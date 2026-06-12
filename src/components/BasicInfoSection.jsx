@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFieldOwner } from '../hooks/useFieldOwner';
 import { isFieldDisabled, getFieldHighlightClass } from '../utils/fieldUtils';
 import { sectionSvg } from '../utils/svgIcons';
@@ -36,8 +35,8 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
                 onChange={(e) => setField('basicInfo.productNo', e.target.value)}
                 disabled={isFieldDisabled(data, currentUser, 'basicInfo.productNo')} />
             </div>
-            <div className={`form-group ${getFieldHighlightClass(highlightField, 'productDesc')}`}>
-              <label className="form-label">產品名稱 / 描述</label>
+            <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'productDesc')}`}>
+              <label className="form-label">產品名稱 / 描述 <span className="req">*</span></label>
               <input type="text" className="form-input edit-active" placeholder="請輸入產品名稱 / 描述" name="basicInfo.productDesc" value={data.basicInfo.productDesc || ''}
                 onChange={(e) => setField('basicInfo.productDesc', e.target.value)}
                 disabled={isFieldDisabled(data, currentUser, 'basicInfo.productDesc')} />
@@ -70,17 +69,23 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
               <div className="radio-group">
                 <label className="radio-label">
                   <input type="radio" name="ecnChange" checked={data.basicInfo.ecnChange?.has || false}
-                    onChange={() => setField('basicInfo.ecnChange', { has: true, no: false })}
+                    onChange={() => setField('basicInfo.ecnChange', { ...(data.basicInfo.ecnChange || {}), has: true, no: false })}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.ecnChange.has')} />
                   <span>有</span>
                 </label>
                 <label className="radio-label">
                   <input type="radio" name="ecnChange" checked={data.basicInfo.ecnChange?.no || false}
-                    onChange={() => setField('basicInfo.ecnChange', { has: false, no: true })}
+                    onChange={() => setField('basicInfo.ecnChange', { has: false, no: true, verificationItem: '' })}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.ecnChange.no')} />
                   <span>沒有</span>
                 </label>
               </div>
+              {data.basicInfo.ecnChange?.has && (
+                <input type="text" className="form-input edit-active animate-fade-in" placeholder="請填寫驗證項目" name="basicInfo.ecnChange.verificationItem" value={data.basicInfo.ecnChange?.verificationItem || ''}
+                  onChange={(e) => setField('basicInfo.ecnChange.verificationItem', e.target.value)}
+                  disabled={isFieldDisabled(data, currentUser, 'basicInfo.ecnChange.verificationItem')}
+                  style={{ marginTop: '10px' }} />
+              )}
             </div>
           </div>
         </div>
@@ -210,18 +215,12 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
           {data.basicInfo.processItems?.smt && (
             <div className={`tooling-box ${getFieldHighlightClass(highlightField, 'stencil')}`}>
               <span className="tooling-badge">SMT 鋼板</span>
-              <div className="form-row-grid-3 animate-fade-in" style={{ marginTop: '8px' }}>
+              <div className="form-row-grid-2 animate-fade-in" style={{ marginTop: '8px' }}>
                 <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'stencil')}`}>
                   <label className="form-label">鋼板厚度 (mm) <span className="req">*</span></label>
                   <input type="text" className="form-input edit-active" placeholder="例如: 0.12" name="basicInfo.tooling.stencil.thickness" value={data.basicInfo.tooling?.stencil?.thickness || ''}
                     onChange={(e) => setField('basicInfo.tooling.stencil.thickness', e.target.value)}
                     disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.stencil.thickness')} />
-                </div>
-                <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'stencil')}`}>
-                  <label className="form-label">開口比例 (%) <span className="req">*</span></label>
-                  <input type="text" className="form-input edit-active" placeholder="例如: 100" name="basicInfo.tooling.stencil.apertureRatio" value={data.basicInfo.tooling?.stencil?.apertureRatio || ''}
-                    onChange={(e) => setField('basicInfo.tooling.stencil.apertureRatio', e.target.value)}
-                    disabled={isFieldDisabled(data, currentUser, 'basicInfo.tooling.stencil.apertureRatio')} />
                 </div>
                 <div className="form-group required-highlight">
                   <label className="form-label">鋼板樣式選擇 <span className="req">*</span></label>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { useFieldOwner } from '../hooks/useFieldOwner';
 import { isFieldDisabled, getFieldHighlightClass } from '../utils/fieldUtils';
 import { sectionSvg } from '../utils/svgIcons';
@@ -69,6 +68,17 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
                   <span>{label}</span>
                 </label>
               ))}
+            </div>
+            <div className={getFieldHighlightClass(highlightField, 'stencilApertureRatio')} style={{ display: 'flex', flexDirection: 'column', gap: '4px', borderRadius: '4px' }}>
+              <label className="form-label" style={{ fontSize: '0.8rem' }}>鋼板開孔比例（錫膏印刷） <span className="req">*</span></label>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <input type="text" className="form-input edit-active compact" placeholder="例如: 100" name="processControl.smtFirstPiece.stencilApertureRatio"
+                  value={data.processControl?.smtFirstPiece?.stencilApertureRatio || ''}
+                  onChange={(e) => setField('processControl.smtFirstPiece.stencilApertureRatio', e.target.value)}
+                  disabled={isFieldDisabled(data, currentUser, 'processControl.smtFirstPiece.stencilApertureRatio')}
+                  style={{ width: '120px' }} />
+                <span style={{ color: '#6b7280', fontSize: '0.85rem' }}>%</span>
+              </div>
             </div>
             <div className={getFieldHighlightClass(highlightField, 'ledTest')} style={{ marginTop: '8px', paddingTop: '8px', borderTop: '1px solid var(--border-color)', display: 'flex', alignItems: 'center', gap: '8px', borderRadius: '4px' }}>
               <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 550, whiteSpace: 'nowrap' }}>LED點亮測試:</span>

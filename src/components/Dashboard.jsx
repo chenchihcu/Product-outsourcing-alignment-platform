@@ -19,23 +19,23 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
 
   const errors = useMemo(() => warnings.filter((w) => w.type === 'error'), [warnings]);
   const warns = useMemo(() => warnings.filter((w) => w.type === 'warning'), [warnings]);
+  const todos = errors;
   const doneSteps = STEP_KEYS.filter((k) => sectionStatus[k]).length;
 
   const byParty = useMemo(() => {
     const g = { oem: [], sign: [] };
-    warnings.forEach((w) => { g[partyOf(w.message)].push(w); });
+    todos.forEach((w) => { g[partyOf(w.message)].push(w); });
     return g;
-  }, [warnings]);
+  }, [todos]);
 
   // U5 — 「下一步」只顯示目前角色能處理的項目
   // QA 與 Admin 只負責審核，不需被提示填寫欄位；簽章項目對所有角色均可見
   const isQaOrAdmin = currentUser?.role === 'qa' || currentUser?.role === 'admin';
   const actionableWarnings = useMemo(() => {
-    if (!isQaOrAdmin) return warnings;
-    return warnings.filter((w) => partyOf(w.message) === 'sign');
-  }, [warnings, isQaOrAdmin]);
+    if (!isQaOrAdmin) return todos;
+    return todos.filter((w) => partyOf(w.message) === 'sign');
+  }, [todos, isQaOrAdmin]);
   const nextItem = actionableWarnings.filter(w => w.type === 'error')[0]
-    || actionableWarnings.filter(w => w.type === 'warning')[0]
     || null;
 
   const [showAll, setShowAll] = useState(false);
@@ -59,8 +59,8 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
   };
 
   const visibleTodos = filterParty
-    ? warnings.filter((w) => partyOf(w.message) === filterParty)
-    : warnings;
+    ? todos.filter((w) => partyOf(w.message) === filterParty)
+    : todos;
 
   return (
     <div className="dashboard-v2">
@@ -131,7 +131,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
           <div className="dash-all glass-card">
             <button type="button" className="all-toggle" onClick={() => setShowAll((s) => !s)}>
               <span>
-                全部待辦（{warnings.length}）
+                全部待辦（{todos.length}）
                 {filterParty && <span className="all-filter">· 篩選：{PARTY_META[filterParty].label}</span>}
               </span>
               <span className="all-chevron">{showAll ? '收合 ▲' : '展開 ▼'}</span>

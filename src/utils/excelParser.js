@@ -12,12 +12,6 @@ function parseCheckbox(val) {
   return false;
 }
 
-// 輔助函數：去除 Checkbox 符號，只拿文字
-function cleanText(val) {
-  if (val === null || val === undefined) return '';
-  return cleanPlaceholder(String(val).replace(/[☑☐]/g, '').trim());
-}
-
 // 輔助函數：清洗數量欄位，去除 Checkbox 符號及方格字元
 function cleanQty(val) {
   if (val === null || val === undefined) return '';
@@ -34,6 +28,19 @@ function cleanPlaceholder(val) {
   if (str === '數量' || str === '數量:' || str === 'qty' || str === '______') return '';
   if (str === '委外加工廠' || str === '加工廠' || str === '公司名稱') return '';
   return str;
+}
+
+function cleanApertureRatio(val) {
+  const cleaned = cleanPlaceholder(val);
+  if (!cleaned) return '';
+  return cleaned
+    .replace(/[☑☐]/g, '')
+    .replace(/鋼板開孔比例（錫膏印刷）[:：]?/g, '')
+    .replace(/鋼板開孔比例\(錫膏印刷\)[:：]?/g, '')
+    .replace(/開孔比例[:：]?/g, '')
+    .replace(/開口比[:：]?/g, '')
+    .replace(/%/g, '')
+    .trim();
 }
 
 
@@ -234,7 +241,7 @@ export function parseRequirementExcel(arrayBuffer) {
         need: stencilNeed,
         noNeed: false,
         thickness: cleanPlaceholder(getVal('B33')),
-        apertureRatio: cleanPlaceholder(getVal('C33')),
+        apertureRatio: cleanApertureRatio(getVal('C33')),
         style: stencilStyle,
         nanoCoating: nanoCoating
       },
@@ -379,6 +386,7 @@ export function parseRequirementExcel(arrayBuffer) {
       fpcaBakeHr
     };
 
+    const stencilApertureRatio = cleanApertureRatio(getVal('J8')) || data.basicInfo.tooling?.stencil?.apertureRatio || '';
     data.processControl.smtFirstPiece = {
       polarity: parseCheckbox(getVal('B8')),
       measureLcr: parseCheckbox(getVal('D8')),
@@ -386,7 +394,8 @@ export function parseRequirementExcel(arrayBuffer) {
       steelTension: parseCheckbox(getVal('E8')),
       ledTest: parseCheckbox(getVal('F8')) ? 'yes' : (parseCheckbox(getVal('G8')) ? 'no' : null),
       pcbReflow: parseCheckbox(getVal('H8')),
-      solderability: parseCheckbox(getVal('I8'))
+      solderability: parseCheckbox(getVal('I8')),
+      stencilApertureRatio
     };
 
     const cleanDipMemo = (val) => {

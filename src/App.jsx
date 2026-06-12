@@ -52,6 +52,11 @@ function sanitizeProjectData(data) {
   
   if (clone.processControl) {
     clone.processControl = { ...clone.processControl };
+    clone.processControl.smtFirstPiece = { ...(clone.processControl.smtFirstPiece || {}) };
+    const legacyApertureRatio = clone.basicInfo?.tooling?.stencil?.apertureRatio;
+    if (!clone.processControl.smtFirstPiece.stencilApertureRatio && legacyApertureRatio) {
+      clone.processControl.smtFirstPiece.stencilApertureRatio = legacyApertureRatio;
+    }
     
     // 1. tempPoints
     if (clone.processControl.tempPoints) {

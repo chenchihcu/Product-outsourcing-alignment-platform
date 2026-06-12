@@ -23,7 +23,7 @@ export function validateAlignment(data) {
   const bi = data.basicInfo || {};
   const pi = bi.processItems || {};
   check(!!bi.productNo, '未填寫「產品料號」', 'error');
-  check(!!bi.productDesc, '未填寫「產品名稱 / 描述」', 'warning');
+  check(!!bi.productDesc, '未填寫「產品名稱 / 描述」', 'error');
 
   // 產品階段至少勾選一個 (mpSmall 改為 politRun)
   const stage = bi.stage || {};
@@ -50,9 +50,10 @@ export function validateAlignment(data) {
   if (pi.smt) {
     const stencil = tooling.stencil || {};
     const thickStr = String(stencil.thickness || '');
-    const apertStr = String(stencil.apertureRatio || '');
+    const apertureRatio = pc.smtFirstPiece?.stencilApertureRatio || stencil.apertureRatio || '';
+    const apertStr = String(apertureRatio);
     check(!!stencil.thickness && !thickStr.includes('____'), '未填寫鋼板「厚度」', 'error');
-    check(!!stencil.apertureRatio && !apertStr.includes('____'), '未填寫鋼板「開口比」', 'error');
+    check(!!apertureRatio && !apertStr.includes('____'), '未填寫「鋼板開孔比例（錫膏印刷）」', 'error');
     const hasType = ['general', 'step'].includes(stencil.style);
     check(hasType, '未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
   }
@@ -92,7 +93,7 @@ export function validateAlignment(data) {
 
   // SMT/DIP 首件檢查與樣品提供
   const hasSample = pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart;
-  check(hasSample, '未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
+  check(hasSample, '未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'error');
 
   const smtFirst = pc.smtFirstPiece || {};
   const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi || smtFirst.steelTension || (smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no') || smtFirst.pcbReflow || smtFirst.solderability;

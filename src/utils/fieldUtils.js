@@ -16,6 +16,7 @@ export function getFieldHighlightClass(highlightField, fieldName) {
     sampleProvided: ['樣品種類'],
     bakeRequired: ['烘烤'],
     smtFirstPiece: ['SMT 首件檢查', 'SMT首件'],
+    stencilApertureRatio: ['鋼板開孔比例', '錫膏印刷', '開口比', '開孔比例'],
     ledTest: ['LED點亮測試', 'LED'],
     dipFirstPiece: ['DIP 首件檢查', 'DIP首件', '剪腳前置作業'],
     smtOrder: ['SMT 焊接順序'],
