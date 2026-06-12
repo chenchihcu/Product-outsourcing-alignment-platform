@@ -72,10 +72,18 @@ export function setDeep(obj, path, value) {
   let current = result;
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    const nextKey = keys[i + 1];
+    const isNextKeyIndex = /^\d+$/.test(nextKey);
+    
     if (!current[key] || typeof current[key] !== 'object') {
-      current[key] = {};
+      current[key] = isNextKeyIndex ? [] : {};
+    } else {
+      if (Array.isArray(current[key])) {
+        current[key] = [ ...current[key] ];
+      } else {
+        current[key] = { ...current[key] };
+      }
     }
-    current[key] = { ...current[key] };
     current = current[key];
   }
   current[keys[keys.length - 1]] = value;

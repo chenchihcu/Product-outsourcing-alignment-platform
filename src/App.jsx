@@ -20,6 +20,144 @@ import { getCurrentUser, onAuthChange, signOut } from './data/auth';
 import * as XLSX from 'xlsx';
 import './App.css';
 
+function sanitizeProjectData(data) {
+  if (!data) return data;
+  const clone = { ...data };
+  
+  if (clone.processControl) {
+    clone.processControl = { ...clone.processControl };
+    
+    // 1. tempPoints
+    if (clone.processControl.tempPoints) {
+      if (!Array.isArray(clone.processControl.tempPoints)) {
+        const arr = [];
+        const obj = clone.processControl.tempPoints;
+        for (let i = 0; i < 6; i++) {
+          arr.push({
+            id: i + 1,
+            pos: obj[i]?.pos || '',
+            desc: obj[i]?.desc || '',
+            memo: obj[i]?.memo || ''
+          });
+        }
+        clone.processControl.tempPoints = arr;
+      } else {
+        const arr = [...clone.processControl.tempPoints];
+        while (arr.length < 6) {
+          arr.push({ id: arr.length + 1, pos: '', desc: '', memo: '' });
+        }
+        clone.processControl.tempPoints = arr.map((item, idx) => ({
+          id: idx + 1,
+          pos: item.pos || '',
+          desc: item.desc || '',
+          memo: item.memo || ''
+        }));
+      }
+    }
+  }
+  
+  if (clone.trialReport) {
+    clone.trialReport = { ...clone.trialReport };
+    
+    // 2. printRecords
+    if (clone.trialReport.printRecords) {
+      if (!Array.isArray(clone.trialReport.printRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.printRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          arr.push({
+            id: obj[k].id || (k + 1),
+            name: obj[k].name || '',
+            checked: !!obj[k].checked,
+            date: obj[k].date || ''
+          });
+        });
+        clone.trialReport.printRecords = arr;
+      }
+    }
+    
+    // 3. inspectRecords
+    if (clone.trialReport.inspectRecords) {
+      if (!Array.isArray(clone.trialReport.inspectRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.inspectRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          arr.push({
+            id: obj[k].id || (k + 1),
+            name: obj[k].name || '',
+            checked: !!obj[k].checked,
+            date: obj[k].date || ''
+          });
+        });
+        clone.trialReport.inspectRecords = arr;
+      }
+    }
+
+    // 4. photoRecords
+    if (clone.trialReport.photoRecords) {
+      if (!Array.isArray(clone.trialReport.photoRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.photoRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          const rawItem = obj[k] || {};
+          let itemParts = rawItem.parts;
+          if (!Array.isArray(itemParts)) {
+            itemParts = itemParts ? Object.values(itemParts) : ['', '', '', ''];
+          }
+          while (itemParts.length < 4) itemParts.push('');
+          arr.push({
+            id: rawItem.id || (k + 1),
+            name: rawItem.name || '',
+            checked: !!rawItem.checked,
+            date: rawItem.date || '',
+            isXray: !!rawItem.isXray,
+            parts: itemParts.map(String)
+          });
+        });
+        // 合併被污染的外部 xray.parts
+        const xrayData = obj.xray;
+        if (xrayData && xrayData.parts) {
+          const xrayParts = Array.isArray(xrayData.parts) ? xrayData.parts : Object.values(xrayData.parts);
+          const xrayItem = arr.find(item => item.isXray);
+          if (xrayItem) {
+            for (let i = 0; i < 4; i++) {
+              if (xrayParts[i]) xrayItem.parts[i] = String(xrayParts[i]);
+            }
+          }
+        }
+        clone.trialReport.photoRecords = arr;
+      } else {
+        clone.trialReport.photoRecords = clone.trialReport.photoRecords.map(item => {
+          if (item.isXray) {
+            let pts = item.parts;
+            if (!Array.isArray(pts)) {
+              pts = pts ? Object.values(pts) : ['', '', '', ''];
+            }
+            while (pts.length < 4) pts.push('');
+            return { ...item, parts: pts.map(String) };
+          }
+          return item;
+        });
+      }
+    }
+  }
+  
+  return clone;
+}
+
+function sanitizeProjects(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map(p => {
+    if (p && p.data) {
+      return { ...p, data: sanitizeProjectData(p.data) };
+    }
+    return p;
+  });
+}
+
 class ErrorBoundary extends Component {
   constructor(props) {
     super(props);
@@ -154,7 +292,7 @@ export default function App() {
           const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
           if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
           const ab = await response.arrayBuffer();
-          const parsedData = parseRequirementExcel(ab);
+          const parsedData = sanitizeProjectData(parseRequirementExcel(ab));
           
           const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
           const base64 = btoa(binaryString);
@@ -177,7 +315,7 @@ export default function App() {
           setSyncError('載入預設範本失敗，請重新整理頁面。若持續發生，請確認網路連線。');
         }
       } else {
-        setProjects(list);
+        setProjects(sanitizeProjects(list));
       }
     };
 
@@ -197,8 +335,9 @@ export default function App() {
         const cloud = await pullProjects(ws);
         if (cancelled || !cloud) return;
         if (cloud.length > 0) {
-          setProjects(cloud);
-          setJSON(localKey, cloud); // 同時更新本機離線快取
+          const sanitizedCloud = sanitizeProjects(cloud);
+          setProjects(sanitizedCloud);
+          setJSON(localKey, sanitizedCloud); // 同時更新本機離線快取
         } else {
           const local = getJSON(localKey, []);
           if (local.length > 0) {
@@ -377,7 +516,7 @@ export default function App() {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
     // U10 — 偵測 localStorage 容量滿
-    const ok = setJSON(key.replace('ag_', ''), projects);
+    const ok = setJSON(key.replace('ag_', ''), sanitizeProjects(projects));
     if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。');
   }, [projects, currentUser]);
 
@@ -393,7 +532,7 @@ export default function App() {
         editedSinceLoadRef.current = false;
         setSaveState('saved');
         setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
-        setData(project.data);
+        setData(sanitizeProjectData(project.data));
         setFileName(project.name);
         if (project.originalWbBase64) {
           try {
@@ -435,7 +574,7 @@ export default function App() {
       setRemoteUpdate(null);
       setSaveState('saved');
       setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
-      setData(project.data);
+      setData(sanitizeProjectData(project.data));
       setFileName(project.name);
 
       // 解析原始 Excel 二進位資料為 Workbook 物件
@@ -491,7 +630,7 @@ export default function App() {
         const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
         if (!response.ok) throw new Error('無法載入範本');
         const ab = await response.arrayBuffer();
-        parsedData = parseRequirementExcel(ab);
+        parsedData = sanitizeProjectData(parseRequirementExcel(ab));
         const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
         base64 = btoa(binaryString);
       }
@@ -502,7 +641,7 @@ export default function App() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         alignmentRate: 0,
-        data: parsedData,
+        data: sanitizeProjectData(parsedData),
         originalWbBase64: base64
       };
 
@@ -539,7 +678,7 @@ export default function App() {
         bytes[i] = binaryString.charCodeAt(i);
       }
       
-      const parsedData = parseRequirementExcel(bytes.buffer);
+      const parsedData = sanitizeProjectData(parseRequirementExcel(bytes.buffer));
 
       const newProj = {
         id: 'proj_' + crypto.randomUUID(),
@@ -615,7 +754,7 @@ export default function App() {
       if (!window.confirm('您有尚未儲存的修改，載入遠端版本後本地變更將被覆蓋。確定繼續？')) return;
     }
     editedSinceLoadRef.current = false;
-    setData(remoteUpdate.data);
+    setData(sanitizeProjectData(remoteUpdate.data));
     setFileName(remoteUpdate.name);
     if (remoteUpdate.originalWbBase64) {
       try {

@@ -51,9 +51,10 @@ export function parseRequirementExcel(arrayBuffer) {
   if (missingSheets.length > 0) {
     throw new Error(`此檔案不符合需求一覽表模板格式（缺少工作表：${missingSheets.join('、')}）`);
   }
-  // D4 — 驗證標題列
+  // D4 — 驗證標題列(官方範本 A1 為「…新產品導入…」,舊版為「…新機種…」,兩者皆接受)
   const titleCell = workbook.Sheets['產品基本資料']?.['A1'];
-  if (titleCell && !String(titleCell.v || '').includes('新機種')) {
+  const titleStr = String(titleCell?.v || '');
+  if (titleCell && !titleStr.includes('新機種') && !titleStr.includes('新產品導入')) {
     throw new Error('此檔案不符合需求一覽表模板格式（A1 標題不符）');
   }
 

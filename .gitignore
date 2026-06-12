@@ -40,3 +40,6 @@ e2e-*.png
 cloud-*.png
 fix-*.png
 reject-*.png
+
+# Local Netlify folder
+.netlify

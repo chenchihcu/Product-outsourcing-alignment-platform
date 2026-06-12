@@ -12,6 +12,9 @@ export default function PrintReport({ data }) {
   const bi = data.basicInfo || {};
   const pc = data.processControl || {};
   const tr = data.trialReport || {};
+  const printRecords = Array.isArray(tr.printRecords) ? tr.printRecords : [];
+  const inspectRecords = Array.isArray(tr.inspectRecords) ? tr.inspectRecords : [];
+  const photoRecords = Array.isArray(tr.photoRecords) ? tr.photoRecords : [];
   const tooling = bi.tooling || {};
   const sign = bi.signOff || {};
 
@@ -321,7 +324,7 @@ export default function PrintReport({ data }) {
           <tr>
             <td className="cell-bold" colSpan={2} style={{ background: '#f9fafb' }}>🖨️ A. 印刷品質 / 迴焊紀錄</td>
           </tr>
-          {tr.printRecords?.map((rec) => (
+          {printRecords.map((rec) => (
             <tr key={rec.id}>
               <td style={{ paddingLeft: '20px' }}>{rec.name}</td>
               <td className="text-center">
@@ -337,7 +340,7 @@ export default function PrintReport({ data }) {
           <tr>
             <td className="cell-bold" colSpan={2} style={{ background: '#f9fafb' }}>🔍 B. 檢驗紀錄</td>
           </tr>
-          {tr.inspectRecords?.map((rec) => (
+          {inspectRecords.map((rec) => (
             <tr key={rec.id}>
               <td style={{ paddingLeft: '20px' }}>{rec.name}</td>
               <td className="text-center">
@@ -353,7 +356,7 @@ export default function PrintReport({ data }) {
           <tr>
             <td className="cell-bold" colSpan={2} style={{ background: '#f9fafb' }}>📸 D. 照片提供</td>
           </tr>
-          {tr.photoRecords?.map((rec) => {
+          {photoRecords.map((rec) => {
             let displayName = rec.name;
           if (rec.isXray && rec.parts) {
             const partsStr = rec.parts.map(cleanXrayPart).filter(Boolean).join(', ');
