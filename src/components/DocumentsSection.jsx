@@ -46,8 +46,9 @@ export default function DocumentsSection({ data, onChange, currentUser, highligh
       </div>
 
       <div className="action-row" style={{ marginTop: '24px' }}>
-        <button className="btn btn-primary" onClick={onNext}>下一步：雙向線上簽核</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：雙向線上簽核</button>
       </div>
     </div>
   );
 }
+

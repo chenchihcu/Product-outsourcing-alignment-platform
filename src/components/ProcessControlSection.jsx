@@ -84,13 +84,13 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
               <label className="form-label">PCB 烘烤條件 <span className="req">*</span></label>
               <div className="inline-bake-inputs edit-active">
                 <span>PCB 烘烤: </span>
-                <input type="text" className="inline-num-input" placeholder="120" value={data.processControl?.bakeRequired?.pcbBakeTemp || ''}
+                <input type="text" className="inline-num-input" placeholder="120" name="processControl.bakeRequired.pcbBakeTemp" value={data.processControl?.bakeRequired?.pcbBakeTemp || ''}
                   onChange={(e) => handleBakeChange('pcbBakeTemp', e.target.value)} disabled={isFieldDisabled(data, currentUser, 'processControl.bakeRequired.pcbBakeTemp')} />
                 <span> °C ± </span>
-                <input type="text" className="inline-num-input inline-num-small" placeholder="5" value={data.processControl?.bakeRequired?.pcbBakeTol || ''}
+                <input type="text" className="inline-num-input inline-num-small" placeholder="5" name="processControl.bakeRequired.pcbBakeTol" value={data.processControl?.bakeRequired?.pcbBakeTol || ''}
                   onChange={(e) => handleBakeChange('pcbBakeTol', e.target.value)} disabled={isFieldDisabled(data, currentUser, 'processControl.bakeRequired.pcbBakeTol')} />
                 <span> °C × </span>
-                <input type="text" className="inline-num-input inline-num-small" placeholder="2" value={data.processControl?.bakeRequired?.pcbBakeHr || ''}
+                <input type="text" className="inline-num-input inline-num-small" placeholder="2" name="processControl.bakeRequired.pcbBakeHr" value={data.processControl?.bakeRequired?.pcbBakeHr || ''}
                   onChange={(e) => handleBakeChange('pcbBakeHr', e.target.value)} disabled={isFieldDisabled(data, currentUser, 'processControl.bakeRequired.pcbBakeHr')} />
                 <span> hr（依 PCB 廠建議）</span>
               </div>
@@ -103,10 +103,10 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
               <label className="form-label">FPCA 烘烤條件 <span className="req">*</span></label>
               <div className="inline-bake-inputs edit-active">
                 <span>FPCA 烘烤: 依原物料規格書，若無規格則 </span>
-                <input type="text" className="inline-num-input" placeholder="80" value={data.processControl?.bakeRequired?.fpcaBakeTemp || ''}
+                <input type="text" className="inline-num-input" placeholder="80" name="processControl.bakeRequired.fpcaBakeTemp" value={data.processControl?.bakeRequired?.fpcaBakeTemp || ''}
                   onChange={(e) => handleBakeChange('fpcaBakeTemp', e.target.value)} disabled={isFieldDisabled(data, currentUser, 'processControl.bakeRequired.fpcaBakeTemp')} />
                 <span> °C × </span>
-                <input type="text" className="inline-num-input inline-num-small" placeholder="4" value={data.processControl?.bakeRequired?.fpcaBakeHr || ''}
+                <input type="text" className="inline-num-input inline-num-small" placeholder="4" name="processControl.bakeRequired.fpcaBakeHr" value={data.processControl?.bakeRequired?.fpcaBakeHr || ''}
                   onChange={(e) => handleBakeChange('fpcaBakeHr', e.target.value)} disabled={isFieldDisabled(data, currentUser, 'processControl.bakeRequired.fpcaBakeHr')} />
                 <span> hr</span>
               </div>
@@ -146,7 +146,7 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
             {[0, 1, 2].map((idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#000000' }}>#{idx + 1}</label>
-                <input type="text" className="form-input edit-active" placeholder="例如: U12, Q5" value={data.processControl.tempPoints?.[idx]?.pos || ''}
+                <input type="text" className="form-input edit-active" placeholder="例如: U12, Q5" name={`processControl.tempPoints.${idx}.pos`} value={data.processControl.tempPoints?.[idx]?.pos || ''}
                   onChange={(e) => setField(`processControl.tempPoints.${idx}.pos`, e.target.value)}
                   disabled={isFieldDisabled(data, currentUser, `processControl.tempPoints.${idx}.pos`)} style={{ fontSize: '0.9rem' }} />
               </div>
@@ -156,7 +156,7 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
             {[3, 4, 5].map((idx) => (
               <div key={idx} style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
                 <label style={{ fontSize: '0.85rem', fontWeight: '600', color: '#000000' }}>#{idx + 1}</label>
-                <input type="text" className="form-input edit-active" placeholder="例如: U12, Q5" value={data.processControl.tempPoints?.[idx]?.pos || ''}
+                <input type="text" className="form-input edit-active" placeholder="例如: U12, Q5" name={`processControl.tempPoints.${idx}.pos`} value={data.processControl.tempPoints?.[idx]?.pos || ''}
                   onChange={(e) => setField(`processControl.tempPoints.${idx}.pos`, e.target.value)}
                   disabled={isFieldDisabled(data, currentUser, `processControl.tempPoints.${idx}.pos`)} style={{ fontSize: '0.9rem' }} />
               </div>
@@ -231,7 +231,7 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
             </label>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', marginTop: '4px' }}>
               <span style={{ fontSize: '0.78rem', color: '#6b7280', fontWeight: 550 }}>DIP 注意事項 (限 50 字):</span>
-              <textarea className="form-input edit-active compact" placeholder={data.basicInfo.processItems?.dip ? "請輸入 DIP 注意事項..." : "不適用"} maxLength={50}
+              <textarea className="form-input edit-active compact" placeholder={data.basicInfo.processItems?.dip ? "請輸入 DIP 注意事項..." : "不適用"} name="processControl.dipFirstPiece.memo" maxLength={50}
                 value={data.processControl?.dipFirstPiece?.memo || ''}
                 onChange={(e) => setField('processControl.dipFirstPiece', { ...(data.processControl?.dipFirstPiece || {}), memo: e.target.value })}
                 disabled={isFieldDisabled(data, currentUser, 'processControl.dipFirstPiece.memo') || !data.basicInfo.processItems?.dip}
@@ -264,20 +264,20 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
         <div className="form-group">
           <label className="form-label">Underfill 後烘烤</label>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <input type="text" className="form-input edit-active compact" placeholder="溫度" value={data.processControl?.underfill?.bakeTemp || ''}
-              onChange={(e) => setField('processControl.underfill', { ...data.processControl.underfill, bakeTemp: e.target.value })}
+            <input type="text" className="form-input edit-active compact" placeholder="溫度" name="processControl.underfill.bakeTemp" value={data.processControl?.underfill?.bakeTemp || ''}
+              onChange={(e) => setField('processControl.underfill', { ...(data.processControl.underfill || {}), bakeTemp: e.target.value })}
               disabled={isFieldDisabled(data, currentUser, 'processControl.underfill.bakeTemp')} style={{ width: '80px' }} />
             <span style={{ color: '#6b7280' }}>°C x</span>
-            <input type="text" className="form-input edit-active compact" placeholder="時間" value={data.processControl?.underfill?.bakeTime || ''}
-              onChange={(e) => setField('processControl.underfill', { ...data.processControl.underfill, bakeTime: e.target.value })}
+            <input type="text" className="form-input edit-active compact" placeholder="時間" name="processControl.underfill.bakeTime" value={data.processControl?.underfill?.bakeTime || ''}
+              onChange={(e) => setField('processControl.underfill', { ...(data.processControl.underfill || {}), bakeTime: e.target.value })}
               disabled={isFieldDisabled(data, currentUser, 'processControl.underfill.bakeTime')} style={{ width: '80px' }} />
             <span style={{ color: '#6b7280' }}>min</span>
           </div>
         </div>
         <div className="form-group">
           <label className="form-label">膠材型號</label>
-          <input type="text" className="form-input edit-active" placeholder="例如: Loctite 3513" value={data.processControl?.underfill?.glueModel || ''}
-            onChange={(e) => setField('processControl.underfill', { ...data.processControl.underfill, glueModel: e.target.value })}
+          <input type="text" className="form-input edit-active" placeholder="例如: Loctite 3513" name="processControl.underfill.glueModel" value={data.processControl?.underfill?.glueModel || ''}
+            onChange={(e) => setField('processControl.underfill', { ...(data.processControl.underfill || {}), glueModel: e.target.value })}
             disabled={isFieldDisabled(data, currentUser, 'processControl.underfill.glueModel')} />
         </div>
       </div>
@@ -288,7 +288,7 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
           {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
             <label key={key} className="checkbox-label">
               <input type="checkbox" checked={data.processControl?.pcbaPackaging?.[key] || false}
-                onChange={(e) => setField('processControl.pcbaPackaging', { ...data.processControl.pcbaPackaging, [key]: e.target.checked })}
+                onChange={(e) => setField('processControl.pcbaPackaging', { ...(data.processControl.pcbaPackaging || {}), [key]: e.target.checked })}
                 disabled={isFieldDisabled(data, currentUser, `processControl.pcbaPackaging.${key}`)} />
               <span>{label}</span>
             </label>
@@ -302,7 +302,7 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
           {[['staticBag', '靜電袋'], ['honeycomb', '蜂巢式抗靜電隔板'], ['tray', 'Tray 抗靜電脆盤'], ['sensorCover', 'Sensor 保護貼'], ['cameraCover', 'Camera 保護貼']].map(([key, label]) => (
             <label key={key} className="checkbox-label">
               <input type="checkbox" checked={data.processControl?.fpcaPackaging?.[key] || false}
-                onChange={(e) => setField('processControl.fpcaPackaging', { ...data.processControl.fpcaPackaging, [key]: e.target.checked })}
+                onChange={(e) => setField('processControl.fpcaPackaging', { ...(data.processControl.fpcaPackaging || {}), [key]: e.target.checked })}
                 disabled={isFieldDisabled(data, currentUser, `processControl.fpcaPackaging.${key}`)} />
               <span>{label}</span>
             </label>
@@ -312,15 +312,17 @@ export default function ProcessControlSection({ data, onChange, currentUser, hig
 
       <div className="form-group">
         <label className="form-label">特殊製程備註 (研發/工程)</label>
-        <textarea className="form-textarea edit-active" rows={3} placeholder="如有特殊焊接、清洗、塗覆要求，請在此填寫..."
+        <textarea className="form-textarea edit-active" rows={3} placeholder="如有特殊焊接、清洗、塗覆要求，請在此填寫..." name="processControl.specialProcessMemo"
           value={data.processControl?.specialProcessMemo || ''}
           onChange={(e) => setField('processControl.specialProcessMemo', e.target.value)}
           disabled={isFieldDisabled(data, currentUser, 'processControl.specialProcessMemo')} />
       </div>
 
       <div className="action-row">
-        <button className="btn btn-primary" onClick={onNext}>下一步：試產報告要求</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：試產報告要求</button>
       </div>
     </div>
   );
 }
+
+

@@ -70,18 +70,18 @@ function CloudUserManagement({ currentUser }) {
       {/* 邀請表單 */}
       <form onSubmit={handleInvite} style={{ display: 'flex', flexWrap: 'wrap', gap: '10px', alignItems: 'flex-end', marginTop: '16px' }}>
         <div className="form-group" style={{ flex: '1 1 200px' }}>
-          <label className="form-label">電子郵件 <span className="req">*</span></label>
-          <input type="email" className="form-input edit-active" placeholder="name@company.com"
+          <label className="form-label" htmlFor="inviteEmail">電子郵件 <span className="req">*</span></label>
+          <input type="email" className="form-input edit-active" placeholder="name@company.com" id="inviteEmail"
             value={inviteEmail} onChange={(e) => setInviteEmail(e.target.value)} required />
         </div>
         <div className="form-group" style={{ flex: '1 1 160px' }}>
-          <label className="form-label">顯示名稱</label>
-          <input type="text" className="form-input edit-active" placeholder="例：陳小明"
+          <label className="form-label" htmlFor="inviteName">顯示名稱</label>
+          <input type="text" className="form-input edit-active" placeholder="例：陳小明" id="inviteName"
             value={inviteName} onChange={(e) => setInviteName(e.target.value)} />
         </div>
         <div className="form-group" style={{ flex: '1 1 200px' }}>
-          <label className="form-label">單位 / 角色</label>
-          <select className="form-input edit-active" value={inviteRoleIdx}
+          <label className="form-label" htmlFor="inviteRole">單位 / 角色</label>
+          <select className="form-input edit-active" value={inviteRoleIdx} id="inviteRole"
             onChange={(e) => setInviteRoleIdx(Number(e.target.value))}>
             {CLOUD_ROLE_OPTIONS.map((r, i) => (
               <option key={r.value} value={i}>{r.label}</option>
@@ -326,10 +326,10 @@ export default function Settings({
                 {factories.map((fac, idx) => (
                   <li key={idx} className="settings-list-item">
                     <span>{fac}</span>
-                    <button
+                    <button type="button"
                       className="btn-delete-item"
                       onClick={() => onRemoveFactory(fac)}
-                      title="刪除此加工廠"
+                      title="刪除此加工廠" aria-label="刪除加工廠"
                     >
                       ✕
                     </button>
@@ -351,7 +351,7 @@ export default function Settings({
               <h4>新增帳號：</h4>
               <div className="form-row-grid">
                 <div className="form-group">
-                  <label className="form-label">登入帳號 <span className="req">*</span></label>
+                  <label className="form-label" htmlFor="newUsername">登入帳號 <span className="req">*</span></label>
                   <input
                     type="text"
                     className="form-input edit-active"
@@ -362,7 +362,7 @@ export default function Settings({
                   />
                 </div>
                 <div className="form-group">
-                  <label className="form-label">密碼 <span className="req">*</span></label>
+                  <label className="form-label" htmlFor="newPassword">密碼 <span className="req">*</span></label>
                   <input
                     type="password"
                     className="form-input edit-active"
@@ -376,7 +376,7 @@ export default function Settings({
 
               <div className="form-row-grid" style={{ marginTop: '8px' }}>
                 <div className="form-group">
-                  <label className="form-label">權限等級</label>
+                  <label className="form-label" htmlFor="newLevel">權限等級</label>
                   <select
                     className="form-input edit-active"
                     value={newLevel}
@@ -388,7 +388,7 @@ export default function Settings({
                   </select>
                 </div>
                 <div className="form-group">
-                  <label className="form-label">所屬單位</label>
+                  <label className="form-label" htmlFor="newUnit">所屬單位</label>
                   <select
                     className="form-input edit-active"
                     value={newUnit}
@@ -450,7 +450,7 @@ export default function Settings({
                           </select>
                         </td>
                         <td>
-                          <button
+                          <button type="button"
                             className="btn-delete-account"
                             disabled={currentUser.username === acc.username || acc.role === 'admin'}
                             onClick={() => {
@@ -482,3 +482,11 @@ export default function Settings({
     </div>
   );
 }
+
+
+
+
+
+
+
+

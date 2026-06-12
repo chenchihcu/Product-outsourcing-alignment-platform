@@ -46,6 +46,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
       rdSignature: '',
       engineeringReviewSignature: '',
       qaSignature: '',
+      rejectionResponse: undefined,
     };
     const owners = { ...(data._owners || {}) };
     delete owners['basicInfo.signOff.rdSignature'];
@@ -154,7 +155,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
             <div className="resubmit-section">
               <textarea
                 className="form-input edit-active resubmit-note"
-                placeholder="修正說明（必填）：請說明本次修正了哪些內容…"
+                placeholder="修正說明（必填）：請說明本次修正了哪些內容…" name="resubmitNote"
                 value={resubmitNote}
                 onChange={(e) => setResubmitNote(e.target.value)}
                 rows={2}
@@ -216,7 +217,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
               <label className="form-label">電子簽章</label>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.rdSignature ? (
-                  <img src={data.basicInfo.signOff.rdSignature} alt="RD Signature" className="signature-img-preview" />
+                  <img src={data.basicInfo.signOff.rdSignature} alt="RD Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
                 ) : (
                   <span className="signature-empty-text">尚未設定電子簽章</span>
                 )}
@@ -265,6 +266,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                       type="button" 
                       className="btn btn-secondary btn-xs signature-btn-danger-xs" 
                       onClick={() => handleSignChange('rdSignature', '')}
+                      aria-label="移除研發簽章"
                     >
                       ✕
                     </button>
@@ -289,7 +291,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
               <label className="form-label">電子簽章</label>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.engineeringReviewSignature ? (
-                  <img src={data.basicInfo.signOff.engineeringReviewSignature} alt="PE Signature" className="signature-img-preview" />
+                  <img src={data.basicInfo.signOff.engineeringReviewSignature} alt="PE Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
                 ) : (
                   <span className="signature-empty-text">尚未設定電子簽章</span>
                 )}
@@ -338,6 +340,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                       type="button" 
                       className="btn btn-secondary btn-xs signature-btn-danger-xs" 
                       onClick={() => handleSignChange('engineeringReviewSignature', '')}
+                      aria-label="移除工程簽章"
                     >
                       ✕
                     </button>
@@ -362,7 +365,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
               <label className="form-label">電子簽章</label>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.qaSignature ? (
-                  <img src={data.basicInfo.signOff.qaSignature} alt="QA Signature" className="signature-img-preview" />
+                  <img src={data.basicInfo.signOff.qaSignature} alt="QA Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
                 ) : (
                   <span className="signature-empty-text">尚未設定電子簽章</span>
                 )}
@@ -411,6 +414,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                       type="button" 
                       className="btn btn-secondary btn-xs signature-btn-danger-xs" 
                       onClick={() => handleSignChange('qaSignature', '')}
+                      aria-label="移除品保簽章"
                     >
                       ✕
                     </button>
@@ -434,7 +438,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                 <textarea
                   className="form-textarea reject-textarea"
                   rows={3}
-                  placeholder="例：製程管制分頁的 SMT 焊接順序與測溫點配置尚未填寫，請補齊後重新送審。"
+                  placeholder="例：製程管制分頁的 SMT 焊接順序與測溫點配置尚未填寫，請補齊後重新送審。" name="rejectReason"
                   value={rejectReason}
                   onChange={(e) => setRejectReason(e.target.value)}
                 />
@@ -478,19 +482,19 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
 
       {/* 匯出動作按鈕 */}
       <div className="export-action-row" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
-        <button
+        <button type="button"
           className="btn btn-primary btn-large"
           onClick={() => window.print()}
           disabled={isRejected || exportLoading}
           style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
         >
-          <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
+          <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
-          <span>匯出並下載 PDF 報告 (A4直式)</span>
+          <span>列印 / 儲存為 PDF 報告 (A4直式)</span>
         </button>
 
-        <button
+        <button type="button"
           className="btn btn-secondary btn-large"
           onClick={handleExport}
           disabled={exportLoading || isRejected}
@@ -502,7 +506,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
             </>
           ) : (
             <>
-              <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }}>
+              <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }} aria-hidden="true">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
               </svg>
               <span>匯出並下載 Excel 文件</span>
@@ -514,3 +518,9 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
     </div>
   );
 }
+
+
+
+
+
+

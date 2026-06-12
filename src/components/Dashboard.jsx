@@ -83,7 +83,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
 
       {warnings.length === 0 ? (
         <div className="dash-clear glass-card">
-          <svg className="clear-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="clear-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
@@ -95,7 +95,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
         <>
           {/* ===== 下一步:最優先一件事 ===== */}
           {nextItem && (
-            <button className="dash-next glass-card" onClick={() => handleWarningClick(nextItem.message)}>
+            <button type="button" className="dash-next glass-card" onClick={() => handleWarningClick(nextItem.message)}>
               <span className="next-left">
                 <span className="next-kicker">
                   <span className={`next-dot ${nextItem.type}`} />下一步 · 最優先
@@ -109,7 +109,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
           {/* ===== 輪到誰:依責任方分組 ===== */}
           <div className="dash-parties">
             {['oem', 'sign'].map((p) => byParty[p].length > 0 && (
-              <button
+              <button type="button"
                 key={p}
                 className={`party-card ${filterParty === p ? 'active' : ''}`}
                 onClick={() => { setFilterParty(filterParty === p ? null : p); setShowAll(true); }}
@@ -127,7 +127,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
 
           {/* ===== 全部待辦(可收合) ===== */}
           <div className="dash-all glass-card">
-            <button className="all-toggle" onClick={() => setShowAll((s) => !s)}>
+            <button type="button" className="all-toggle" onClick={() => setShowAll((s) => !s)}>
               <span>
                 全部待辦（{warnings.length}）
                 {filterParty && <span className="all-filter">· 篩選：{PARTY_META[filterParty].label}</span>}
@@ -135,7 +135,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
               <span className="all-chevron">{showAll ? '收合 ▲' : '展開 ▼'}</span>
             </button>
             {filterParty && (
-              <button className="all-clear-filter" onClick={() => setFilterParty(null)}>清除篩選</button>
+              <button type="button" className="all-clear-filter" onClick={() => setFilterParty(null)}>清除篩選</button>
             )}
             {showAll && (
               <div className="all-list">
@@ -159,3 +159,6 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
     </div>
   );
 }
+
+
+

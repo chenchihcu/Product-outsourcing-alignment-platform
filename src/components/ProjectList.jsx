@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import { getJSON, setJSON } from '../utils/storage';
 import './ProjectList.css';
 
 export default function ProjectList({ projects, onSelectProject, onCreateProject, onDeleteProject, onImportExcel }) {
@@ -8,10 +9,11 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
   const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
 
-  // 一覽表排版與過濾狀態
-  const [filterMode, setFilterMode] = useState('in-progress'); // 預設顯示進行中 (進行到一半)
-  const [fontSize, setFontSize] = useState('medium'); // 預設中字型
-  const [rowSpacing, setRowSpacing] = useState('normal'); // 預設標準行距
+  // 一覽表排版與過濾狀態（偏好持久化至 localStorage）
+  const savedPrefs = getJSON('projectListPrefs', {});
+  const [filterMode, setFilterMode] = useState('in-progress');
+  const [fontSize, setFontSize] = useState(savedPrefs.fontSize || 'medium');
+  const [rowSpacing, setRowSpacing] = useState(savedPrefs.rowSpacing || 'normal');
   const [currentPage, setCurrentPage] = useState(1);
 
   // ESC 鍵關閉「建立新機種」Modal
@@ -23,6 +25,11 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
   }, [showCreateModal]);
+
+  // 持久化排版偏好設定
+  useEffect(() => {
+    setJSON('projectListPrefs', { fontSize, rowSpacing });
+  }, [fontSize, rowSpacing]);
 
   const handleSubmitCreate = (e) => {
     e.preventDefault();
@@ -119,10 +126,10 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <p>線上直接管理多個機種對齊進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
         </div>
         <div className="header-actions">
-          <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+          <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
             ➕ 新增機種
           </button>
-          <button 
+          <button type="button" 
             className={`btn btn-secondary ${isImporting ? 'loading' : ''}`} 
             onClick={() => fileInputRef.current?.click()}
             disabled={isImporting}
@@ -146,12 +153,12 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <input 
             type="text" 
             className="search-input" 
-            placeholder="搜尋機種名稱..." 
+            placeholder="搜尋機種名稱..." name="search" 
             value={searchTerm} 
             onChange={(e) => { setSearchTerm(e.target.value); setCurrentPage(1); }} 
           />
           {searchTerm && (
-            <button 
+            <button type="button" 
               className="search-clear-btn" 
               onClick={() => { setSearchTerm(''); setCurrentPage(1); }} 
               title="清除搜尋內容"
@@ -166,19 +173,19 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       <div className="project-list-toolbar glass-card">
         {/* 左側過濾頁籤 */}
         <div className="toolbar-tabs">
-          <button 
+          <button type="button" 
             className={`tab-filter-btn ${filterMode === 'in-progress' ? 'active' : ''}`}
             onClick={() => { setFilterMode('in-progress'); setCurrentPage(1); }}
           >
             ⏳ 進行中 ({searchedProjects.filter(p => p.alignmentRate < 100).length})
           </button>
-          <button 
+          <button type="button" 
             className={`tab-filter-btn ${filterMode === 'completed' ? 'active' : ''}`}
             onClick={() => { setFilterMode('completed'); setCurrentPage(1); }}
           >
             ✅ 已完成 ({searchedProjects.filter(p => p.alignmentRate === 100).length})
           </button>
-          <button 
+          <button type="button" 
             className={`tab-filter-btn ${filterMode === 'all' ? 'active' : ''}`}
             onClick={() => { setFilterMode('all'); setCurrentPage(1); }}
           >
@@ -191,21 +198,21 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <div className="control-group">
             <span className="control-label">字體大小:</span>
             <div className="btn-toggle-group">
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${fontSize === 'small' ? 'active' : ''}`}
                 onClick={() => setFontSize('small')}
                 title="12px"
               >
                 小
               </button>
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${fontSize === 'medium' ? 'active' : ''}`}
                 onClick={() => setFontSize('medium')}
                 title="14px"
               >
                 中
               </button>
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${fontSize === 'large' ? 'active' : ''}`}
                 onClick={() => setFontSize('large')}
                 title="16px"
@@ -218,21 +225,21 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <div className="control-group">
             <span className="control-label">表格間距:</span>
             <div className="btn-toggle-group">
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${rowSpacing === 'compact' ? 'active' : ''}`}
                 onClick={() => setRowSpacing('compact')}
                 title="緊湊間距"
               >
                 緊湊
               </button>
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${rowSpacing === 'normal' ? 'active' : ''}`}
                 onClick={() => setRowSpacing('normal')}
                 title="標準間距"
               >
                 標準
               </button>
-              <button 
+              <button type="button" 
                 className={`toggle-btn ${rowSpacing === 'relaxed' ? 'active' : ''}`}
                 onClick={() => setRowSpacing('relaxed')}
                 title="寬鬆間距"
@@ -302,16 +309,16 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     <td className="table-date-cell hide-on-mobile">{dateStr}</td>
                     <td>
                       <div className="table-actions-cell">
-                        <button 
+                        <button type="button" 
                           className="btn btn-primary compact-btn table-action-btn btn-edit"
                           onClick={() => onSelectProject(proj.id)}
                         >
                           ✏️ 進入編輯
                         </button>
-                        <button 
+                        <button type="button" 
                           className="btn btn-danger compact-btn table-action-btn btn-delete"
                           onClick={() => {
-                            if (confirm(`確定要刪除「${proj.name}」嗎？此操作無法還原。`)) {
+                            if (window.confirm(`確定要刪除「${proj.name}」嗎？此操作無法還原。`)) {
                               onDeleteProject(proj.id);
                             }
                           }}
@@ -331,18 +338,18 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       {/* 分頁控制元件 */}
       {filteredProjects.length > itemsPerPage && (
         <div className="table-pagination glass-card">
-          <button 
+          <button type="button" 
             className="pagination-btn"
             disabled={validCurrentPage === 1}
             onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
-            title="上一頁"
+            title="上一頁" aria-label="上一頁"
           >
             ◀
           </button>
           
           <div className="pagination-numbers">
             {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-              <button
+              <button type="button"
                 key={page}
                 className={`pagination-number-btn ${validCurrentPage === page ? 'active' : ''}`}
                 onClick={() => setCurrentPage(page)}
@@ -352,11 +359,11 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
             ))}
           </div>
 
-          <button 
+          <button type="button" 
             className="pagination-btn"
             disabled={validCurrentPage === totalPages}
             onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
-            title="下一頁"
+            title="下一頁" aria-label="下一頁"
           >
             ▶
           </button>
@@ -364,11 +371,11 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       )}
 
       {showCreateModal && (
-        <div className="modal-backdrop animate-fade-in" onClick={() => setShowCreateModal(false)}>
+        <div className="modal-backdrop animate-fade-in" onClick={() => setShowCreateModal(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowCreateModal(false); } }}>
           <div className="modal-content glass-card animate-scale-in" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>建立新機種</h3>
-              <button className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
+              <button type="button" className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
             </div>
             <form onSubmit={handleSubmitCreate}>
               <div className="modal-body">
@@ -377,7 +384,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                   <input 
                     type="text" 
                     id="projectName" 
-                    placeholder="例如：新機種製作需求一覽表2026_機種A" 
+                    placeholder="例如：新機種製作需求一覽表2026_機種A" name="projectName" 
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
                     required
@@ -401,3 +408,8 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     </div>
   );
 }
+
+
+
+
+

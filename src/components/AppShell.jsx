@@ -194,7 +194,7 @@ export default function AppShell({
         {/* 手機/平板:橫向步驟列,隨時看得到全流程 */}
         {inProject && (
           <div className="shell-steprail" ref={railRef}>
-            <button
+            <button type="button"
               ref={activeTab === 'dashboard' ? activePillRef : null}
               className={`step-pill ${activeTab === 'dashboard' ? 'active' : ''}`}
               onClick={() => go('dashboard')}
@@ -203,7 +203,7 @@ export default function AppShell({
               <span className={`pill-badge ${alignmentRate === 100 ? 'ok' : ''}`}>{alignmentRate}%</span>
             </button>
             {STEPS.map((s, i) => (
-              <button
+              <button type="button"
                 key={s.key}
                 ref={activeTab === s.key ? activePillRef : null}
                 className={`step-pill ${activeTab === s.key ? 'active' : ''} ${sectionStatus[s.key] ? 'done' : ''}`}
@@ -215,7 +215,7 @@ export default function AppShell({
                 {s.label}
               </button>
             ))}
-            <button
+            <button type="button"
               ref={activeTab === 'settings' ? activePillRef : null}
               className={`step-pill ${activeTab === 'settings' ? 'active' : ''}`}
               onClick={() => go('settings')}
@@ -238,3 +238,4 @@ export default function AppShell({
     </div>
   );
 }
+

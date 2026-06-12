@@ -23,12 +23,12 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
     });
   };
 
-  const handleXrayPartChange = (partIdx, val) => {
+  const handleXrayPartChange = (recIdx, partIdx, val) => {
     onChange(prev => {
       const tr = prev.trialReport || {};
       const records = tr.photoRecords ? [...tr.photoRecords] : [];
-      const xrayIdx = records.findIndex(r => r.isXray);
-      if (xrayIdx === -1) return prev;
+      if (!records[recIdx]?.isXray) return prev;
+      const xrayIdx = recIdx;
       const parts = [...(records[xrayIdx].parts || ['', '', '', ''])];
       parts[partIdx] = val;
       records[xrayIdx] = { ...records[xrayIdx], parts };
@@ -108,9 +108,9 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
                   {[0, 1, 2, 3].map((pIdx) => (
                     <div key={pIdx} style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                       <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>{pIdx + 1}:</span>
-                      <input type="text" className="form-input edit-active compact" placeholder={pIdx === 0 ? '預設空白' : `U${pIdx + 1}`}
+                      <input type="text" className="form-input edit-active compact" placeholder={pIdx === 0 ? '預設空白' : `U${pIdx + 1}`} name={`xrayPart_${idx}_${pIdx}`}
                         value={cleanXrayPart(rec.parts?.[pIdx])}
-                        onChange={(e) => handleXrayPartChange(pIdx, e.target.value)}
+                        onChange={(e) => handleXrayPartChange(idx, pIdx, e.target.value)}
                         disabled={isFieldDisabled(data, currentUser, `trialReport.photoRecords.xray.parts.${pIdx}`)}
                         style={{ width: '70px', padding: '2px 4px', fontSize: '0.8rem' }} />
                     </div>
@@ -123,8 +123,10 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
       </div>
 
       <div className="action-row">
-        <button className="btn btn-primary" onClick={onNext}>下一步：工程文件一覽表</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：工程文件一覽表</button>
       </div>
     </div>
   );
 }
+
+

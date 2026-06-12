@@ -96,7 +96,7 @@ export default function Uploader({ onDataLoaded }) {
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current.click()}
+        onClick={() => fileInputRef.current.click()} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); fileInputRef.current.click(); } }}
       >
         <input 
           ref={fileInputRef}
@@ -153,3 +153,6 @@ export default function Uploader({ onDataLoaded }) {
     </div>
   );
 }
+
+
+
