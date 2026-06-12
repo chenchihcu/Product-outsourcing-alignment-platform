@@ -6,6 +6,23 @@ function cleanXrayPart(part) {
   return /_{2,}/.test(value) ? '' : value;
 }
 
+function hasText(value) {
+  return String(value || '').trim().length > 0;
+}
+
+function isInstructionalMemo(value) {
+  const text = String(value || '').trim();
+  return /^（?如有特殊焊接、清洗、點膠等要求，請於此說明）?$/.test(text);
+}
+
+function formatSignDate(value) {
+  if (!value) return '系統未記錄';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const pad = (num) => String(num).padStart(2, '0');
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export default function PrintReport({ data }) {
   if (!data) return null;
 
@@ -17,6 +34,11 @@ export default function PrintReport({ data }) {
   const photoRecords = Array.isArray(tr.photoRecords) ? tr.photoRecords : [];
   const tooling = bi.tooling || {};
   const sign = bi.signOff || {};
+  const filledTempPoints = Array.isArray(pc.tempPoints)
+    ? pc.tempPoints.filter((pt) => hasText(pt?.pos) || hasText(pt?.desc) || hasText(pt?.memo))
+    : [];
+  const specialProcessMemo = String(pc.specialProcessMemo || '').trim();
+  const shouldShowSpecialProcessMemo = hasText(specialProcessMemo) && !isInstructionalMemo(specialProcessMemo);
 
   // 輔助函數：精緻化 Checkbox 狀態元件
   const renderCheck = (checked, label = "") => (
@@ -285,32 +307,36 @@ export default function PrintReport({ data }) {
       {/* 測溫點配置 */}
       {pc.keyParts?.has && (
         <div style={{ marginTop: '12px' }}>
-          <h3 className="print-sub-section-title">🌡️ 測溫點配置 (關鍵零件要求)</h3>
-          <table className="print-table">
-            <thead>
-              <tr>
-                <th style={{ width: '10%' }}>#</th>
-                <th style={{ width: '40%' }}>位置 / 位號</th>
-              </tr>
-            </thead>
-            <tbody>
-              {pc.tempPoints?.map((pt, idx) => (
-                <tr key={idx}>
-                  <td>{idx + 1}</td>
-                  <td>{pt.pos || '—'}</td>
+          <h3 className="print-sub-section-title">測溫點配置 (關鍵零件要求)</h3>
+          {filledTempPoints.length > 0 ? (
+            <table className="print-table">
+              <thead>
+                <tr>
+                  <th style={{ width: '10%' }}>#</th>
+                  <th style={{ width: '40%' }}>位置 / 位號</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {filledTempPoints.map((pt, idx) => (
+                  <tr key={`${pt.pos || pt.desc || 'temp'}-${idx}`}>
+                    <td>{idx + 1}</td>
+                    <td>{pt.pos || pt.desc || '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            <div className="print-memo-box print-warning-box">已勾選關鍵零件要求，測溫點位置尚未填寫。</div>
+          )}
         </div>
       )}
 
       {/* 特殊製程備註 */}
-      {pc.specialProcessMemo && (
+      {shouldShowSpecialProcessMemo && (
         <div style={{ marginTop: '12px' }}>
           <h3 className="print-sub-section-title">特殊製程備註</h3>
           <div className="print-memo-box">
-            {pc.specialProcessMemo}
+            {specialProcessMemo}
           </div>
         </div>
       )}
@@ -402,6 +428,7 @@ export default function PrintReport({ data }) {
                 <span className="sign-text text-danger">⚠️ 待研發確認簽章</span>
               )}
             </div>
+            <div className="print-sign-date">系統紀錄簽名日期: {sign.rdSignature ? formatSignDate(sign.rdSignedAt) : '未簽章'}</div>
             <div className="print-sign-terms">確認產品基本資料與風險零件已填寫完整，並經研發部門核准。</div>
           </div>
         </div>
@@ -416,6 +443,7 @@ export default function PrintReport({ data }) {
                 <span className="sign-text text-danger">⚠️ 待工程審核簽章</span>
               )}
             </div>
+            <div className="print-sign-date">系統紀錄簽名日期: {sign.engineeringReviewSignature ? formatSignDate(sign.engineeringReviewSignedAt) : '未簽章'}</div>
             <div className="print-sign-terms">確認生產治工具規格、鋼板開口以及製程工程參數已審查通過。</div>
           </div>
         </div>
@@ -430,15 +458,12 @@ export default function PrintReport({ data }) {
                 <span className="sign-text text-danger">⚠️ 待品保處審核簽章</span>
               )}
             </div>
+            <div className="print-sign-date">系統紀錄簽名日期: {sign.qaSignature ? formatSignDate(sign.qaSignedAt) : '未簽章'}</div>
             <div className="print-sign-terms">確認兩端資訊與防呆管制點皆已完成填寫與覆核，符合試產要求。</div>
           </div>
         </div>
       </div>
 
-      <div className="print-footer">
-        <p>報告生成時間: {new Date().toLocaleString()} | 醫電鼎眾股份有限公司</p>
-        <p>此文件為委外加工雙向對齊之線上簽核正本，符合廠務管理規範。</p>
-      </div>
     </div>
   );
 }

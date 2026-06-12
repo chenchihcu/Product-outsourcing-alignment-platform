@@ -4,6 +4,12 @@ import { exportRequirementExcel } from '../utils/excelExporter';
 import { compressImage } from '../utils/imageCompressor';
 import './SignOff.css';
 
+const SIGNED_AT_FIELDS = {
+  rdSignature: 'rdSignedAt',
+  engineeringReviewSignature: 'engineeringReviewSignedAt',
+  qaSignature: 'qaSignedAt',
+};
+
 export default function SignOff({
   data,
   originalWb,
@@ -58,6 +64,9 @@ export default function SignOff({
       rdSignature: '',
       engineeringReviewSignature: '',
       qaSignature: '',
+      rdSignedAt: '',
+      engineeringReviewSignedAt: '',
+      qaSignedAt: '',
       rejectionResponse: undefined,
     };
     const owners = { ...(data._owners || {}) };
@@ -85,7 +94,11 @@ export default function SignOff({
   };
 
   const handleSignChange = (field, val) => {
+    const signedAtField = SIGNED_AT_FIELDS[field];
     const updatedSign = { ...data.basicInfo.signOff, [field]: val };
+    if (signedAtField) {
+      updatedSign[signedAtField] = val ? new Date().toISOString() : '';
+    }
     const updatedBasic = { ...data.basicInfo, signOff: updatedSign };
     const path = `basicInfo.signOff.${field}`;
     const owners = { ...(data._owners || {}) };

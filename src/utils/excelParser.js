@@ -266,7 +266,10 @@ export function parseRequirementExcel(arrayBuffer) {
     data.basicInfo.signOff = {
       rdConfirm: getVal('B40') || '',
       engineeringReview: getVal('D40') || '',
-      qaConfirm: getVal('G40') || ''
+      qaConfirm: getVal('G40') || '',
+      rdSignedAt: '',
+      engineeringReviewSignedAt: '',
+      qaSignedAt: ''
     };
 
     // 解析 G1 儲存格以還原防呆鎖定狀態與電子簽章
@@ -282,6 +285,10 @@ export function parseRequirementExcel(arrayBuffer) {
               data.basicInfo.signOff.rdSignature = parsed.signatures.rdSignature || '';
               data.basicInfo.signOff.engineeringReviewSignature = parsed.signatures.engineeringReviewSignature || '';
               data.basicInfo.signOff.qaSignature = parsed.signatures.qaSignature || '';
+              const signatureDates = parsed.signatureDates || {};
+              data.basicInfo.signOff.rdSignedAt = signatureDates.rdSignedAt || parsed.signatures.rdSignedAt || '';
+              data.basicInfo.signOff.engineeringReviewSignedAt = signatureDates.engineeringReviewSignedAt || parsed.signatures.engineeringReviewSignedAt || '';
+              data.basicInfo.signOff.qaSignedAt = signatureDates.qaSignedAt || parsed.signatures.qaSignedAt || '';
             }
           } else {
             // 舊版相容性：G1 直接是 owners

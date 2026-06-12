@@ -21,6 +21,14 @@ function cleanXrayPart(part) {
   return /_{2,}/.test(value) ? '' : value;
 }
 
+function formatSignatureDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const pad = (num) => String(num).padStart(2, '0');
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 // 套用排版格式（欄寬、合併儲存格、以及簽核區對齊）
 function applyFormatting(sheet) {
   if (!sheet) return;
@@ -316,9 +324,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核回寫對齊 + 標籤修正 (A40=研發, C40=工程, F40=品保)
     const sign = bi.signOff || {};
-    writeCell(sheet1, 'B40', sign.rdSignature ? '✓ 已簽章' : '');
-    writeCell(sheet1, 'D40', sign.engineeringReviewSignature ? '✓ 已簽章' : '');
-    writeCell(sheet1, 'G40', sign.qaSignature ? '✓ 已簽章' : '');
+    writeCell(sheet1, 'B40', sign.rdSignature ? `✓ 已簽章 ${formatSignatureDate(sign.rdSignedAt)}`.trim() : '');
+    writeCell(sheet1, 'D40', sign.engineeringReviewSignature ? `✓ 已簽章 ${formatSignatureDate(sign.engineeringReviewSignedAt)}`.trim() : '');
+    writeCell(sheet1, 'G40', sign.qaSignature ? `✓ 已簽章 ${formatSignatureDate(sign.qaSignedAt)}`.trim() : '');
 
     // 修正簽核區標籤（對應實際填寫角色）
     writeCell(sheet1, 'A40', '研發確認');
@@ -331,6 +339,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
         rdSignature: sign.rdSignature || '',
         engineeringReviewSignature: sign.engineeringReviewSignature || '',
         qaSignature: sign.qaSignature || ''
+      },
+      signatureDates: {
+        rdSignedAt: sign.rdSignedAt || '',
+        engineeringReviewSignedAt: sign.engineeringReviewSignedAt || '',
+        qaSignedAt: sign.qaSignedAt || ''
       }
     };
     try {
@@ -461,7 +474,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核 (稽核人員確認 - 回寫品保確認人)
     const sign = bi.signOff || {};
-    writeCell(sheet2, 'E34', sign.qaSignature ? 'QA 已簽章' : '');
+    writeCell(sheet2, 'E34', sign.qaSignature ? `QA 已簽章 ${formatSignatureDate(sign.qaSignedAt)}`.trim() : '');
   }
 
   // 3. 更新【試產報告要求】

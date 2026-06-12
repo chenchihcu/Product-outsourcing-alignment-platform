@@ -28,6 +28,12 @@ function sanitizeProjectData(data) {
   // 產品階段：確保 mp 存在，遷移舊版 ecn 至新結構
   if (clone.basicInfo) {
     clone.basicInfo = { ...clone.basicInfo };
+    clone.basicInfo.signOff = {
+      ...(clone.basicInfo.signOff || {}),
+      rdSignedAt: clone.basicInfo.signOff?.rdSignedAt || '',
+      engineeringReviewSignedAt: clone.basicInfo.signOff?.engineeringReviewSignedAt || '',
+      qaSignedAt: clone.basicInfo.signOff?.qaSignedAt || ''
+    };
     const stage = clone.basicInfo.stage || {};
     const legacyEcn = clone.basicInfo._legacyEcn;
     if (stage.ecn !== undefined) {
