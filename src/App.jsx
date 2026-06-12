@@ -942,6 +942,8 @@ export default function App() {
             onExportComplete={handleExportComplete} 
             currentUser={currentUser}
             onUpdateAccountSignature={handleUpdateAccountSignature}
+            onFinalExit={handleLogout}
+            onFinalBackToList={handleBackToList}
           />
         );
       case 'settings':

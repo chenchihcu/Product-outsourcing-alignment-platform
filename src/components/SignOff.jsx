@@ -4,7 +4,17 @@ import { exportRequirementExcel } from '../utils/excelExporter';
 import { compressImage } from '../utils/imageCompressor';
 import './SignOff.css';
 
-export default function SignOff({ data, originalWb, fileName, onChange, onExportComplete, currentUser, onUpdateAccountSignature }) {
+export default function SignOff({
+  data,
+  originalWb,
+  fileName,
+  onChange,
+  onExportComplete,
+  currentUser,
+  onUpdateAccountSignature,
+  onFinalExit,
+  onFinalBackToList,
+}) {
   const report = useMemo(() => validateAlignment(data), [data]);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
@@ -20,8 +30,10 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   }, []);
 
   // ===== 品保退件流程(硬性鎖定)=====
-  const rejection = data.basicInfo?.signOff?.rejection || null;
+  const signOff = data.basicInfo?.signOff || {};
+  const rejection = signOff.rejection || null;
   const isRejected = !!rejection;
+  const finalApprovalComplete = !!signOff.qaSignature && !isRejected;
   const isQA = currentUser.role === 'qa' || currentUser.role === 'admin';
   const canResubmit = currentUser.role === 'rd' || currentUser.role === 'eng' || currentUser.role === 'admin';
   const [rejectReason, setRejectReason] = useState('');
@@ -479,6 +491,31 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
           <div className="success-desc">
             <p className="success-title">完美！兩端資訊已完全同步！</p>
             <p className="success-detail">恭喜！所有必填與關鍵管制點皆已完成填寫與對齊。點擊下方按鈕即可匯出最終簽章版文件。</p>
+          </div>
+        </div>
+      )}
+
+      {finalApprovalComplete && (
+        <div className="final-approval-next" aria-live="polite">
+          <div className="final-approval-copy">
+            <span className="final-approval-kicker">最終簽核已完成</span>
+            <p>目前機種會先自動儲存，再依您的選擇離開系統或回到機種管理中心。</p>
+          </div>
+          <div className="final-approval-actions">
+            <button
+              type="button"
+              className="btn btn-secondary final-exit-btn"
+              onClick={onFinalExit}
+            >
+              儲存後離開系統
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary final-center-btn"
+              onClick={onFinalBackToList}
+            >
+              回到機種管理中心
+            </button>
           </div>
         </div>
       )}
