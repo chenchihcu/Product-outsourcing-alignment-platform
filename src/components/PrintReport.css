@@ -53,6 +53,22 @@
     padding: 0;
   }
 
+  .print-section {
+    margin: 0 0 12px;
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .print-keep-block {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .print-flow-section {
+    break-inside: auto;
+    page-break-inside: auto;
+  }
+
   /* 報表標頭 */
   .print-header {
     text-align: center;
@@ -85,7 +101,10 @@
     border-left: 5px solid #1e3a8a !important; /* 科技深藍 */
     padding-left: 10px;
     color: #1e3a8a !important;
+    break-after: avoid-page;
+    break-inside: avoid-page;
     page-break-after: avoid;
+    page-break-inside: avoid;
   }
 
   .print-sub-section-title {
@@ -93,11 +112,15 @@
     font-weight: bold;
     margin: 12px 0 6px 0;
     color: #1e293b !important;
+    break-after: avoid-page;
+    break-inside: avoid-page;
     page-break-after: avoid;
+    page-break-inside: avoid;
   }
 
   .print-subsection-block {
     margin-top: 12px;
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
 
@@ -105,17 +128,49 @@
     width: 100%;
     border-collapse: collapse;
     margin-bottom: 12px;
+    break-inside: avoid-page;
     page-break-inside: avoid;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  .print-long-table {
+    break-inside: auto !important;
+    page-break-inside: auto !important;
+  }
+
+  .print-table thead {
+    display: table-header-group;
+  }
+
+  .print-table tbody {
+    display: table-row-group;
+  }
+
+  .print-table tr {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .print-long-table tbody,
+  .print-long-table tr {
+    break-inside: avoid-page;
+    page-break-inside: avoid;
+  }
+
+  .print-subhead-row {
+    break-after: avoid-page;
+    page-break-after: avoid;
   }
 
   .print-table th,
   .print-table td {
     border: 1px solid #cbd5e1 !important; /* 柔和灰框線 */
-    padding: 6px 10px;
+    padding: 6px 8px;
     text-align: left;
-    vertical-align: middle;
+    vertical-align: top;
     font-size: 9.5pt;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
   .print-table th {
@@ -149,7 +204,17 @@
   }
 
   .delivery-item {
-    padding-left: 20px !important;
+    padding-left: 16px !important;
+  }
+
+  .print-long-text-cell {
+    line-height: 1.45;
+  }
+
+  .print-status-cell {
+    text-align: center !important;
+    vertical-align: top !important;
+    padding-top: 7px !important;
   }
 
   .print-field-note {
@@ -247,6 +312,17 @@
     font-weight: bold;
     border-radius: 4px;
     border: 1px solid transparent;
+    line-height: 1.25;
+  }
+
+  .print-status-badge {
+    max-width: 100%;
+    text-align: center;
+    vertical-align: top;
+  }
+
+  .print-delivery-table .print-status-badge {
+    white-space: nowrap;
   }
 
   .badge-success {
@@ -296,12 +372,14 @@
   }
 
   .print-pending-table {
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
 
   .print-pending-table .badge-danger {
     white-space: normal;
-    line-height: 1.35;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
   }
 
   /* 雙向線上簽核區 */
@@ -312,6 +390,7 @@
     margin-top: 15px;
     border-collapse: separate;
     border-spacing: 12px 0;
+    break-inside: avoid-page;
     page-break-inside: avoid;
   }
 
@@ -419,6 +498,7 @@
 
   /* 分頁控制 */
   .page-break {
+    break-before: page;
     page-break-before: always;
   }
 

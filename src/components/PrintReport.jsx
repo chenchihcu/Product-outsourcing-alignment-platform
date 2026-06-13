@@ -128,198 +128,206 @@ export default function PrintReport({ data }) {
         <p className="print-subtitle">SMT 生產前置確認 checklist</p>
       </div>
 
-      <h2 className="print-section-title">A. 產品資料與製程範圍</h2>
-      <table className="print-table">
-        <tbody>
-          <tr>
-            <td className="cell-label" style={{ width: '15%' }}>委外加工廠</td>
-            <td className="cell-value" style={{ width: '35%' }}>{bi.factory || '(未填寫)'}</td>
-            <td className="cell-label" style={{ width: '15%' }}>產品料號</td>
-            <td className="cell-value" style={{ width: '35%' }}>{bi.productNo || '(未填寫)'}</td>
-          </tr>
-          <tr>
-            <td className="cell-label">產品名稱/描述</td>
-            <td className="cell-value">{bi.productDesc || '(未填寫)'}</td>
-            <td className="cell-label">產品階段</td>
-            <td className="cell-value">
-              {renderCheck(bi.stage?.evt, 'EVT')}
-              {renderCheck(bi.stage?.dvt, 'DVT')}
-              {renderCheck(bi.stage?.pvt, 'PVT')}
-              {renderCheck(bi.stage?.politRun, 'Pilot-run')}
-              {renderCheck(bi.stage?.mp, 'MP')}
-              {bi.ecnChange?.has && (
-                <span className="print-checkbox-item is-checked">
-                  <span className="checkbox-square">✓</span>
-                  <span className="checkbox-label">工程變更</span>
-                </span>
-              )}
-              {bi.ecnChange?.has && bi.ecnChange?.verificationItem && (
-                <div className="print-field-note">驗證項目: {bi.ecnChange.verificationItem}</div>
-              )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2 className="print-section-title">B. 製程前置條件</h2>
-      <table className="print-table">
-        <tbody>
-          <tr>
-            <td className="cell-label" style={{ width: '20%' }}>樣品提供確認</td>
-            <td className="cell-value" colSpan={3}>
-              {renderCheck(pc.sampleProvided?.trialBoard, '試錫板')}
-              {renderCheck(pc.sampleProvided?.tempBoard, '測溫板')}
-              {renderCheck(pc.sampleProvided?.standardPart, '標準件')}
-            </td>
-          </tr>
-          <tr>
-            <td className="cell-label">PCB / FPCA 烘烤需求</td>
-            <td className="cell-value" colSpan={3}>
-              {renderCheck(pc.bakeRequired?.need, '需要烘烤')}
-              {renderCheck(pc.bakeRequired?.noNeed, '不需要')}
-              {pc.bakeRequired?.need && (
-                <div className="print-field-note">
-                  PCB 烘烤條件: {pc.bakeRequired?.pcbBakeCond || '—'}<br />
-                  FPCA 烘烤條件: {pc.bakeRequired?.fpcaBakeCond || '—'}
-                </div>
-              )}
-            </td>
-          </tr>
-        </tbody>
-      </table>
-
-      <h2 className="print-section-title">C. 鋼板與治工具確認</h2>
-      <table className="print-table">
-        <thead>
-          <tr>
-            <th style={{ width: '30%' }}>治工具名稱</th>
-            <th style={{ width: '45%' }}>規格描述 / 加工廠確認</th>
-            <th style={{ width: '25%' }}>提供數量</th>
-          </tr>
-        </thead>
-        <tbody>
-          {bi.processItems?.smt && (
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">A. 產品資料與製程範圍</h2>
+        <table className="print-table">
+          <tbody>
             <tr>
-              <td className="cell-bold">SMT 鋼板</td>
+              <td className="cell-label" style={{ width: '15%' }}>委外加工廠</td>
+              <td className="cell-value" style={{ width: '35%' }}>{bi.factory || '(未填寫)'}</td>
+              <td className="cell-label" style={{ width: '15%' }}>產品料號</td>
+              <td className="cell-value" style={{ width: '35%' }}>{bi.productNo || '(未填寫)'}</td>
+            </tr>
+            <tr>
+              <td className="cell-label">產品名稱/描述</td>
+              <td className="cell-value">{bi.productDesc || '(未填寫)'}</td>
+              <td className="cell-label">產品階段</td>
+              <td className="cell-value">
+                {renderCheck(bi.stage?.evt, 'EVT')}
+                {renderCheck(bi.stage?.dvt, 'DVT')}
+                {renderCheck(bi.stage?.pvt, 'PVT')}
+                {renderCheck(bi.stage?.politRun, 'Pilot-run')}
+                {renderCheck(bi.stage?.mp, 'MP')}
+                {bi.ecnChange?.has && (
+                  <span className="print-checkbox-item is-checked">
+                    <span className="checkbox-square">✓</span>
+                    <span className="checkbox-label">工程變更</span>
+                  </span>
+                )}
+                {bi.ecnChange?.has && bi.ecnChange?.verificationItem && (
+                  <div className="print-field-note">驗證項目: {bi.ecnChange.verificationItem}</div>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">B. 製程前置條件</h2>
+        <table className="print-table">
+          <tbody>
+            <tr>
+              <td className="cell-label" style={{ width: '20%' }}>樣品提供確認</td>
+              <td className="cell-value" colSpan={3}>
+                {renderCheck(pc.sampleProvided?.trialBoard, '試錫板')}
+                {renderCheck(pc.sampleProvided?.tempBoard, '測溫板')}
+                {renderCheck(pc.sampleProvided?.standardPart, '標準件')}
+              </td>
+            </tr>
+            <tr>
+              <td className="cell-label">PCB / FPCA 烘烤需求</td>
+              <td className="cell-value" colSpan={3}>
+                {renderCheck(pc.bakeRequired?.need, '需要烘烤')}
+                {renderCheck(pc.bakeRequired?.noNeed, '不需要')}
+                {pc.bakeRequired?.need && (
+                  <div className="print-field-note">
+                    PCB 烘烤條件: {pc.bakeRequired?.pcbBakeCond || '—'}<br />
+                    FPCA 烘烤條件: {pc.bakeRequired?.fpcaBakeCond || '—'}
+                  </div>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">C. 鋼板與治工具確認</h2>
+        <table className="print-table">
+          <thead>
+            <tr>
+              <th style={{ width: '28%' }}>治工具名稱</th>
+              <th style={{ width: '54%' }}>規格描述 / 加工廠確認</th>
+              <th style={{ width: '18%' }}>提供數量</th>
+            </tr>
+          </thead>
+          <tbody>
+            {bi.processItems?.smt && (
+              <tr>
+                <td className="cell-bold">SMT 鋼板</td>
+                <td>
+                  {renderCheck(true, '鋼板規格 (100% 需要)')}
+                  <div className="print-field-note">
+                    厚度: <strong>{tooling.stencil?.thickness || '—'}</strong> mm |
+                    樣式: <strong>{tooling.stencil?.style === 'step' ? '階梯鋼板' : '一般鋼板'}</strong>
+                    {tooling.stencil?.nanoCoating && <span className="nano-coating-badge">表面奈米塗層</span>}
+                  </div>
+                </td>
+                <td>—</td>
+              </tr>
+            )}
+            <tr>
+              <td className="cell-bold">Routing 治具</td>
+              <td>{renderCheck(tooling.routingFixture?.need, '需要')}{renderCheck(tooling.routingFixture?.noNeed, '不需要')}</td>
+              <td>{tooling.routingFixture?.need ? (tooling.routingFixture?.qty || '—') : '—'}</td>
+            </tr>
+            <tr>
+              <td className="cell-bold">塗膠治具</td>
+              <td>{renderCheck(tooling.glueFixture?.need, '需要')}{renderCheck(tooling.glueFixture?.noNeed, '不需要')}</td>
+              <td>{tooling.glueFixture?.need ? (tooling.glueFixture?.qty || '—') : '—'}</td>
+            </tr>
+            <tr>
+              <td className="cell-bold">測試治具</td>
+              <td>{renderCheck(tooling.testFixture?.need, '需要')}{renderCheck(tooling.testFixture?.noNeed, '不需要')}</td>
+              <td>{tooling.testFixture?.need ? (tooling.testFixture?.qty || '—') : '—'}</td>
+            </tr>
+            <tr>
+              <td className="cell-bold">組裝治具</td>
+              <td>{renderCheck(tooling.assemblyFixture?.need, '需要')}{renderCheck(tooling.assemblyFixture?.noNeed, '不需要')}</td>
+              <td>{tooling.assemblyFixture?.need ? (tooling.assemblyFixture?.qty || '—') : '—'}</td>
+            </tr>
+            <tr>
+              <td className="cell-bold">SMT刷錫載具</td>
               <td>
-                {renderCheck(true, '鋼板規格 (100% 需要)')}
-                <div className="print-field-note">
-                  厚度: <strong>{tooling.stencil?.thickness || '—'}</strong> mm |
-                  樣式: <strong>{tooling.stencil?.style === 'step' ? '階梯鋼板' : '一般鋼板'}</strong>
-                  {tooling.stencil?.nanoCoating && <span className="nano-coating-badge">表面奈米塗層</span>}
-                </div>
+                {renderCheck(tooling.smtCarrier?.need, '需要')}
+                {renderCheck(tooling.smtCarrier?.noNeed, '不需要')}
+                {tooling.smtCarrier?.need && (
+                  <div className="print-field-note">
+                    選項: {renderCheck(tooling.smtCarrier?.upper, '上載板')}{renderCheck(tooling.smtCarrier?.lower, '下載板')}
+                  </div>
+                )}
               </td>
               <td>—</td>
             </tr>
-          )}
-          <tr>
-            <td className="cell-bold">Routing 治具</td>
-            <td>{renderCheck(tooling.routingFixture?.need, '需要')}{renderCheck(tooling.routingFixture?.noNeed, '不需要')}</td>
-            <td>{tooling.routingFixture?.need ? (tooling.routingFixture?.qty || '—') : '—'}</td>
-          </tr>
-          <tr>
-            <td className="cell-bold">塗膠治具</td>
-            <td>{renderCheck(tooling.glueFixture?.need, '需要')}{renderCheck(tooling.glueFixture?.noNeed, '不需要')}</td>
-            <td>{tooling.glueFixture?.need ? (tooling.glueFixture?.qty || '—') : '—'}</td>
-          </tr>
-          <tr>
-            <td className="cell-bold">測試治具</td>
-            <td>{renderCheck(tooling.testFixture?.need, '需要')}{renderCheck(tooling.testFixture?.noNeed, '不需要')}</td>
-            <td>{tooling.testFixture?.need ? (tooling.testFixture?.qty || '—') : '—'}</td>
-          </tr>
-          <tr>
-            <td className="cell-bold">組裝治具</td>
-            <td>{renderCheck(tooling.assemblyFixture?.need, '需要')}{renderCheck(tooling.assemblyFixture?.noNeed, '不需要')}</td>
-            <td>{tooling.assemblyFixture?.need ? (tooling.assemblyFixture?.qty || '—') : '—'}</td>
-          </tr>
-          <tr>
-            <td className="cell-bold">SMT刷錫載具</td>
-            <td>
-              {renderCheck(tooling.smtCarrier?.need, '需要')}
-              {renderCheck(tooling.smtCarrier?.noNeed, '不需要')}
-              {tooling.smtCarrier?.need && (
-                <div className="print-field-note">
-                  選項: {renderCheck(tooling.smtCarrier?.upper, '上載板')}{renderCheck(tooling.smtCarrier?.lower, '下載板')}
-                </div>
-              )}
-            </td>
-            <td>—</td>
-          </tr>
-          <tr>
-            <td className="cell-bold">其他治具</td>
-            <td>
-              {renderCheck(tooling.otherFixture?.need, '需要')}
-              {renderCheck(tooling.otherFixture?.noNeed, '不需要')}
-              {tooling.otherFixture?.need && (
-                <div className="print-field-note">名稱: <strong>{tooling.otherFixture?.name || '—'}</strong></div>
-              )}
-            </td>
-            <td>{tooling.otherFixture?.need ? (tooling.otherFixture?.qty || '—') : '—'}</td>
-          </tr>
-        </tbody>
-      </table>
+            <tr>
+              <td className="cell-bold">其他治具</td>
+              <td>
+                {renderCheck(tooling.otherFixture?.need, '需要')}
+                {renderCheck(tooling.otherFixture?.noNeed, '不需要')}
+                {tooling.otherFixture?.need && (
+                  <div className="print-field-note">名稱: <strong>{tooling.otherFixture?.name || '—'}</strong></div>
+                )}
+              </td>
+              <td>{tooling.otherFixture?.need ? (tooling.otherFixture?.qty || '—') : '—'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
-      <h2 className="print-section-title">D. SMT 製程條件</h2>
-      <table className="print-table">
-        <colgroup>
-          <col style={{ width: '20%' }} />
-          <col style={{ width: '45%' }} />
-          <col style={{ width: '15%' }} />
-          <col style={{ width: '20%' }} />
-        </colgroup>
-        <tbody>
-          <tr>
-            <td className="cell-label">SMT 焊接順序</td>
-            <td className="cell-value">
-              <div className="print-checkbox-vertical">
-                {renderCheck(pc.smtOrder?.bToT, '先焊底面 (B→T)')}
-                {renderCheck(pc.smtOrder?.tToB, '先焊頂面 (T→B)')}
-              </div>
-            </td>
-            <td className="cell-label">鋼板開孔比例</td>
-            <td className="cell-value">{stencilApertureRatio || '—'} %</td>
-          </tr>
-          <tr>
-            <td className="cell-label">SMT 首件檢查項目</td>
-            <td className="cell-value" colSpan={3}>
-              <div className="print-checkbox-grid">
-                {renderCheck(pc.smtFirstPiece?.polarity, '極性方向檢查')}
-                {renderCheck(pc.smtFirstPiece?.measureLcr, '量測 LCR (電容/電阻/電感)')}
-                {renderCheck(pc.smtFirstPiece?.spi, 'SPI 錫膏厚度測試')}
-                {renderCheck(pc.smtFirstPiece?.steelTension, '鋼板張力量測')}
-                {renderCheck(pc.smtFirstPiece?.ledTest === 'yes', 'LED點亮測試: 有')}
-                {renderCheck(pc.smtFirstPiece?.ledTest === 'no', 'LED點亮測試: 無 (不適用)')}
-                {renderCheck(pc.smtFirstPiece?.pcbReflow, 'PCB外觀檢查 (reflow)')}
-                {renderCheck(pc.smtFirstPiece?.solderability, '濕潤性檢查 (試錫板)')}
-              </div>
-            </td>
-          </tr>
-          {bi.processItems?.dip && (
-            <>
-              <tr>
-                <td className="cell-label">DIP 首件檢查項目</td>
-                <td className="cell-value">{renderCheck(pc.dipFirstPiece?.cutLead, '剪腳前置作業')}</td>
-                <td className="cell-label">DIP 焊接順序</td>
-                <td className="cell-value">
-                  <div className="print-checkbox-vertical">
-                    {renderCheck(pc.dipOrder?.bToT, '先焊底面 (B→T)')}
-                    {renderCheck(pc.dipOrder?.tToB, '先焊頂面 (T→B)')}
-                  </div>
-                </td>
-              </tr>
-              {pc.dipFirstPiece?.memo && (
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">D. SMT 製程條件</h2>
+        <table className="print-table">
+          <colgroup>
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '45%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '20%' }} />
+          </colgroup>
+          <tbody>
+            <tr>
+              <td className="cell-label">SMT 焊接順序</td>
+              <td className="cell-value">
+                <div className="print-checkbox-vertical">
+                  {renderCheck(pc.smtOrder?.bToT, '先焊底面 (B→T)')}
+                  {renderCheck(pc.smtOrder?.tToB, '先焊頂面 (T→B)')}
+                </div>
+              </td>
+              <td className="cell-label">鋼板開孔比例</td>
+              <td className="cell-value">{stencilApertureRatio || '—'} %</td>
+            </tr>
+            <tr>
+              <td className="cell-label">SMT 首件檢查項目</td>
+              <td className="cell-value" colSpan={3}>
+                <div className="print-checkbox-grid">
+                  {renderCheck(pc.smtFirstPiece?.polarity, '極性方向檢查')}
+                  {renderCheck(pc.smtFirstPiece?.measureLcr, '量測 LCR (電容/電阻/電感)')}
+                  {renderCheck(pc.smtFirstPiece?.spi, 'SPI 錫膏厚度測試')}
+                  {renderCheck(pc.smtFirstPiece?.steelTension, '鋼板張力量測')}
+                  {renderCheck(pc.smtFirstPiece?.ledTest === 'yes', 'LED點亮測試: 有')}
+                  {renderCheck(pc.smtFirstPiece?.ledTest === 'no', 'LED點亮測試: 無 (不適用)')}
+                  {renderCheck(pc.smtFirstPiece?.pcbReflow, 'PCB外觀檢查 (reflow)')}
+                  {renderCheck(pc.smtFirstPiece?.solderability, '濕潤性檢查 (試錫板)')}
+                </div>
+              </td>
+            </tr>
+            {bi.processItems?.dip && (
+              <>
                 <tr>
-                  <td className="cell-label">DIP 注意事項</td>
-                  <td className="cell-value" colSpan={3}>{pc.dipFirstPiece.memo}</td>
+                  <td className="cell-label">DIP 首件檢查項目</td>
+                  <td className="cell-value">{renderCheck(pc.dipFirstPiece?.cutLead, '剪腳前置作業')}</td>
+                  <td className="cell-label">DIP 焊接順序</td>
+                  <td className="cell-value">
+                    <div className="print-checkbox-vertical">
+                      {renderCheck(pc.dipOrder?.bToT, '先焊底面 (B→T)')}
+                      {renderCheck(pc.dipOrder?.tToB, '先焊頂面 (T→B)')}
+                    </div>
+                  </td>
                 </tr>
-              )}
-            </>
-          )}
-        </tbody>
-      </table>
+                {pc.dipFirstPiece?.memo && (
+                  <tr>
+                    <td className="cell-label">DIP 注意事項</td>
+                    <td className="cell-value" colSpan={3}>{pc.dipFirstPiece.memo}</td>
+                  </tr>
+                )}
+              </>
+            )}
+          </tbody>
+        </table>
+      </section>
 
       {pc.keyParts?.has && (
-        <div className="print-subsection-block">
+        <section className="print-subsection-block print-keep-block">
           <h3 className="print-sub-section-title">D1. 測溫點配置 (關鍵零件要求)</h3>
           {filledTempPoints.length > 0 ? (
             <table className="print-table">
@@ -341,151 +349,161 @@ export default function PrintReport({ data }) {
           ) : (
             <div className="print-memo-box print-warning-box">已勾選關鍵零件要求，測溫點位置尚未填寫。</div>
           )}
-        </div>
+        </section>
       )}
 
-      <h2 className="print-section-title">E. 特殊製程條件</h2>
-      <table className="print-table">
-        <tbody>
-          <tr>
-            <td className="cell-label" style={{ width: '20%' }}>Underfill 後烘烤</td>
-            <td className="cell-value" style={{ width: '30%' }}>
-              {(pc.underfill?.bakeTemp && pc.underfill?.bakeTime)
-                ? `${pc.underfill?.bakeTemp} °C x ${pc.underfill?.bakeTime} min`
-                : '—'}
-            </td>
-            <td className="cell-label" style={{ width: '20%' }}>膠材型號</td>
-            <td className="cell-value" style={{ width: '30%' }}>{pc.underfill?.glueModel || '—'}</td>
-          </tr>
-        </tbody>
-      </table>
-      {shouldShowSpecialProcessMemo && (
-        <div className="print-subsection-block">
-          <h3 className="print-sub-section-title">E1. 特殊製程備註</h3>
-          <div className="print-memo-box">{specialProcessMemo}</div>
-        </div>
-      )}
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">E. 特殊製程條件</h2>
+        <table className="print-table">
+          <tbody>
+            <tr>
+              <td className="cell-label" style={{ width: '20%' }}>Underfill 後烘烤</td>
+              <td className="cell-value" style={{ width: '30%' }}>
+                {(pc.underfill?.bakeTemp && pc.underfill?.bakeTime)
+                  ? `${pc.underfill?.bakeTemp} °C x ${pc.underfill?.bakeTime} min`
+                  : '—'}
+              </td>
+              <td className="cell-label" style={{ width: '20%' }}>膠材型號</td>
+              <td className="cell-value" style={{ width: '30%' }}>{pc.underfill?.glueModel || '—'}</td>
+            </tr>
+          </tbody>
+        </table>
+        {shouldShowSpecialProcessMemo && (
+          <div className="print-subsection-block print-keep-block">
+            <h3 className="print-sub-section-title">E1. 特殊製程備註</h3>
+            <div className="print-memo-box">{specialProcessMemo}</div>
+          </div>
+        )}
+      </section>
 
-      <h2 className="print-section-title">F. 出貨與保護條件</h2>
-      <table className="print-table">
-        <tbody>
-          <tr>
-            <td className="cell-label" style={{ width: '20%' }}>包材種類</td>
-            <td className="cell-value" colSpan={3}>
-              {pc.packagingType === 'pcba' && renderPackagingChecks('pcba', pc.pcbaPackaging)}
-              {pc.packagingType === 'fpca' && renderPackagingChecks('fpca', pc.fpcaPackaging)}
-              {!pc.packagingType && <span className="text-danger">未選擇</span>}
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <section className="print-section print-keep-block">
+        <h2 className="print-section-title">F. 出貨與保護條件</h2>
+        <table className="print-table">
+          <tbody>
+            <tr>
+              <td className="cell-label" style={{ width: '20%' }}>包材種類</td>
+              <td className="cell-value" colSpan={3}>
+                {pc.packagingType === 'pcba' && renderPackagingChecks('pcba', pc.pcbaPackaging)}
+                {pc.packagingType === 'fpca' && renderPackagingChecks('fpca', pc.fpcaPackaging)}
+                {!pc.packagingType && <span className="text-danger">未選擇</span>}
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
 
       <div className="page-break"></div>
 
-      <h2 className="print-section-title">G. 試產交付與檢驗紀錄</h2>
-      <table className="print-table">
-        <thead>
-          <tr>
-            <th style={{ width: '70%' }}>交付項目 / 檢驗紀錄 / 照片清單</th>
-            <th style={{ width: '30%' }}>完成狀態</th>
-          </tr>
-        </thead>
-        <tbody>
-          {deliverySections.map((section) => (
-            <Fragment key={section.label}>
-              <tr>
-                <td className="cell-subhead" colSpan={2}>{section.label}</td>
-              </tr>
-              {section.records.map((rec) => (
-                <tr key={rec.id}>
-                  <td className="delivery-item">{section.formatName ? section.formatName(rec) : rec.name}</td>
-                  <td className="text-center">
-                    {rec.checked ? (
-                      <span className="badge badge-success">已完成 ✓</span>
-                    ) : (
-                      <span className="badge badge-danger">未完成 —</span>
-                    )}
-                  </td>
-                </tr>
-              ))}
-            </Fragment>
-          ))}
-        </tbody>
-      </table>
-
-      <h2 className="print-section-title">H. 未完成與待確認項目</h2>
-      <table className="print-table print-pending-table">
-        <thead>
-          <tr>
-            <th style={{ width: '28%' }}>範圍</th>
-            <th style={{ width: '47%' }}>項目</th>
-            <th style={{ width: '25%' }}>狀態</th>
-          </tr>
-        </thead>
-        <tbody>
-          {pendingItems.length > 0 ? (
-            pendingItems.map((item, idx) => (
-              <tr key={`${item.scope}-${item.item}-${idx}`}>
-                <td>{item.scope}</td>
-                <td>{item.item}</td>
-                <td><span className="badge badge-danger">{item.status}</span></td>
-              </tr>
-            ))
-          ) : (
+      <section className="print-section print-flow-section">
+        <h2 className="print-section-title">G. 試產交付與檢驗紀錄</h2>
+        <table className="print-table print-long-table print-delivery-table">
+          <thead>
             <tr>
-              <td colSpan={3} className="text-center">目前無未完成與待確認項目</td>
+              <th style={{ width: '76%' }}>交付項目 / 檢驗紀錄 / 照片清單</th>
+              <th style={{ width: '24%' }}>完成狀態</th>
             </tr>
-          )}
-        </tbody>
-      </table>
+          </thead>
+          <tbody>
+            {deliverySections.map((section) => (
+              <Fragment key={section.label}>
+                <tr className="print-subhead-row">
+                  <td className="cell-subhead" colSpan={2}>{section.label}</td>
+                </tr>
+                {section.records.map((rec) => (
+                  <tr key={rec.id}>
+                    <td className="delivery-item print-long-text-cell">{section.formatName ? section.formatName(rec) : rec.name}</td>
+                    <td className="text-center print-status-cell">
+                      {rec.checked ? (
+                        <span className="badge badge-success print-status-badge">已完成 ✓</span>
+                      ) : (
+                        <span className="badge badge-danger print-status-badge">未完成 —</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </Fragment>
+            ))}
+          </tbody>
+        </table>
+      </section>
 
-      <h2 className="print-section-title sign-section-title">I. 線上簽核記錄</h2>
-      <div className="print-sign-grid">
-        <div className={`print-sign-box role-rd ${sign.rdSignature ? 'is-signed' : 'is-unsigned'}`}>
-          <div className="print-sign-header">研發確認簽核 (RD)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">
-              {sign.rdSignature ? (
-                <img src={sign.rdSignature} alt="RD Signature" />
-              ) : (
-                <span className="sign-text text-danger">⚠ 待研發確認簽章</span>
-              )}
+      <section className="print-section print-pending-section">
+        <h2 className="print-section-title">H. 未完成與待確認項目</h2>
+        <table className="print-table print-pending-table">
+          <thead>
+            <tr>
+              <th style={{ width: '24%' }}>範圍</th>
+              <th style={{ width: '56%' }}>項目</th>
+              <th style={{ width: '20%' }}>狀態</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pendingItems.length > 0 ? (
+              pendingItems.map((item, idx) => (
+                <tr key={`${item.scope}-${item.item}-${idx}`}>
+                  <td>{item.scope}</td>
+                  <td className="print-long-text-cell">{item.item}</td>
+                  <td className="print-status-cell"><span className="badge badge-danger print-status-badge">{item.status}</span></td>
+                </tr>
+              ))
+            ) : (
+              <tr>
+                <td colSpan={3} className="text-center">目前無未完成與待確認項目</td>
+              </tr>
+            )}
+          </tbody>
+        </table>
+      </section>
+
+      <section className="print-section print-sign-section">
+        <h2 className="print-section-title sign-section-title">I. 線上簽核記錄</h2>
+        <div className="print-sign-grid">
+          <div className={`print-sign-box role-rd ${sign.rdSignature ? 'is-signed' : 'is-unsigned'}`}>
+            <div className="print-sign-header">研發確認簽核 (RD)</div>
+            <div className="print-sign-body">
+              <div className="print-sign-name">
+                {sign.rdSignature ? (
+                  <img src={sign.rdSignature} alt="RD Signature" />
+                ) : (
+                  <span className="sign-text text-danger">⚠ 待研發確認簽章</span>
+                )}
+              </div>
+              <div className="print-sign-date">系統紀錄簽名日期: {sign.rdSignature ? formatSignDate(sign.rdSignedAt) : '未簽章'}</div>
+              <div className="print-sign-terms">確認產品基本資料與風險零件已填寫完整，並經研發部門核准。</div>
             </div>
-            <div className="print-sign-date">系統紀錄簽名日期: {sign.rdSignature ? formatSignDate(sign.rdSignedAt) : '未簽章'}</div>
-            <div className="print-sign-terms">確認產品基本資料與風險零件已填寫完整，並經研發部門核准。</div>
+          </div>
+
+          <div className={`print-sign-box role-pe ${sign.engineeringReviewSignature ? 'is-signed' : 'is-unsigned'}`}>
+            <div className="print-sign-header">工程審核簽核 (PE)</div>
+            <div className="print-sign-body">
+              <div className="print-sign-name">
+                {sign.engineeringReviewSignature ? (
+                  <img src={sign.engineeringReviewSignature} alt="PE Signature" />
+                ) : (
+                  <span className="sign-text text-danger">⚠ 待工程審核簽章</span>
+                )}
+              </div>
+              <div className="print-sign-date">系統紀錄簽名日期: {sign.engineeringReviewSignature ? formatSignDate(sign.engineeringReviewSignedAt) : '未簽章'}</div>
+              <div className="print-sign-terms">確認生產治工具規格、鋼板開口以及製程工程參數已審查通過。</div>
+            </div>
+          </div>
+
+          <div className={`print-sign-box role-qa ${sign.qaSignature ? 'is-signed' : 'is-unsigned'}`}>
+            <div className="print-sign-header">品保處最後審核 (QA)</div>
+            <div className="print-sign-body">
+              <div className="print-sign-name">
+                {sign.qaSignature ? (
+                  <img src={sign.qaSignature} alt="QA Signature" />
+                ) : (
+                  <span className="sign-text text-danger">⚠ 待品保處審核簽章</span>
+                )}
+              </div>
+              <div className="print-sign-date">系統紀錄簽名日期: {sign.qaSignature ? formatSignDate(sign.qaSignedAt) : '未簽章'}</div>
+              <div className="print-sign-terms">確認項目已完成填寫與覆核，符合試產要求。</div>
+            </div>
           </div>
         </div>
-
-        <div className={`print-sign-box role-pe ${sign.engineeringReviewSignature ? 'is-signed' : 'is-unsigned'}`}>
-          <div className="print-sign-header">工程審核簽核 (PE)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">
-              {sign.engineeringReviewSignature ? (
-                <img src={sign.engineeringReviewSignature} alt="PE Signature" />
-              ) : (
-                <span className="sign-text text-danger">⚠ 待工程審核簽章</span>
-              )}
-            </div>
-            <div className="print-sign-date">系統紀錄簽名日期: {sign.engineeringReviewSignature ? formatSignDate(sign.engineeringReviewSignedAt) : '未簽章'}</div>
-            <div className="print-sign-terms">確認生產治工具規格、鋼板開口以及製程工程參數已審查通過。</div>
-          </div>
-        </div>
-
-        <div className={`print-sign-box role-qa ${sign.qaSignature ? 'is-signed' : 'is-unsigned'}`}>
-          <div className="print-sign-header">品保處最後審核 (QA)</div>
-          <div className="print-sign-body">
-            <div className="print-sign-name">
-              {sign.qaSignature ? (
-                <img src={sign.qaSignature} alt="QA Signature" />
-              ) : (
-                <span className="sign-text text-danger">⚠ 待品保處審核簽章</span>
-              )}
-            </div>
-            <div className="print-sign-date">系統紀錄簽名日期: {sign.qaSignature ? formatSignDate(sign.qaSignedAt) : '未簽章'}</div>
-            <div className="print-sign-terms">確認項目已完成填寫與覆核，符合試產要求。</div>
-          </div>
-        </div>
-      </div>
+      </section>
     </div>
   );
 }
