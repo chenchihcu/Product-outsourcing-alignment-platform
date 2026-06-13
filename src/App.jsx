@@ -15,7 +15,18 @@ import { validateAlignment } from './utils/validator';
 import { parseRequirementExcel } from './utils/excelParser';
 import { getJSON, setJSON, removeKey } from './utils/storage';
 import { isSupabaseEnabled } from './data/supabaseClient';
-import { pullProjects, pushProject, deleteProjectRemote, subscribeProjects, subscribePresence } from './data/cloudSync';
+import {
+  pullProjects,
+  pushProject,
+  deleteProjectRemote,
+  subscribeProjects,
+  subscribePresence,
+  pullFactories,
+  migrateFactories,
+  addFactoryRemote,
+  deleteFactoryRemote,
+  subscribeFactories,
+} from './data/cloudSync';
 import { migrateLocalProjects } from './data/migrateLocal';
 import { getCurrentUser, onAuthChange, signOut, updateMySignature } from './data/auth';
 import * as XLSX from 'xlsx';
@@ -189,6 +200,45 @@ function sanitizeProjects(list) {
   });
 }
 
+const DEFAULT_FACTORIES = ['富士康', '捷普', '醫電鼎眾'];
+
+const getProjectsKey = (user) => {
+  if (!user) return 'ag_projects';
+  if (user.role === 'admin') {
+    return 'ag_projects_admin_test'; // 系統管理員最高權限測試資料庫，避免與部門正式數據混淆
+  }
+  return 'ag_projects';
+};
+
+const getStorageSuffix = (user) => {
+  if (!user) return '';
+  if (user.role === 'admin') return '_admin_test';
+  return '';
+};
+
+const normalizeFactories = (list) => {
+  if (!Array.isArray(list)) return [];
+  return Array.from(new Set(list.map((fac) => String(fac || '').trim()).filter(Boolean)));
+};
+
+const getFactoriesCacheKey = (user) => {
+  if (isSupabaseEnabled) return 'factories_cloud';
+  return 'factories' + getStorageSuffix(user);
+};
+
+const getCachedFactories = (user) => {
+  const cached = getJSON(getFactoriesCacheKey(user), null);
+  if (Array.isArray(cached)) return normalizeFactories(cached);
+  if (isSupabaseEnabled) {
+    const legacy = getJSON('factories' + getStorageSuffix(user), null);
+    if (Array.isArray(legacy)) return normalizeFactories(legacy);
+  }
+  return DEFAULT_FACTORIES;
+};
+
+// 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
+const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
+
 // S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
 const DEFAULT_ACCOUNTS = import.meta.env.DEV ? [
   { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
@@ -224,23 +274,6 @@ class ErrorBoundary extends Component {
 }
 
 export default function App() {
-  const getProjectsKey = (user) => {
-    if (!user) return 'ag_projects';
-    if (user.role === 'admin') {
-      return 'ag_projects_admin_test'; // 系統管理員最高權限測試資料庫，避免與部門正式數據混淆
-    }
-    return 'ag_projects';
-  };
-
-  const getStorageSuffix = (user) => {
-    if (!user) return '';
-    if (user.role === 'admin') return '_admin_test';
-    return '';
-  };
-
-  // 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
-  const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
-
   const [projects, setProjects] = useState([]);
   const projectsRef = useRef([]);
   useEffect(() => { projectsRef.current = projects; }, [projects]);
@@ -286,7 +319,7 @@ export default function App() {
   useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
 
   const [factories, setFactories] = useState(() => {
-    return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
+    return getCachedFactories(currentUser);
   });
 
   const [accounts, setAccounts] = useState(() => {
@@ -392,6 +425,37 @@ export default function App() {
     return () => { cancelled = true; };
   }, [currentUser]);
 
+  // 1c. 委外加工廠主檔同步:雲端模式使用全系統共用資料表,localStorage 僅作離線快取
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const localFactories = getCachedFactories(currentUser);
+        const cloudFactories = await pullFactories();
+        if (cancelled || !cloudFactories) return;
+        if (cloudFactories.length > 0) {
+          const normalizedCloud = normalizeFactories(cloudFactories);
+          setFactories(normalizedCloud);
+          setJSON(getFactoriesCacheKey(currentUser), normalizedCloud);
+          return;
+        }
+
+        if (localFactories.length > 0) {
+          const migrated = await migrateFactories(localFactories, currentUser?.id);
+          if (cancelled) return;
+          const normalizedMigrated = normalizeFactories(migrated.length > 0 ? migrated : localFactories);
+          setFactories(normalizedMigrated);
+          setJSON(getFactoriesCacheKey(currentUser), normalizedMigrated);
+        }
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 加工廠主檔同步失敗,改用本機快取', e);
+        if (!cancelled) setSyncError('委外加工廠主檔雲端同步失敗，目前使用本機快取。請確認資料表已建立並檢查網路連線。');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [currentUser]);
+
   // 3a. 即時同步(P3):訂閱雲端機種變更 → 更新清單;目前開啟中且為「他人」更新則提示,不直接覆蓋
   useEffect(() => {
     if (!currentUser || !isSupabaseEnabled) return;
@@ -407,6 +471,38 @@ export default function App() {
         ? prev.map(p => (p.id === row.id ? row : p))
         : [...prev, row]));
       if (row.id === currentProjectIdRef.current) setRemoteUpdate(row);
+    });
+    return unsub;
+  }, [currentUser]);
+
+  // 3a-2. 即時同步共用委外加工廠主檔
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    const myId = currentUser.id;
+    const refreshFactories = () => {
+      pullFactories()
+        .then((cloudFactories) => {
+          if (!cloudFactories) return;
+          const normalized = normalizeFactories(cloudFactories);
+          setFactories(normalized);
+          setJSON(getFactoriesCacheKey(currentUser), normalized);
+        })
+        .catch((e) => {
+          if (import.meta.env.DEV) console.warn('[cloud] 加工廠主檔重新拉取失敗', e);
+          setSyncError('委外加工廠主檔更新失敗，請重新整理後再確認。');
+        });
+    };
+    const unsub = subscribeFactories(({ eventType, new: row, old }) => {
+      if (eventType === 'DELETE') {
+        if (old?.name) {
+          setFactories(prev => normalizeFactories(prev.filter(f => f !== old.name)));
+        } else {
+          refreshFactories();
+        }
+        return;
+      }
+      if (!row?.name || (row.updatedBy && row.updatedBy === myId)) return;
+      setFactories(prev => normalizeFactories(prev.includes(row.name) ? prev : [...prev, row.name]));
     });
     return unsub;
   }, [currentUser]);
@@ -549,20 +645,29 @@ export default function App() {
     };
   }, [currentUser]);
 
+  const factoriesCacheKeyRef = useRef(getFactoriesCacheKey(currentUser));
+  useEffect(() => {
+    const key = getFactoriesCacheKey(currentUser);
+    if (key !== factoriesCacheKeyRef.current) {
+      factoriesCacheKeyRef.current = key;
+      setFactories(getCachedFactories(currentUser));
+      return;
+    }
+    setJSON(key, normalizeFactories(factories));
+  }, [factories, currentUser]);
+
   // 身分命名空間(admin 測試庫)切換時:改為從新命名空間「載入」,
   // 避免把上一個身分的 in-memory 狀態寫進新身分的 key(互相汙染)
-  const settingsSuffixRef = useRef(getStorageSuffix(currentUser));
+  const accountsSuffixRef = useRef(getStorageSuffix(currentUser));
   useEffect(() => {
     const suffix = getStorageSuffix(currentUser);
-    if (suffix !== settingsSuffixRef.current) {
-      settingsSuffixRef.current = suffix;
-      setFactories(getJSON('factories' + suffix, ['富士康', '捷普', '醫電鼎眾']));
+    if (suffix !== accountsSuffixRef.current) {
+      accountsSuffixRef.current = suffix;
       setAccounts(getJSON('accounts' + suffix, DEFAULT_ACCOUNTS));
       return;
     }
-    setJSON('factories' + suffix, factories);
     setJSON('accounts' + suffix, accounts);
-  }, [factories, accounts, currentUser]);
+  }, [accounts, currentUser]);
 
   useEffect(() => {
     if (currentUser) {
@@ -625,14 +730,44 @@ export default function App() {
     }
   }, [currentUser, projects, currentProjectId]);
 
-  const handleAddFactory = (fac) => {
-    if (!factories.includes(fac)) {
-      setFactories([...factories, fac]);
+  const handleAddFactory = async (fac) => {
+    const name = String(fac || '').trim();
+    if (!name || factories.includes(name)) return;
+    const snapshot = factories;
+    const next = normalizeFactories([...factories, name]);
+    setFactories(next);
+    setJSON(getFactoriesCacheKey(currentUser), next);
+
+    if (isSupabaseEnabled) {
+      try {
+        await addFactoryRemote(name, currentUser?.id);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 新增加工廠主檔失敗', e);
+        setFactories(snapshot);
+        setJSON(getFactoriesCacheKey(currentUser), snapshot);
+        setSyncError(`新增委外加工廠「${name}」雲端同步失敗，已還原。請確認網路連線後再試。`);
+      }
     }
   };
 
-  const handleRemoveFactory = (fac) => {
-    setFactories(factories.filter(f => f !== fac));
+  const handleRemoveFactory = async (fac) => {
+    const name = String(fac || '').trim();
+    if (!name) return;
+    const snapshot = factories;
+    const next = normalizeFactories(factories.filter(f => f !== name));
+    setFactories(next);
+    setJSON(getFactoriesCacheKey(currentUser), next);
+
+    if (isSupabaseEnabled) {
+      try {
+        await deleteFactoryRemote(name);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 刪除加工廠主檔失敗', e);
+        setFactories(snapshot);
+        setJSON(getFactoriesCacheKey(currentUser), snapshot);
+        setSyncError(`刪除委外加工廠「${name}」雲端同步失敗，已還原。請確認網路連線後再試。`);
+      }
+    }
   };
 
   const handleAddAccount = (acc) => {
