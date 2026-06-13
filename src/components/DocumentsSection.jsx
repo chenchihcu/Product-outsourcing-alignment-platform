@@ -10,7 +10,7 @@ export default function DocumentsSection({ data, onChange, currentUser, highligh
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">工程文件</h2>
-      <p className="section-subtitle">請確認以下 8 項關鍵工程文件之對齊勾選狀態，這將會雙向同步寫入 Excel 報表中。</p>
+      <p className="section-subtitle">請確認以下 8 項關鍵工程文件，勾選結果將寫入 Excel 報表。</p>
 
       <div className="documents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
         {[
@@ -46,7 +46,7 @@ export default function DocumentsSection({ data, onChange, currentUser, highligh
       </div>
 
       <div className="action-row" style={{ marginTop: '24px' }}>
-        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：雙向線上簽核</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：線上簽核</button>
       </div>
     </div>
   );

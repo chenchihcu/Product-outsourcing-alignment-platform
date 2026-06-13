@@ -9,16 +9,240 @@ const PrintReport = lazy(() =>
   import('./components/PrintReport').catch(() => ({ default: () => null }))
 );
 import Settings from './components/Settings';
+
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
 import { parseRequirementExcel } from './utils/excelParser';
 import { getJSON, setJSON, removeKey } from './utils/storage';
 import { isSupabaseEnabled } from './data/supabaseClient';
-import { pullProjects, pushProject, deleteProjectRemote, subscribeProjects, subscribePresence } from './data/cloudSync';
+import {
+  pullProjects,
+  pushProject,
+  deleteProjectRemote,
+  subscribeProjects,
+  subscribePresence,
+  pullFactories,
+  migrateFactories,
+  addFactoryRemote,
+  deleteFactoryRemote,
+  subscribeFactories,
+} from './data/cloudSync';
 import { migrateLocalProjects } from './data/migrateLocal';
-import { getCurrentUser, onAuthChange, signOut } from './data/auth';
+import { getCurrentUser, onAuthChange, signOut, updateMySignature } from './data/auth';
 import * as XLSX from 'xlsx';
 import './App.css';
+
+function sanitizeProjectData(data) {
+  if (!data) return data;
+  const clone = { ...data };
+  
+  // 產品階段：確保 mp 存在，遷移舊版 ecn 至新結構
+  if (clone.basicInfo) {
+    clone.basicInfo = { ...clone.basicInfo };
+    clone.basicInfo.signOff = {
+      ...(clone.basicInfo.signOff || {}),
+      rdSignedAt: clone.basicInfo.signOff?.rdSignedAt || '',
+      engineeringReviewSignedAt: clone.basicInfo.signOff?.engineeringReviewSignedAt || '',
+      qaSignedAt: clone.basicInfo.signOff?.qaSignedAt || ''
+    };
+    const stage = clone.basicInfo.stage || {};
+    const legacyEcn = clone.basicInfo._legacyEcn;
+    if (stage.ecn !== undefined) {
+      clone.basicInfo.ecnChange = { has: !!stage.ecn, no: !stage.ecn };
+      delete stage.ecn;
+    } else if (legacyEcn !== undefined) {
+      clone.basicInfo.ecnChange = { has: !!legacyEcn, no: !legacyEcn };
+    }
+    delete clone.basicInfo._legacyEcn;
+    if (clone.basicInfo.ecnChange === undefined) {
+      clone.basicInfo.ecnChange = { has: false, no: true };
+    }
+    stage.mp = stage.mp ?? false;
+    clone.basicInfo.stage = { ...stage };
+  }
+  
+  if (clone.processControl) {
+    clone.processControl = { ...clone.processControl };
+    clone.processControl.smtFirstPiece = { ...(clone.processControl.smtFirstPiece || {}) };
+    const legacyApertureRatio = clone.basicInfo?.tooling?.stencil?.apertureRatio;
+    if (!clone.processControl.smtFirstPiece.stencilApertureRatio && legacyApertureRatio) {
+      clone.processControl.smtFirstPiece.stencilApertureRatio = legacyApertureRatio;
+    }
+    
+    // 1. tempPoints
+    if (clone.processControl.tempPoints) {
+      if (!Array.isArray(clone.processControl.tempPoints)) {
+        const arr = [];
+        const obj = clone.processControl.tempPoints;
+        for (let i = 0; i < 6; i++) {
+          arr.push({
+            id: i + 1,
+            pos: obj[i]?.pos || '',
+            desc: obj[i]?.desc || '',
+            memo: obj[i]?.memo || ''
+          });
+        }
+        clone.processControl.tempPoints = arr;
+      } else {
+        const arr = [...clone.processControl.tempPoints];
+        while (arr.length < 6) {
+          arr.push({ id: arr.length + 1, pos: '', desc: '', memo: '' });
+        }
+        clone.processControl.tempPoints = arr.map((item, idx) => ({
+          id: idx + 1,
+          pos: item.pos || '',
+          desc: item.desc || '',
+          memo: item.memo || ''
+        }));
+      }
+    }
+  }
+  
+  if (clone.trialReport) {
+    clone.trialReport = { ...clone.trialReport };
+    
+    // 2. printRecords
+    if (clone.trialReport.printRecords) {
+      if (!Array.isArray(clone.trialReport.printRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.printRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          arr.push({
+            id: obj[k].id || (k + 1),
+            name: obj[k].name || '',
+            checked: !!obj[k].checked,
+            date: obj[k].date || ''
+          });
+        });
+        clone.trialReport.printRecords = arr;
+      }
+    }
+    
+    // 3. inspectRecords
+    if (clone.trialReport.inspectRecords) {
+      if (!Array.isArray(clone.trialReport.inspectRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.inspectRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          arr.push({
+            id: obj[k].id || (k + 1),
+            name: obj[k].name || '',
+            checked: !!obj[k].checked,
+            date: obj[k].date || ''
+          });
+        });
+        clone.trialReport.inspectRecords = arr;
+      }
+    }
+
+    // 4. photoRecords
+    if (clone.trialReport.photoRecords) {
+      if (!Array.isArray(clone.trialReport.photoRecords)) {
+        const arr = [];
+        const obj = clone.trialReport.photoRecords;
+        const keys = Object.keys(obj).filter(k => /^\d+$/.test(k)).map(Number).sort((a,b)=>a-b);
+        keys.forEach(k => {
+          const rawItem = obj[k] || {};
+          let itemParts = rawItem.parts;
+          if (!Array.isArray(itemParts)) {
+            itemParts = itemParts ? Object.values(itemParts) : ['', '', '', ''];
+          }
+          while (itemParts.length < 4) itemParts.push('');
+          arr.push({
+            id: rawItem.id || (k + 1),
+            name: rawItem.name || '',
+            checked: !!rawItem.checked,
+            date: rawItem.date || '',
+            isXray: !!rawItem.isXray,
+            parts: itemParts.map(String)
+          });
+        });
+        // 合併被污染的外部 xray.parts
+        const xrayData = obj.xray;
+        if (xrayData && xrayData.parts) {
+          const xrayParts = Array.isArray(xrayData.parts) ? xrayData.parts : Object.values(xrayData.parts);
+          const xrayItem = arr.find(item => item.isXray);
+          if (xrayItem) {
+            for (let i = 0; i < 4; i++) {
+              if (xrayParts[i]) xrayItem.parts[i] = String(xrayParts[i]);
+            }
+          }
+        }
+        clone.trialReport.photoRecords = arr;
+      } else {
+        clone.trialReport.photoRecords = clone.trialReport.photoRecords.map(item => {
+          if (item.isXray) {
+            let pts = item.parts;
+            if (!Array.isArray(pts)) {
+              pts = pts ? Object.values(pts) : ['', '', '', ''];
+            }
+            while (pts.length < 4) pts.push('');
+            return { ...item, parts: pts.map(String) };
+          }
+          return item;
+        });
+      }
+    }
+  }
+  
+  return clone;
+}
+
+function sanitizeProjects(list) {
+  if (!Array.isArray(list)) return [];
+  return list.map(p => {
+    if (p && p.data) {
+      return { ...p, data: sanitizeProjectData(p.data) };
+    }
+    return p;
+  });
+}
+
+const DEFAULT_FACTORIES = ['富士康', '捷普', '醫電鼎眾'];
+
+const getProjectsKey = (user) => {
+  if (!user) return 'ag_projects';
+  if (user.role === 'admin') {
+    return 'ag_projects_admin_test'; // 系統管理員最高權限測試資料庫，避免與部門正式數據混淆
+  }
+  return 'ag_projects';
+};
+
+const getStorageSuffix = (user) => {
+  if (!user) return '';
+  if (user.role === 'admin') return '_admin_test';
+  return '';
+};
+
+const normalizeFactories = (list) => {
+  if (!Array.isArray(list)) return [];
+  return Array.from(new Set(list.map((fac) => String(fac || '').trim()).filter(Boolean)));
+};
+
+const getFactoriesCacheKey = (user) => {
+  if (isSupabaseEnabled) return 'factories_cloud';
+  return 'factories' + getStorageSuffix(user);
+};
+
+const getCachedFactories = (user) => {
+  const cached = getJSON(getFactoriesCacheKey(user), null);
+  if (Array.isArray(cached)) return normalizeFactories(cached);
+  if (isSupabaseEnabled) {
+    const legacy = getJSON('factories' + getStorageSuffix(user), null);
+    if (Array.isArray(legacy)) return normalizeFactories(legacy);
+  }
+  return DEFAULT_FACTORIES;
+};
+
+// 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
+const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
+
+// S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
+const DEFAULT_ACCOUNTS = import.meta.env.DEV ? [
+  { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
+] : [];
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -50,26 +274,11 @@ class ErrorBoundary extends Component {
 }
 
 export default function App() {
-  const getProjectsKey = (user) => {
-    if (!user) return 'ag_projects';
-    if (user.role === 'admin') {
-      return 'ag_projects_admin_test'; // 系統管理員最高權限測試資料庫，避免與部門正式數據混淆
-    }
-    return 'ag_projects';
-  };
-
-  const getStorageSuffix = (user) => {
-    if (!user) return '';
-    if (user.role === 'admin') return '_admin_test';
-    return '';
-  };
-
-  // 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
-  const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
-
   const [projects, setProjects] = useState([]);
   const projectsRef = useRef([]);
   useEffect(() => { projectsRef.current = projects; }, [projects]);
+  // projects 目前內容所屬的 localStorage key(身分切換時用來擋住交叉寫入)
+  const projectsKeyRef = useRef(null);
   const [currentProjectId, setCurrentProjectId] = useState(null);
   const currentProjectIdRef = useRef(null);
   useEffect(() => { currentProjectIdRef.current = currentProjectId; }, [currentProjectId]);
@@ -110,15 +319,11 @@ export default function App() {
   useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
 
   const [factories, setFactories] = useState(() => {
-    return getJSON('factories' + getStorageSuffix(currentUser), ['富士康', '捷普', '醫電鼎眾']);
+    return getCachedFactories(currentUser);
   });
 
-  // S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
-  const defaultAccounts = import.meta.env.DEV ? [
-    { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
-  ] : [];
   const [accounts, setAccounts] = useState(() => {
-    return getJSON('accounts' + getStorageSuffix(currentUser), defaultAccounts);
+    return getJSON('accounts' + getStorageSuffix(currentUser), DEFAULT_ACCOUNTS);
   });
 
   const currentAlignmentRate = useMemo(
@@ -134,9 +339,10 @@ export default function App() {
     const sign = bi.signOff || {};
     return {
       basicInfo: !!(bi.factory && bi.productNo && Object.values(bi.stage || {}).some(v => v)),
-      processControl: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
+      preparation: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
         (pc.bakeRequired?.need || pc.bakeRequired?.noNeed) &&
-        (pc.smtOrder?.bToT || pc.smtOrder?.tToB)),
+        !!pc.packagingType),
+      processControl: !!(pc.smtOrder?.bToT || pc.smtOrder?.tToB),
       trialReport: !!(tr.printRecords?.some(r => r.checked) || tr.inspectRecords?.some(r => r.checked) || tr.photoRecords?.some(r => r.checked)),
       documents: !!Object.values(bi.documents || {}).some(v => v),
       signOff: !!(sign.rdSignature || sign.engineeringReviewSignature || sign.qaSignature)
@@ -154,7 +360,7 @@ export default function App() {
           const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
           if (!response.ok) throw new Error('無法載入範本 Excel 檔案。');
           const ab = await response.arrayBuffer();
-          const parsedData = parseRequirementExcel(ab);
+          const parsedData = sanitizeProjectData(parseRequirementExcel(ab));
           
           const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
           const base64 = btoa(binaryString);
@@ -171,13 +377,15 @@ export default function App() {
 
           const newList = [defaultProj];
           setJSON(key.replace('ag_', ''), newList);
+          projectsKeyRef.current = key;
           setProjects(newList);
         } catch (err) {
           if (import.meta.env.DEV) console.error('載入預設範本失敗:', err);
           setSyncError('載入預設範本失敗，請重新整理頁面。若持續發生，請確認網路連線。');
         }
       } else {
-        setProjects(list);
+        projectsKeyRef.current = key;
+        setProjects(sanitizeProjects(list));
       }
     };
 
@@ -197,8 +405,10 @@ export default function App() {
         const cloud = await pullProjects(ws);
         if (cancelled || !cloud) return;
         if (cloud.length > 0) {
-          setProjects(cloud);
-          setJSON(localKey, cloud); // 同時更新本機離線快取
+          const sanitizedCloud = sanitizeProjects(cloud);
+          projectsKeyRef.current = getProjectsKey(currentUser);
+          setProjects(sanitizedCloud);
+          setJSON(localKey, sanitizedCloud); // 同時更新本機離線快取
         } else {
           const local = getJSON(localKey, []);
           if (local.length > 0) {
@@ -210,6 +420,37 @@ export default function App() {
         if (import.meta.env.DEV) console.warn('[cloud] 雲端同步失敗,改用本機資料', e);
         // E2 — 同步失敗時顯示可見橫幅
         if (!cancelled) setSyncError('雲端同步失敗，目前使用本機資料。請確認網路連線。');
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [currentUser]);
+
+  // 1c. 委外加工廠主檔同步:雲端模式使用全系統共用資料表,localStorage 僅作離線快取
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    let cancelled = false;
+    (async () => {
+      try {
+        const localFactories = getCachedFactories(currentUser);
+        const cloudFactories = await pullFactories();
+        if (cancelled || !cloudFactories) return;
+        if (cloudFactories.length > 0) {
+          const normalizedCloud = normalizeFactories(cloudFactories);
+          setFactories(normalizedCloud);
+          setJSON(getFactoriesCacheKey(currentUser), normalizedCloud);
+          return;
+        }
+
+        if (localFactories.length > 0) {
+          const migrated = await migrateFactories(localFactories, currentUser?.id);
+          if (cancelled) return;
+          const normalizedMigrated = normalizeFactories(migrated.length > 0 ? migrated : localFactories);
+          setFactories(normalizedMigrated);
+          setJSON(getFactoriesCacheKey(currentUser), normalizedMigrated);
+        }
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 加工廠主檔同步失敗,改用本機快取', e);
+        if (!cancelled) setSyncError('委外加工廠主檔雲端同步失敗，目前使用本機快取。請確認資料表已建立並檢查網路連線。');
       }
     })();
     return () => { cancelled = true; };
@@ -234,6 +475,38 @@ export default function App() {
     return unsub;
   }, [currentUser]);
 
+  // 3a-2. 即時同步共用委外加工廠主檔
+  useEffect(() => {
+    if (!currentUser || !isSupabaseEnabled) return;
+    const myId = currentUser.id;
+    const refreshFactories = () => {
+      pullFactories()
+        .then((cloudFactories) => {
+          if (!cloudFactories) return;
+          const normalized = normalizeFactories(cloudFactories);
+          setFactories(normalized);
+          setJSON(getFactoriesCacheKey(currentUser), normalized);
+        })
+        .catch((e) => {
+          if (import.meta.env.DEV) console.warn('[cloud] 加工廠主檔重新拉取失敗', e);
+          setSyncError('委外加工廠主檔更新失敗，請重新整理後再確認。');
+        });
+    };
+    const unsub = subscribeFactories(({ eventType, new: row, old }) => {
+      if (eventType === 'DELETE') {
+        if (old?.name) {
+          setFactories(prev => normalizeFactories(prev.filter(f => f !== old.name)));
+        } else {
+          refreshFactories();
+        }
+        return;
+      }
+      if (!row?.name || (row.updatedBy && row.updatedBy === myId)) return;
+      setFactories(prev => normalizeFactories(prev.includes(row.name) ? prev : [...prev, row.name]));
+    });
+    return unsub;
+  }, [currentUser]);
+
   // 3b. 在線狀態(P3):同一機種有誰正在檢視
   useEffect(() => {
     if (!currentUser || !currentProjectId || !isSupabaseEnabled) return;
@@ -250,18 +523,25 @@ export default function App() {
     if (!projId || !projData) return;
     const report = validateAlignment(projData);
     const updatedAt = new Date().toISOString();
-    setProjects(prev => prev.map(p =>
+    const next = projectsRef.current.map(p =>
       p.id === projId
         ? { ...p, name, data: projData, alignmentRate: report.alignmentRate, updatedAt }
         : p
-    ));
+    );
+    projectsRef.current = next;
+    setProjects(next);
+    // 同步落盤:beforeunload / 登出等時機 setState 不會再 commit,persist effect 不會執行
+    const user = currentUserRef.current;
+    if (user) setJSON(getProjectsKey(user).replace('ag_', ''), sanitizeProjects(next));
     // 雲端同步(關閉時 pushProject 為 no-op)
     if (isSupabaseEnabled) {
-      const base = projectsRef.current.find(p => p.id === projId);
+      const base = next.find(p => p.id === projId);
       if (base) {
-        pushProject(getWorkspace(currentUserRef.current), {
-          ...base, name, data: projData, alignmentRate: report.alignmentRate, updatedAt,
-        }, currentUserRef.current?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 上推失敗', e); });
+        pushProject(getWorkspace(user), base, user?.id).catch(e => {
+          if (import.meta.env.DEV) console.warn('[cloud] 上推失敗', e);
+          // E2 — 上推失敗不能無聲:儲存指示仍顯示已儲存,需以橫幅告知僅存於本機
+          setSyncError('雲端同步失敗，此筆變更目前僅儲存於本機。請確認網路連線。');
+        });
       }
     }
   }, []);
@@ -319,6 +599,30 @@ export default function App() {
     };
   }, [saveState]);
 
+  // 共用登出流程:先儲存當前編輯(write-through 落盤+上雲),再清除登入狀態與
+  // 「上次開啟機種」記錄,避免共用工作站上下一位登入者自動開啟上一位的機種
+  const handleLogout = () => {
+    flushPendingSaveRef.current();
+    if (currentProjectId && data) {
+      saveProjectData(currentProjectId, fileName, data);
+    }
+    signOut();
+    setCurrentUser(null);
+    setData(null);
+    setOriginalWb(null);
+    setFileName('');
+    setCurrentProjectId(null);
+    setActiveTab('dashboard');
+    setShowSuccessOverlay(false);
+    setRemoteUpdate(null);
+    setSaveState('idle');
+    removeKey('last_project_id');
+    lastIdRef.current = null;
+    setProjects([]);
+  };
+  const handleLogoutRef = useRef(handleLogout);
+  useEffect(() => { handleLogoutRef.current = handleLogout; });
+
   // I3 — 30 分鐘無操作自動登出(保護共用工作站)
   useEffect(() => {
     if (!currentUser) return;
@@ -327,9 +631,8 @@ export default function App() {
     const reset = () => {
       clearTimeout(timerId);
       timerId = setTimeout(() => {
-        signOut();
-        setCurrentUser(null);
-        handleBackToList();
+        // 透過 ref 取最新版本,避免 30 分鐘前的 stale closure 漏存當前編輯
+        handleLogoutRef.current();
         alert('因長時間無操作，已自動登出，請重新登入。');
       }, TIMEOUT_MS);
     };
@@ -340,14 +643,30 @@ export default function App() {
       clearTimeout(timerId);
       events.forEach(ev => window.removeEventListener(ev, reset));
     };
-  }, [currentUser]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentUser]);
 
+  const factoriesCacheKeyRef = useRef(getFactoriesCacheKey(currentUser));
   useEffect(() => {
-    setJSON('factories' + getStorageSuffix(currentUser), factories);
+    const key = getFactoriesCacheKey(currentUser);
+    if (key !== factoriesCacheKeyRef.current) {
+      factoriesCacheKeyRef.current = key;
+      setFactories(getCachedFactories(currentUser));
+      return;
+    }
+    setJSON(key, normalizeFactories(factories));
   }, [factories, currentUser]);
 
+  // 身分命名空間(admin 測試庫)切換時:改為從新命名空間「載入」,
+  // 避免把上一個身分的 in-memory 狀態寫進新身分的 key(互相汙染)
+  const accountsSuffixRef = useRef(getStorageSuffix(currentUser));
   useEffect(() => {
-    setJSON('accounts' + getStorageSuffix(currentUser), accounts);
+    const suffix = getStorageSuffix(currentUser);
+    if (suffix !== accountsSuffixRef.current) {
+      accountsSuffixRef.current = suffix;
+      setAccounts(getJSON('accounts' + suffix, DEFAULT_ACCOUNTS));
+      return;
+    }
+    setJSON('accounts' + suffix, accounts);
   }, [accounts, currentUser]);
 
   useEffect(() => {
@@ -376,8 +695,10 @@ export default function App() {
   useEffect(() => {
     if (!currentUser || projects.length === 0) return;
     const key = getProjectsKey(currentUser);
+    // 身分切換期間,projects 仍是上一個命名空間的內容,寫入會汙染新身分的資料
+    if (projectsKeyRef.current !== key) return;
     // U10 — 偵測 localStorage 容量滿
-    const ok = setJSON(key.replace('ag_', ''), projects);
+    const ok = setJSON(key.replace('ag_', ''), sanitizeProjects(projects));
     if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。');
   }, [projects, currentUser]);
 
@@ -393,7 +714,7 @@ export default function App() {
         editedSinceLoadRef.current = false;
         setSaveState('saved');
         setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
-        setData(project.data);
+        setData(sanitizeProjectData(project.data));
         setFileName(project.name);
         if (project.originalWbBase64) {
           try {
@@ -409,14 +730,44 @@ export default function App() {
     }
   }, [currentUser, projects, currentProjectId]);
 
-  const handleAddFactory = (fac) => {
-    if (!factories.includes(fac)) {
-      setFactories([...factories, fac]);
+  const handleAddFactory = async (fac) => {
+    const name = String(fac || '').trim();
+    if (!name || factories.includes(name)) return;
+    const snapshot = factories;
+    const next = normalizeFactories([...factories, name]);
+    setFactories(next);
+    setJSON(getFactoriesCacheKey(currentUser), next);
+
+    if (isSupabaseEnabled) {
+      try {
+        await addFactoryRemote(name, currentUser?.id);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 新增加工廠主檔失敗', e);
+        setFactories(snapshot);
+        setJSON(getFactoriesCacheKey(currentUser), snapshot);
+        setSyncError(`新增委外加工廠「${name}」雲端同步失敗，已還原。請確認網路連線後再試。`);
+      }
     }
   };
 
-  const handleRemoveFactory = (fac) => {
-    setFactories(factories.filter(f => f !== fac));
+  const handleRemoveFactory = async (fac) => {
+    const name = String(fac || '').trim();
+    if (!name) return;
+    const snapshot = factories;
+    const next = normalizeFactories(factories.filter(f => f !== name));
+    setFactories(next);
+    setJSON(getFactoriesCacheKey(currentUser), next);
+
+    if (isSupabaseEnabled) {
+      try {
+        await deleteFactoryRemote(name);
+      } catch (e) {
+        if (import.meta.env.DEV) console.warn('[cloud] 刪除加工廠主檔失敗', e);
+        setFactories(snapshot);
+        setJSON(getFactoriesCacheKey(currentUser), snapshot);
+        setSyncError(`刪除委外加工廠「${name}」雲端同步失敗，已還原。請確認網路連線後再試。`);
+      }
+    }
   };
 
   const handleAddAccount = (acc) => {
@@ -429,13 +780,15 @@ export default function App() {
 
   // 3. 選取機種並載入詳細資料
   const handleSelectProject = (id, currentList = projects) => {
+    // 上一個機種還有未儲存的編輯(debounce 未觸發)時,先強制存檔,避免切換造成資料遺失
+    flushPendingSaveRef.current();
     const project = currentList.find(p => p.id === id);
     if (project) {
       editedSinceLoadRef.current = false;
       setRemoteUpdate(null);
       setSaveState('saved');
       setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
-      setData(project.data);
+      setData(sanitizeProjectData(project.data));
       setFileName(project.name);
 
       // 解析原始 Excel 二進位資料為 Workbook 物件
@@ -462,16 +815,16 @@ export default function App() {
     }
   };
 
-  // 4. 線上直接新增機種 (複製預設範本)
+  // 4. 線上直接新增機種 (複製預設範本);回傳是否成功,失敗時呼叫端保留 Modal 讓使用者修正
   const handleCreateProject = async (name) => {
-    if (!name || !name.trim()) return;
+    if (!name || !name.trim()) return false;
     const trimmedName = name.trim();
-    
+
     // 防呆設計：防範重複機種名稱
     const isDuplicate = projects.some(p => p.name.toLowerCase() === trimmedName.toLowerCase());
     if (isDuplicate) {
       alert(`已存在名稱為「${trimmedName}」的機種，請使用其他名稱！`);
-      return;
+      return false;
     }
 
     try {
@@ -491,7 +844,7 @@ export default function App() {
         const response = await fetch(import.meta.env.BASE_URL + '新機種製作需求一覽表2026 v2.xlsx');
         if (!response.ok) throw new Error('無法載入範本');
         const ab = await response.arrayBuffer();
-        parsedData = parseRequirementExcel(ab);
+        parsedData = sanitizeProjectData(parseRequirementExcel(ab));
         const binaryString = new Uint8Array(ab).reduce((data, byte) => data + String.fromCharCode(byte), '');
         base64 = btoa(binaryString);
       }
@@ -502,7 +855,7 @@ export default function App() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
         alignmentRate: 0,
-        data: parsedData,
+        data: sanitizeProjectData(parsedData),
         originalWbBase64: base64
       };
 
@@ -512,9 +865,11 @@ export default function App() {
       if (isSupabaseEnabled) pushProject(getWorkspace(currentUser), newProj, currentUser?.id).catch(e => { if (import.meta.env.DEV) console.warn('[cloud] 新增上推失敗', e); });
 
       handleSelectProject(newProj.id, newList);
+      return true;
     } catch (err) {
       console.error(err);
       alert('建立新機種失敗！');
+      return false;
     }
   };
 
@@ -539,7 +894,7 @@ export default function App() {
         bytes[i] = binaryString.charCodeAt(i);
       }
       
-      const parsedData = parseRequirementExcel(bytes.buffer);
+      const parsedData = sanitizeProjectData(parseRequirementExcel(bytes.buffer));
 
       const newProj = {
         id: 'proj_' + crypto.randomUUID(),
@@ -615,7 +970,7 @@ export default function App() {
       if (!window.confirm('您有尚未儲存的修改，載入遠端版本後本地變更將被覆蓋。確定繼續？')) return;
     }
     editedSinceLoadRef.current = false;
-    setData(remoteUpdate.data);
+    setData(sanitizeProjectData(remoteUpdate.data));
     setFileName(remoteUpdate.name);
     if (remoteUpdate.originalWbBase64) {
       try {
@@ -646,6 +1001,13 @@ export default function App() {
     ));
     if (currentUser && currentUser.username === uname) {
       setCurrentUser(prev => ({ ...prev, signature }));
+      // 雲端模式:寫回 Supabase profile;否則 token 刷新或重新登入後簽章會遺失
+      if (isSupabaseEnabled) {
+        updateMySignature(signature).catch((e) => {
+          if (import.meta.env.DEV) console.warn('[auth] 簽章雲端同步失敗', e);
+          setSyncError('簽章已套用，但雲端同步失敗；重新登入後可能需要重新上傳簽章。');
+        });
+      }
     }
   };
 
@@ -661,6 +1023,18 @@ export default function App() {
           <FormSections 
             data={data} 
             activeSection="basicInfo" 
+            onChange={setData} 
+            onNext={() => setActiveTab('preparation')} 
+            currentUser={currentUser}
+            factories={factories}
+            highlightField={highlightField}
+          />
+        );
+      case 'preparation':
+        return (
+          <FormSections 
+            data={data} 
+            activeSection="preparation" 
             onChange={setData} 
             onNext={() => setActiveTab('processControl')} 
             currentUser={currentUser}
@@ -714,6 +1088,8 @@ export default function App() {
             onExportComplete={handleExportComplete} 
             currentUser={currentUser}
             onUpdateAccountSignature={handleUpdateAccountSignature}
+            onFinalExit={handleLogout}
+            onFinalBackToList={handleBackToList}
           />
         );
       case 'settings':
@@ -751,7 +1127,7 @@ export default function App() {
       <ErrorBoundary>
         <AppShell
         currentUser={currentUser}
-        onLogout={() => { signOut(); setCurrentUser(null); handleBackToList(); }}
+        onLogout={handleLogout}
         inProject={!!currentProjectId}
         projectName={fileName}
         onBackToList={handleBackToList}
@@ -799,7 +1175,7 @@ export default function App() {
         {/* 頁尾(瘦身,credit 移出黃金區) */}
         <footer className="app-footer">
           <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
-          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React 製程管制平台</p>
+          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React</p>
         </footer>
       </AppShell>
       </ErrorBoundary>
@@ -809,8 +1185,8 @@ export default function App() {
         <div className="success-overlay animate-fade-in" onClick={() => setShowSuccessOverlay(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowSuccessOverlay(false); } }}>
           <div className="success-card glass-card text-center" onClick={(e) => e.stopPropagation()}>
             <span className="big-check-icon">✓</span>
-            <h2>Excel 匯出下載成功！</h2>
-            <p>對齊簽核版確認表已成功匯出。雙向資訊與防呆管制點皆已正確填入！</p>
+            <h2>Excel 已匯出</h2>
+            <p>簽核版文件已完成下載。</p>
             <div className="success-actions">
               <button type="button" className="btn btn-primary" onClick={() => setShowSuccessOverlay(false)}>
                 確定

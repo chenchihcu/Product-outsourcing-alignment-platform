@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
 import './AppShell.css';
 
-/* 對齊流程的五個步驟(順序固定) */
+/* 確認流程的五個步驟(順序固定) */
 const STEPS = [
   { key: 'basicInfo', label: '基本資料', icon: '📋' },
+  { key: 'preparation', label: '前置作業', icon: '🔧' },
   { key: 'processControl', label: '製程管制', icon: '🔰' },
   { key: 'trialReport', label: '試產要求', icon: '🎯' },
   { key: 'documents', label: '工程文件', icon: '📂' },
@@ -110,7 +111,7 @@ export default function AppShell({
               <NavItem {...navShared} tab="dashboard" icon="📈" label="儀表板" badge={`${alignmentRate}%`} />
 
               <div className="nav-group-label">
-                對齊流程
+                確認流程
                 <span className="nav-group-count">{completedSteps}/{STEPS.length}</span>
               </div>
               {STEPS.map((s, i) => (
@@ -124,8 +125,12 @@ export default function AppShell({
                 />
               ))}
 
-              <div className="nav-group-label">系統</div>
-              <NavItem {...navShared} tab="settings" icon="⚙️" label="系統設定" />
+              {currentUser?.role === 'admin' && (
+                <div className="nav-group-label">系統</div>
+              )}
+              {currentUser?.role === 'admin' && (
+                <NavItem {...navShared} tab="settings" icon="⚙️" label="系統設定" />
+              )}
             </>
           ) : (
             <>
@@ -202,6 +207,7 @@ export default function AppShell({
               <span className="pill-icon">📈</span>儀表板
               <span className={`pill-badge ${alignmentRate === 100 ? 'ok' : ''}`}>{alignmentRate}%</span>
             </button>
+
             {STEPS.map((s, i) => (
               <button type="button"
                 key={s.key}
@@ -215,13 +221,15 @@ export default function AppShell({
                 {s.label}
               </button>
             ))}
-            <button type="button"
-              ref={activeTab === 'settings' ? activePillRef : null}
-              className={`step-pill ${activeTab === 'settings' ? 'active' : ''}`}
-              onClick={() => go('settings')}
-            >
-              <span className="pill-icon">⚙️</span>設定
-            </button>
+            {currentUser?.role === 'admin' && (
+              <button type="button"
+                ref={activeTab === 'settings' ? activePillRef : null}
+                className={`step-pill ${activeTab === 'settings' ? 'active' : ''}`}
+                onClick={() => go('settings')}
+              >
+                <span className="pill-icon">⚙️</span>設定
+              </button>
+            )}
           </div>
         )}
 

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { validateAlignment } from '../utils/validator';
 import './Dashboard.css';
 
-const STEP_KEYS = ['basicInfo', 'processControl', 'trialReport', 'documents', 'signOff'];
+const STEP_KEYS = ['basicInfo', 'preparation', 'processControl', 'trialReport', 'documents', 'signOff'];
 
 /* 責任歸屬:本需求一覽表由「發包方(研發/工程)」填寫全部項目;
    供應商(委外加工廠)不負責填寫任何一項。電子簽章為獨立的簽核階段。 */
@@ -19,23 +19,23 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
 
   const errors = useMemo(() => warnings.filter((w) => w.type === 'error'), [warnings]);
   const warns = useMemo(() => warnings.filter((w) => w.type === 'warning'), [warnings]);
+  const todos = errors;
   const doneSteps = STEP_KEYS.filter((k) => sectionStatus[k]).length;
 
   const byParty = useMemo(() => {
     const g = { oem: [], sign: [] };
-    warnings.forEach((w) => { g[partyOf(w.message)].push(w); });
+    todos.forEach((w) => { g[partyOf(w.message)].push(w); });
     return g;
-  }, [warnings]);
+  }, [todos]);
 
   // U5 — 「下一步」只顯示目前角色能處理的項目
   // QA 與 Admin 只負責審核，不需被提示填寫欄位；簽章項目對所有角色均可見
   const isQaOrAdmin = currentUser?.role === 'qa' || currentUser?.role === 'admin';
   const actionableWarnings = useMemo(() => {
-    if (!isQaOrAdmin) return warnings;
-    return warnings.filter((w) => partyOf(w.message) === 'sign');
-  }, [warnings, isQaOrAdmin]);
+    if (!isQaOrAdmin) return todos;
+    return todos.filter((w) => partyOf(w.message) === 'sign');
+  }, [todos, isQaOrAdmin]);
   const nextItem = actionableWarnings.filter(w => w.type === 'error')[0]
-    || actionableWarnings.filter(w => w.type === 'warning')[0]
     || null;
 
   const [showAll, setShowAll] = useState(false);
@@ -46,7 +46,9 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
     let tab = 'basicInfo';
     if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具') || msg.includes('委外加工廠')) {
       tab = 'basicInfo';
-    } else if (msg.includes('烘烤') || msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('樣品') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('包材') || msg.includes('包裝') || msg.includes('維修記號') || msg.includes('備註')) {
+    } else if (msg.includes('烘烤') || msg.includes('樣品') || msg.includes('包材') || msg.includes('包裝')) {
+      tab = 'preparation';
+    } else if (msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('維修記號') || msg.includes('備註')) {
       tab = 'processControl';
     } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('翹曲') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
       tab = 'trialReport';
@@ -57,8 +59,8 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
   };
 
   const visibleTodos = filterParty
-    ? warnings.filter((w) => partyOf(w.message) === filterParty)
-    : warnings;
+    ? todos.filter((w) => partyOf(w.message) === filterParty)
+    : todos;
 
   return (
     <div className="dashboard-v2">
@@ -66,17 +68,17 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
       <div className="dash-hero glass-card">
         <div className="hero-rate" data-ok={alignmentRate === 100}>
           <span className="rate-num">{alignmentRate}<small>%</small></span>
-          <span className="rate-label">雙向資訊對齊率</span>
+          <span className="rate-label">完成率</span>
         </div>
         <div className="hero-main">
           <div className="hero-bar">
             <div className="hero-bar-fill" data-ok={alignmentRate === 100} style={{ width: `${alignmentRate}%` }} />
           </div>
           <div className="hero-stats">
-            <span className="stat"><b>{doneSteps}</b>/5 步驟完成</span>
+            <span className="stat"><b>{doneSteps}</b>/6 步驟完成</span>
             {errors.length > 0 && <span className="stat stat-error">● {errors.length} 異常</span>}
             {warns.length > 0 && <span className="stat stat-warn">● {warns.length} 警告</span>}
-            {warnings.length === 0 && <span className="stat stat-ok">✓ 已完美對齊</span>}
+            {warnings.length === 0 && <span className="stat stat-ok">✓ 已完成</span>}
           </div>
         </div>
       </div>
@@ -87,8 +89,8 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           <div>
-            <p className="clear-title">兩端資訊已完全同步！</p>
-            <p className="clear-desc">無任何漏失項目，可進行線上雙向簽章並下載 Excel。</p>
+            <p className="clear-title">確認項目已完成</p>
+            <p className="clear-desc">無漏失項目，可進行簽章並下載 Excel。</p>
           </div>
         </div>
       ) : (
@@ -129,7 +131,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
           <div className="dash-all glass-card">
             <button type="button" className="all-toggle" onClick={() => setShowAll((s) => !s)}>
               <span>
-                全部待辦（{warnings.length}）
+                全部待辦（{todos.length}）
                 {filterParty && <span className="all-filter">· 篩選：{PARTY_META[filterParty].label}</span>}
               </span>
               <span className="all-chevron">{showAll ? '收合 ▲' : '展開 ▼'}</span>

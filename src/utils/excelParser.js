@@ -12,12 +12,6 @@ function parseCheckbox(val) {
   return false;
 }
 
-// 輔助函數：去除 Checkbox 符號，只拿文字
-function cleanText(val) {
-  if (val === null || val === undefined) return '';
-  return cleanPlaceholder(String(val).replace(/[☑☐]/g, '').trim());
-}
-
 // 輔助函數：清洗數量欄位，去除 Checkbox 符號及方格字元
 function cleanQty(val) {
   if (val === null || val === undefined) return '';
@@ -36,6 +30,19 @@ function cleanPlaceholder(val) {
   return str;
 }
 
+function cleanApertureRatio(val) {
+  const cleaned = cleanPlaceholder(val);
+  if (!cleaned) return '';
+  return cleaned
+    .replace(/[☑☐]/g, '')
+    .replace(/鋼板開孔比例（錫膏印刷）[:：]?/g, '')
+    .replace(/鋼板開孔比例\(錫膏印刷\)[:：]?/g, '')
+    .replace(/開孔比例[:：]?/g, '')
+    .replace(/開口比[:：]?/g, '')
+    .replace(/%/g, '')
+    .trim();
+}
+
 
 /**
  * 解析新機種製作需求一覽表 Excel 檔案
@@ -51,9 +58,10 @@ export function parseRequirementExcel(arrayBuffer) {
   if (missingSheets.length > 0) {
     throw new Error(`此檔案不符合需求一覽表模板格式（缺少工作表：${missingSheets.join('、')}）`);
   }
-  // D4 — 驗證標題列
+  // D4 — 驗證標題列(官方範本 A1 為「…新產品導入…」,舊版為「…新機種…」,兩者皆接受)
   const titleCell = workbook.Sheets['產品基本資料']?.['A1'];
-  if (titleCell && !String(titleCell.v || '').includes('新機種')) {
+  const titleStr = String(titleCell?.v || '');
+  if (titleCell && !titleStr.includes('新機種') && !titleStr.includes('新產品導入')) {
     throw new Error('此檔案不符合需求一覽表模板格式（A1 標題不符）');
   }
 
@@ -81,8 +89,10 @@ export function parseRequirementExcel(arrayBuffer) {
       dvt: parseCheckbox(getVal('C5')),
       pvt: parseCheckbox(getVal('E5')), 
       politRun: parseCheckbox(getVal('F5')),
-      ecn: parseCheckbox(getVal('G5'))
+      mp: parseCheckbox(getVal('H5'))
     };
+    // 舊版 ecn 欄位保留解析供 sanitizeProjectData 遷移
+    data.basicInfo._legacyEcn = parseCheckbox(getVal('G5'));
     
     // 烘烤參數 (發包方預填/加工廠參考)
     data.basicInfo.pcbBake = getVal('D5') || '';
@@ -231,7 +241,7 @@ export function parseRequirementExcel(arrayBuffer) {
         need: stencilNeed,
         noNeed: false,
         thickness: cleanPlaceholder(getVal('B33')),
-        apertureRatio: cleanPlaceholder(getVal('C33')),
+        apertureRatio: cleanApertureRatio(getVal('C33')),
         style: stencilStyle,
         nanoCoating: nanoCoating
       },
@@ -263,7 +273,10 @@ export function parseRequirementExcel(arrayBuffer) {
     data.basicInfo.signOff = {
       rdConfirm: getVal('B40') || '',
       engineeringReview: getVal('D40') || '',
-      qaConfirm: getVal('G40') || ''
+      qaConfirm: getVal('G40') || '',
+      rdSignedAt: '',
+      engineeringReviewSignedAt: '',
+      qaSignedAt: ''
     };
 
     // 解析 G1 儲存格以還原防呆鎖定狀態與電子簽章
@@ -279,6 +292,10 @@ export function parseRequirementExcel(arrayBuffer) {
               data.basicInfo.signOff.rdSignature = parsed.signatures.rdSignature || '';
               data.basicInfo.signOff.engineeringReviewSignature = parsed.signatures.engineeringReviewSignature || '';
               data.basicInfo.signOff.qaSignature = parsed.signatures.qaSignature || '';
+              const signatureDates = parsed.signatureDates || {};
+              data.basicInfo.signOff.rdSignedAt = signatureDates.rdSignedAt || parsed.signatures.rdSignedAt || '';
+              data.basicInfo.signOff.engineeringReviewSignedAt = signatureDates.engineeringReviewSignedAt || parsed.signatures.engineeringReviewSignedAt || '';
+              data.basicInfo.signOff.qaSignedAt = signatureDates.qaSignedAt || parsed.signatures.qaSignedAt || '';
             }
           } else {
             // 舊版相容性：G1 直接是 owners
@@ -302,7 +319,7 @@ export function parseRequirementExcel(arrayBuffer) {
     }
 
     // 相容舊版：將殘留的 stage.* 擁有者 key 遷移為 basicInfo.stage.*
-    ['evt', 'dvt', 'pvt', 'politRun', 'ecn'].forEach(k => {
+    ['evt', 'dvt', 'pvt', 'politRun', 'mp'].forEach(k => {
       if (data._owners[`stage.${k}`] !== undefined) {
         data._owners[`basicInfo.stage.${k}`] = data._owners[`stage.${k}`];
         delete data._owners[`stage.${k}`];
@@ -369,6 +386,7 @@ export function parseRequirementExcel(arrayBuffer) {
       fpcaBakeHr
     };
 
+    const stencilApertureRatio = cleanApertureRatio(getVal('J8')) || data.basicInfo.tooling?.stencil?.apertureRatio || '';
     data.processControl.smtFirstPiece = {
       polarity: parseCheckbox(getVal('B8')),
       measureLcr: parseCheckbox(getVal('D8')),
@@ -376,7 +394,8 @@ export function parseRequirementExcel(arrayBuffer) {
       steelTension: parseCheckbox(getVal('E8')),
       ledTest: parseCheckbox(getVal('F8')) ? 'yes' : (parseCheckbox(getVal('G8')) ? 'no' : null),
       pcbReflow: parseCheckbox(getVal('H8')),
-      solderability: parseCheckbox(getVal('I8'))
+      solderability: parseCheckbox(getVal('I8')),
+      stencilApertureRatio
     };
 
     const cleanDipMemo = (val) => {

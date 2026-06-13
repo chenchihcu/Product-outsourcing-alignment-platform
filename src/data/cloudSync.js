@@ -22,6 +22,16 @@ const fromRow = (r) => ({
   updatedBy: r.updated_by ?? null,
 });
 
+const normalizeFactoryName = (name) => String(name || '').trim();
+
+const fromFactoryRow = (r) => ({
+  id: r.id,
+  name: normalizeFactoryName(r.name),
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+  updatedBy: r.updated_by ?? null,
+});
+
 /** 拉取某工作區的全部機種(Supabase 未啟用回傳 null,呼叫端沿用本機資料) */
 export async function pullProjects(workspace) {
   if (!isSupabaseEnabled) return null;
@@ -48,6 +58,55 @@ export async function deleteProjectRemote(id) {
   if (error) throw error;
 }
 
+/** 拉取全系統共用的委外加工廠主檔 */
+export async function pullFactories() {
+  if (!isSupabaseEnabled) return null;
+  const { data, error } = await supabase
+    .from('factories')
+    .select('*')
+    .order('created_at', { ascending: true })
+    .order('name', { ascending: true });
+  if (error) throw error;
+  return data.map((row) => fromFactoryRow(row).name).filter(Boolean);
+}
+
+/** 將既有本機加工廠清單一次性遷移到共用雲端主檔 */
+export async function migrateFactories(factories, userId) {
+  if (!isSupabaseEnabled || !Array.isArray(factories)) return [];
+  const names = Array.from(new Set(factories.map(normalizeFactoryName).filter(Boolean)));
+  if (names.length === 0) return [];
+  const rows = names.map((name) => ({ name, updated_by: userId ?? null }));
+  const { data, error } = await supabase
+    .from('factories')
+    .upsert(rows, { onConflict: 'name' })
+    .select('*');
+  if (error) throw error;
+  return data.map((row) => fromFactoryRow(row).name).filter(Boolean);
+}
+
+/** 新增或確認一筆委外加工廠主檔 */
+export async function addFactoryRemote(name, userId) {
+  if (!isSupabaseEnabled) return normalizeFactoryName(name);
+  const trimmed = normalizeFactoryName(name);
+  if (!trimmed) return '';
+  const { data, error } = await supabase
+    .from('factories')
+    .upsert({ name: trimmed, updated_by: userId ?? null }, { onConflict: 'name' })
+    .select('*')
+    .single();
+  if (error) throw error;
+  return fromFactoryRow(data).name;
+}
+
+/** 刪除一筆委外加工廠主檔 */
+export async function deleteFactoryRemote(name) {
+  if (!isSupabaseEnabled) return;
+  const trimmed = normalizeFactoryName(name);
+  if (!trimmed) return;
+  const { error } = await supabase.from('factories').delete().eq('name', trimmed);
+  if (error) throw error;
+}
+
 /**
  * 訂閱某工作區機種的即時變更(P3)。
  * onChange 收到 { eventType, new, old };回傳取消訂閱函式。
@@ -60,6 +119,27 @@ export function subscribeProjects(workspace, onChange) {
       'postgres_changes',
       { event: '*', schema: 'public', table: 'projects', filter: `workspace=eq.${workspace}` },
       (payload) => onChange({ eventType: payload.eventType, new: payload.new ? fromRow(payload.new) : null, old: payload.old }),
+    )
+    .subscribe();
+  return () => { supabase.removeChannel(channel); };
+}
+
+/**
+ * 訂閱全系統共用的委外加工廠主檔變更。
+ * onChange 收到 { eventType, new, old };回傳取消訂閱函式。
+ */
+export function subscribeFactories(onChange) {
+  if (!isSupabaseEnabled) return () => {};
+  const channel = supabase
+    .channel('factories:shared')
+    .on(
+      'postgres_changes',
+      { event: '*', schema: 'public', table: 'factories' },
+      (payload) => onChange({
+        eventType: payload.eventType,
+        new: payload.new ? fromFactoryRow(payload.new) : null,
+        old: payload.old ? fromFactoryRow(payload.old) : null,
+      }),
     )
     .subscribe();
   return () => { supabase.removeChannel(channel); };
@@ -86,4 +166,4 @@ export function subscribePresence(channelName, meta, onSync) {
   return () => { supabase.removeChannel(channel); };
 }
 
-export { fromRow, toRow };
+export { fromRow, toRow, fromFactoryRow };

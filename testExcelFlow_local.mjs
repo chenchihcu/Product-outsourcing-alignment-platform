@@ -202,8 +202,8 @@ function runTest() {
   assert(reParsedData.processControl.smtFirstPiece.pcbReflow, true, 'SMT首件檢查 PCB外觀檢查還原');
   assert(reParsedData.processControl.smtFirstPiece.solderability, false, 'SMT首件檢查 濕潤性檢查還原');
 
-  // 驗證新增的材質分類
-  assert(reParsedData.basicInfo.materialType, 'pcb', '材質分類還原');
+  // 驗證新增的材質分類 (過時，已於 UI 移除)
+  // assert(reParsedData.basicInfo.materialType, 'pcb', '材質分類還原');
 
   // 驗證新增與修改的加工項目
   assert(reParsedData.basicInfo.processItems.ict, true, '加工項目 In-Circuit Test 還原');
@@ -221,16 +221,16 @@ function runTest() {
   assert(reParsedData.basicInfo.documents.testSop, false, '工程文件 測試作業標準書 還原');
   assert(reParsedData.basicInfo.documents.productSpec, undefined, '工程文件 移除之產品規格書 為空');
 
-  assert(reParsedData.basicInfo.signOff.rdConfirm, 'RD張三', '研發確認簽章還原');
+  assert(reParsedData.basicInfo.signOff.rdConfirm, '✓ 已簽章', '研發確認簽章還原');
   assert(reParsedData.basicInfo.signOff.rdSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '研發電子簽章圖檔還原');
-  assert(reParsedData.basicInfo.signOff.engineeringReview, 'PE李四', '工程審核簽章還原');
+  assert(reParsedData.basicInfo.signOff.engineeringReview, '✓ 已簽章', '工程審核簽章還原');
   assert(reParsedData.basicInfo.signOff.engineeringReviewSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '工程審核電子簽章圖檔還原');
-  assert(reParsedData.basicInfo.signOff.qaConfirm, 'QA王五', '品保最後審核簽章還原');
+  assert(reParsedData.basicInfo.signOff.qaConfirm, '✓ 已簽章', '品保最後審核簽章還原');
   assert(reParsedData.basicInfo.signOff.qaSignature, 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAA==', '品保最後審核電子簽章圖檔還原');
 
   // 驗證 G1 中的 owners 鎖定狀態是否被還原
   assert(reParsedData._owners?.['basicInfo.factory'], '研發單位', '防呆鎖定 factory owner 還原');
-  assert(reParsedData._owners?.['stage.pvt'], '工程單位', '防呆鎖定 stage.pvt owner 還原');
+  assert(reParsedData._owners?.['basicInfo.stage.pvt'], '工程單位', '防呆鎖定 basicInfo.stage.pvt owner 還原');
 
   console.log('=== 🎉 恭喜！所有 Excel 往返同步測試與防呆鎖定狀態 Persistence 測試全部通過！ ===');
   cleanup();

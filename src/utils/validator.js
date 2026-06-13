@@ -23,12 +23,12 @@ export function validateAlignment(data) {
   const bi = data.basicInfo || {};
   const pi = bi.processItems || {};
   check(!!bi.productNo, '未填寫「產品料號」', 'error');
-  check(!!bi.productDesc, '未填寫「產品名稱 / 描述」', 'warning');
+  check(!!bi.productDesc, '未填寫「產品名稱 / 描述」', 'error');
 
   // 產品階段至少勾選一個 (mpSmall 改為 politRun)
   const stage = bi.stage || {};
-  const hasStage = stage.evt || stage.dvt || stage.pvt || stage.politRun || stage.ecn;
-  check(hasStage, '未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / ECN）', 'error');
+  const hasStage = stage.evt || stage.dvt || stage.pvt || stage.politRun || stage.mp;
+  check(hasStage, '未勾選「產品階段」（EVT / DVT / PVT / Pilot-run / MP）', 'error');
 
   // --- 委外加工廠回填檢核 ---
   check(!!(bi.factory || '').trim(), '未填寫「委外加工廠」名稱', 'error');
@@ -48,11 +48,13 @@ export function validateAlignment(data) {
 
   const tooling = bi.tooling || {};
   if (pi.smt) {
-    const thickStr = String(tooling.stencil.thickness || '');
-    const apertStr = String(tooling.stencil.apertureRatio || '');
-    check(!!tooling.stencil.thickness && !thickStr.includes('____'), '未填寫鋼板「厚度」', 'error');
-    check(!!tooling.stencil.apertureRatio && !apertStr.includes('____'), '未填寫鋼板「開口比」', 'error');
-    const hasType = ['general', 'step'].includes(tooling.stencil.style);
+    const stencil = tooling.stencil || {};
+    const thickStr = String(stencil.thickness || '');
+    const apertureRatio = pc.smtFirstPiece?.stencilApertureRatio || stencil.apertureRatio || '';
+    const apertStr = String(apertureRatio);
+    check(!!stencil.thickness && !thickStr.includes('____'), '未填寫鋼板「厚度」', 'error');
+    check(!!apertureRatio && !apertStr.includes('____'), '未填寫「鋼板開孔比例（錫膏印刷）」', 'error');
+    const hasType = ['general', 'step'].includes(stencil.style);
     check(hasType, '未選擇鋼板樣式「一般鋼板 / 階梯鋼板」', 'error');
   }
 
@@ -91,24 +93,19 @@ export function validateAlignment(data) {
 
   // SMT/DIP 首件檢查與樣品提供
   const hasSample = pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart;
-  check(hasSample, '未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'warning');
+  check(hasSample, '未勾選任何提供的「樣品種類」（試錫板 / 測溫板 / 標準件）', 'error');
 
   const smtFirst = pc.smtFirstPiece || {};
-  if (pi.smt) {
-    const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi || smtFirst.steelTension || (smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no') || smtFirst.pcbReflow || smtFirst.solderability;
-    check(hasSmtFirst, '未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI / 鋼板張力量測 / LED點亮測試 / PCB外觀檢查 / 濕潤性檢查）', 'error');
+  const hasSmtFirst = smtFirst.polarity || smtFirst.measureLcr || smtFirst.spi || smtFirst.steelTension || (smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no') || smtFirst.pcbReflow || smtFirst.solderability;
+  check(hasSmtFirst, '未確認「SMT 首件檢查」項目（極性方向 / LCR量測 / SPI / 鋼板張力量測 / LED點亮測試 / PCB外觀檢查 / 濕潤性檢查）', 'error');
 
-    const hasLedTest = smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no';
-    check(hasLedTest, '未確認 SMT「LED點亮測試」為「有」或「無 (不適用)」', 'error');
-  }
+  const hasLedTest = smtFirst.ledTest === 'yes' || smtFirst.ledTest === 'no';
+  check(hasLedTest, '未確認 SMT「LED點亮測試」為「有」或「無 (不適用)」', 'error');
 
-  // 新增: DIP 首件校驗 (如果加工項目包含 DIP)
-  if (pi.dip) {
-    const dipFirst = pc.dipFirstPiece || {};
-    check(dipFirst.cutLead, '未勾選 DIP 首件「剪腳前置作業」', 'error');
-    if (dipFirst.memo) {
-      check(dipFirst.memo.length <= 50, 'DIP 注意事項字數不得超過 50 字', 'error');
-    }
+  const dipFirst = pc.dipFirstPiece || {};
+  check(dipFirst.cutLead, '未勾選 DIP 首件「剪腳前置作業」', 'error');
+  if (dipFirst.memo) {
+    check(dipFirst.memo.length <= 50, 'DIP 注意事項字數不得超過 50 字', 'error');
   }
 
   // SMT/DIP 焊接順序
@@ -116,28 +113,32 @@ export function validateAlignment(data) {
   const hasSmtOrder = smtOrder.bToT || smtOrder.tToB;
   check(hasSmtOrder, '未確認「SMT 焊接順序」（先焊底面 / 先焊頂面）', 'error');
 
-  if (pi.dip) {
-    const dipOrder = pc.dipOrder || {};
-    const hasDipOrder = dipOrder.bToT || dipOrder.tToB;
-    check(hasDipOrder, '未確認「DIP 焊接順序」', 'error');
-  }
+  const dipOrder = pc.dipOrder || {};
+  const hasDipOrder = dipOrder.bToT || dipOrder.tToB;
+  check(hasDipOrder, '未確認「DIP 焊接順序」', 'error');
 
-  // 測溫點配置：如果有關鍵零件，最少要有 6 個位置
+  // 測溫點配置：如果有關鍵零件，至少需填寫 1 個測溫點
   const hasKeyParts = pc.keyParts?.has;
   if (hasKeyParts) {
-    const tempPoints = pc.tempPoints || [];
-    const validPoints = tempPoints.filter(p => !!p.pos);
-    check(validPoints.length >= 6, '已勾選有關鍵零件，但「測溫點配置」未填滿至少 6 點位置', 'error');
+    const rawPoints = pc.tempPoints || [];
+    const tempPoints = Array.isArray(rawPoints) ? rawPoints : Object.values(rawPoints);
+    const validPoints = tempPoints.filter(p => !!p?.pos);
+    check(validPoints.length >= 1, '已勾選有關鍵零件，但尚未填寫任何「測溫點」位置', 'warning');
   }
 
-  // 包材種類 (PCBA 與 FPCA 各需確認至少一項)
-  const pcbaPkg = pc.pcbaPackaging || {};
-  const hasPcbaPkg = pcbaPkg.staticBag || pcbaPkg.honeycomb || pcbaPkg.tray || pcbaPkg.sensorCover || pcbaPkg.cameraCover;
-  check(hasPcbaPkg, '未確認「PCBA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
-
-  const fpcaPkg = pc.fpcaPackaging || {};
-  const hasFpcaPkg = fpcaPkg.staticBag || fpcaPkg.honeycomb || fpcaPkg.tray || fpcaPkg.sensorCover || fpcaPkg.cameraCover;
-  check(hasFpcaPkg, '未確認「FPCA 包材種類」（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+  // 包材種類 (僅能選擇 PCBA 或 FPCA 其中一種)
+  const pkgType = pc.packagingType;
+  check(!!pkgType, '未選擇「包材種類」（PCBA 包材 / FPCA 包材）', 'error');
+  if (pkgType === 'pcba') {
+    const pcbaPkg = pc.pcbaPackaging || {};
+    const hasPcbaPkg = pcbaPkg.staticBag || pcbaPkg.honeycomb || pcbaPkg.tray || pcbaPkg.sensorCover || pcbaPkg.cameraCover;
+    check(hasPcbaPkg, '已選 PCBA 包材，但未勾選任何「PCBA 包材」項目（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+  }
+  if (pkgType === 'fpca') {
+    const fpcaPkg = pc.fpcaPackaging || {};
+    const hasFpcaPkg = fpcaPkg.staticBag || fpcaPkg.honeycomb || fpcaPkg.tray || fpcaPkg.sensorCover || fpcaPkg.cameraCover;
+    check(hasFpcaPkg, '已選 FPCA 包材，但未勾選任何「FPCA 包材」項目（靜電袋 / 蜂巢 / 脆盤 / 保護貼）', 'error');
+  }
 
   // 簽核欄對齊（檢查電子簽章圖片）
   const sign = bi.signOff || {};

@@ -16,6 +16,7 @@ export function getFieldHighlightClass(highlightField, fieldName) {
     sampleProvided: ['樣品種類'],
     bakeRequired: ['烘烤'],
     smtFirstPiece: ['SMT 首件檢查', 'SMT首件'],
+    stencilApertureRatio: ['鋼板開孔比例', '錫膏印刷', '開口比', '開孔比例'],
     ledTest: ['LED點亮測試', 'LED'],
     dipFirstPiece: ['DIP 首件檢查', 'DIP首件', '剪腳前置作業'],
     smtOrder: ['SMT 焊接順序'],
@@ -42,10 +43,9 @@ export function isFieldDisabled(data, currentUser, fieldPath) {
   if (fieldPath === 'basicInfo.stage.pvt' || fieldPath === 'basicInfo.stage.politRun') {
     return currentUser.role !== 'eng';
   }
-  if (fieldPath === 'basicInfo.stage.ecn') {
-    const ecnChecked = data.basicInfo.stage?.ecn;
-    const owner = data._owners?.['basicInfo.stage.ecn'];
-    if (ecnChecked && owner && owner !== currentUser.unit) {
+  if (fieldPath === 'basicInfo.ecnChange.has' || fieldPath === 'basicInfo.ecnChange.no') {
+    const owner = data._owners?.['basicInfo.ecnChange'];
+    if (owner && owner !== currentUser.unit) {
       return true;
     }
     return false;
@@ -72,10 +72,18 @@ export function setDeep(obj, path, value) {
   let current = result;
   for (let i = 0; i < keys.length - 1; i++) {
     const key = keys[i];
+    const nextKey = keys[i + 1];
+    const isNextKeyIndex = /^\d+$/.test(nextKey);
+    
     if (!current[key] || typeof current[key] !== 'object') {
-      current[key] = {};
+      current[key] = isNextKeyIndex ? [] : {};
+    } else {
+      if (Array.isArray(current[key])) {
+        current[key] = [ ...current[key] ];
+      } else {
+        current[key] = { ...current[key] };
+      }
     }
-    current[key] = { ...current[key] };
     current = current[key];
   }
   current[keys[keys.length - 1]] = value;

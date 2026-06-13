@@ -24,13 +24,15 @@ VITE_SUPABASE_ANON_KEY=eyJhbGci...
 > `.env` 已列入 `.gitignore`,不會被提交。
 
 ### 3. 建立資料表與安全規則
-於 Supabase Dashboard → **SQL Editor**,貼上並執行：
+於 Supabase Dashboard → **SQL Editor**,依序貼上並執行：
 
 ```
 supabase/migrations/0001_init.sql
+supabase/migrations/0002_admin_rls.sql
+supabase/migrations/0003_factories.sql
 ```
 
-這會建立 `profiles`、`projects` 兩張表、Row-Level Security 規則、自動建立 profile 的 trigger,並把 `projects` 加入 Realtime publication。
+這會建立 `profiles`、`projects`、`factories` 資料表、Row-Level Security 規則、自動建立 profile 的 trigger,並把需即時同步的資料表加入 Realtime publication。
 
 ### 4.(開發便利)關閉 Email 驗證
 Authentication → Providers → Email → 視需要關閉「Confirm email」,
@@ -113,7 +115,8 @@ Supabase → **Authentication → URL Configuration**,把 Netlify 網址(如 `ht
 ## 資料模型
 - `profiles`：對應 `auth.users`,存角色(rd/eng/qa/admin)、單位、電子簽章。
 - `projects`：機種對齊資料。`data` 為整包 JSONB(對應 `parseRequirementExcel` 結果),`original_wb` 保留原始 Excel base64 以維持匯出格式。`workspace` 區隔正式庫與 admin 測試庫。
+- `factories`：全系統共用的委外加工廠主檔。所有雲端登入者讀寫同一份清單,避免不同帳號重新登入後看到舊本機快取。
 
 ## 安全
-- 啟用 RLS:僅登入者可存取共享工作區的機種(雙向對齊本質為協作)。
+- 啟用 RLS:僅登入者可存取共享工作區的機種與共用加工廠主檔(雙向對齊本質為協作)。
 - 如需依組織/廠別細分權限,可在 `projects` 加入成員表並調整 policy。

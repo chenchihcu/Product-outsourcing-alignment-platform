@@ -59,12 +59,16 @@ export async function getCurrentUser() {
   return toCurrentUser(profile, session.user);
 }
 
-/** 更新本人簽章到 profile */
+/** 更新本人簽章到 profile(失敗時拋錯,讓呼叫端能提示使用者) */
 export async function updateMySignature(signature) {
   if (!isSupabaseEnabled) return;
   const { data: { session } } = await supabase.auth.getSession();
-  if (!session) return;
-  await supabase.from('profiles').update({ signature }).eq('id', session.user.id);
+  if (!session) throw new Error('尚未登入，無法同步簽章');
+  const { error } = await supabase
+    .from('profiles')
+    .update({ signature: signature || null })
+    .eq('id', session.user.id);
+  if (error) throw error;
 }
 
 /** 監聽登入狀態變化(回傳取消訂閱) */

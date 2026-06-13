@@ -1,6 +1,6 @@
 import React from 'react';
 import { useFieldOwner } from '../hooks/useFieldOwner';
-import { isFieldDisabled, getFieldHighlightClass, updateFieldWithOwner } from '../utils/fieldUtils';
+import { isFieldDisabled, getFieldHighlightClass } from '../utils/fieldUtils';
 import { sectionSvg } from '../utils/svgIcons';
 import './FormSections.css';
 
@@ -13,30 +13,16 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
   const { setField } = useFieldOwner(onChange, currentUser);
 
   const handleRecordChange = (category, index, field, val) => {
-    onChange(prev => {
-      const tr = prev.trialReport || {};
-      const records = tr[category] ? [...tr[category]] : [];
-      if (!records[index]) records[index] = {};
-      records[index] = { ...records[index], [field]: val };
-      return updateFieldWithOwner({ ...prev, trialReport: { ...tr, [category]: records } },
-        `trialReport.${category}.${index}.${field}`, val, currentUser?.unit);
-    });
+    setField(`trialReport.${category}.${index}.${field}`, val);
   };
 
   const handleXrayPartChange = (recIdx, partIdx, val) => {
-    onChange(prev => {
-      const tr = prev.trialReport || {};
-      const records = tr.photoRecords ? [...tr.photoRecords] : [];
-      if (!records[recIdx]?.isXray) return prev;
-      const xrayIdx = recIdx;
-      const parts = [...(records[xrayIdx].parts || ['', '', '', ''])];
-      parts[partIdx] = val;
-      records[xrayIdx] = { ...records[xrayIdx], parts };
-      const path = `trialReport.photoRecords.xray.parts.${partIdx}`;
-      return updateFieldWithOwner({ ...prev, trialReport: { ...tr, photoRecords: records } },
-        path, val, currentUser?.unit);
-    });
+    setField(`trialReport.photoRecords.${recIdx}.parts.${partIdx}`, val);
   };
+
+  const printRecords = Array.isArray(data.trialReport?.printRecords) ? data.trialReport.printRecords : [];
+  const inspectRecords = Array.isArray(data.trialReport?.inspectRecords) ? data.trialReport.inspectRecords : [];
+  const photoRecords = Array.isArray(data.trialReport?.photoRecords) ? data.trialReport.photoRecords : [];
 
   return (
     <div className={`section-form animate-fade-in ${getFieldHighlightClass(highlightField, 'trialReport')}`}>
@@ -47,7 +33,7 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
       <div className="record-list-section">
         <h4 className="list-group-title" data-accent="blue"><span className="card-icon-circle card-icon-xs">{sectionSvg.printer}</span>A. 印刷品質 / 迴焊紀錄</h4>
         <div className="records-grid">
-          {data.trialReport?.printRecords?.map((rec, idx) => (
+          {printRecords.map((rec, idx) => (
             <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
               <label className="checkbox-label flex-1">
                 <input type="checkbox" checked={rec.checked || false}
@@ -63,7 +49,7 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
       <div className="record-list-section">
         <h4 className="list-group-title" data-accent="purple"><span className="card-icon-circle card-icon-xs">{sectionSvg.search}</span>B. 檢驗紀錄</h4>
         <div className="records-grid">
-          {data.trialReport?.inspectRecords?.map((rec, idx) => (
+          {inspectRecords.map((rec, idx) => (
             <div key={rec.id} className="record-row edit-active" style={{ margin: 0 }}>
               <label className="checkbox-label flex-1">
                 <input type="checkbox" checked={rec.checked || false}
@@ -93,7 +79,7 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
       <div className="record-list-section">
         <h4 className="list-group-title" data-accent="pink"><span className="card-icon-circle card-icon-xs">{sectionSvg.camera}</span>D. 照片提供</h4>
         <div className="records-grid">
-          {data.trialReport?.photoRecords?.map((rec, idx) => (
+          {photoRecords.map((rec, idx) => (
             <div key={rec.id} className="record-row edit-active" style={{ display: 'flex', flexDirection: 'column', gap: '8px', alignItems: 'flex-start', margin: 0 }}>
               <label className="checkbox-label flex-1" style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '100%' }}>
                 <input type="checkbox" checked={rec.checked || false}
@@ -111,7 +97,7 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
                       <input type="text" className="form-input edit-active compact" placeholder={pIdx === 0 ? '預設空白' : `U${pIdx + 1}`} name={`xrayPart_${idx}_${pIdx}`}
                         value={cleanXrayPart(rec.parts?.[pIdx])}
                         onChange={(e) => handleXrayPartChange(idx, pIdx, e.target.value)}
-                        disabled={isFieldDisabled(data, currentUser, `trialReport.photoRecords.xray.parts.${pIdx}`)}
+                        disabled={isFieldDisabled(data, currentUser, `trialReport.photoRecords.${idx}.parts.${pIdx}`)}
                         style={{ width: '70px', padding: '2px 4px', fontSize: '0.8rem' }} />
                     </div>
                   ))}

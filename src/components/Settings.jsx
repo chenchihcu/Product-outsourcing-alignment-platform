@@ -264,6 +264,7 @@ export default function Settings({
                 style={{ display: 'none' }} 
                 onChange={(e) => {
                   const file = e.target.files?.[0];
+                  e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取(如清除後重新上傳)
                   if (file) {
                     const reader = new FileReader();
                     reader.onload = async (event) => {

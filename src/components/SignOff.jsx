@@ -4,7 +4,23 @@ import { exportRequirementExcel } from '../utils/excelExporter';
 import { compressImage } from '../utils/imageCompressor';
 import './SignOff.css';
 
-export default function SignOff({ data, originalWb, fileName, onChange, onExportComplete, currentUser, onUpdateAccountSignature }) {
+const SIGNED_AT_FIELDS = {
+  rdSignature: 'rdSignedAt',
+  engineeringReviewSignature: 'engineeringReviewSignedAt',
+  qaSignature: 'qaSignedAt',
+};
+
+export default function SignOff({
+  data,
+  originalWb,
+  fileName,
+  onChange,
+  onExportComplete,
+  currentUser,
+  onUpdateAccountSignature,
+  onFinalExit,
+  onFinalBackToList,
+}) {
   const report = useMemo(() => validateAlignment(data), [data]);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
@@ -20,8 +36,10 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   }, []);
 
   // ===== 品保退件流程(硬性鎖定)=====
-  const rejection = data.basicInfo?.signOff?.rejection || null;
+  const signOff = data.basicInfo?.signOff || {};
+  const rejection = signOff.rejection || null;
   const isRejected = !!rejection;
+  const finalApprovalComplete = !!signOff.qaSignature && !isRejected;
   const isQA = currentUser.role === 'qa' || currentUser.role === 'admin';
   const canResubmit = currentUser.role === 'rd' || currentUser.role === 'eng' || currentUser.role === 'admin';
   const [rejectReason, setRejectReason] = useState('');
@@ -39,13 +57,16 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
     const reason = rejectReason.trim();
     if (!reason) { alert('請填寫退件原因。'); return; }
     // U2 — 退件前確認
-    if (!window.confirm('此操作將清除三方簽章並鎖定機種，要求重新簽核。確定退件？')) return;
+    if (!window.confirm('此操作將清除三方簽章，並鎖定「簽章與匯出」功能；表單內容仍可由發包方(研發/工程)依退件原因修正後重新送審。確定退件？')) return;
     const updatedSign = {
       ...data.basicInfo.signOff,
       rejection: { reason, by: currentUser.username, byUnit: currentUser.unit, at: new Date().toISOString() },
       rdSignature: '',
       engineeringReviewSignature: '',
       qaSignature: '',
+      rdSignedAt: '',
+      engineeringReviewSignedAt: '',
+      qaSignedAt: '',
       rejectionResponse: undefined,
     };
     const owners = { ...(data._owners || {}) };
@@ -73,7 +94,11 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
   };
 
   const handleSignChange = (field, val) => {
+    const signedAtField = SIGNED_AT_FIELDS[field];
     const updatedSign = { ...data.basicInfo.signOff, [field]: val };
+    if (signedAtField) {
+      updatedSign[signedAtField] = val ? new Date().toISOString() : '';
+    }
     const updatedBasic = { ...data.basicInfo, signOff: updatedSign };
     const path = `basicInfo.signOff.${field}`;
     const owners = { ...(data._owners || {}) };
@@ -137,8 +162,8 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
 
   return (
     <div className="signoff-container glass-card animate-fade-in">
-      <h2 className="section-title">D. 雙向線上簽核與 Excel 匯出</h2>
-      <p className="section-subtitle">兩端資訊對齊無誤後，請於下方進行線上簽章並下載匯出檔案。</p>
+      <h2 className="section-title">D. 簽章與匯出</h2>
+      <p className="section-subtitle">完成前置確認後，請於下方簽章並下載文件。</p>
 
       {/* 品保退件提示(硬性鎖定:簽章與匯出皆已封鎖) */}
       {isRejected && (
@@ -188,7 +213,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
       <div className="status-banner">
         <div className="status-progress-bar-wrapper">
           <div className="status-progress-info">
-            <span className="status-label">當前對齊率</span>
+            <span className="status-label">完成率</span>
             <span className="status-percentage">{alignmentRate}%</span>
           </div>
           <div className="status-bar-bg">
@@ -243,6 +268,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {
@@ -317,6 +343,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {
@@ -391,6 +418,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                     style={{ display: 'none' }}
                     onChange={(e) => {
                       const file = e.target.files?.[0];
+                      e.target.value = ''; // 重設 input,讓同一張簽章圖可再次選取
                       if (file) {
                         const reader = new FileReader();
                         reader.onload = async (event) => {
@@ -428,7 +456,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
                 ⚠️ 建議等研發與工程完成簽章後再進行最終審核，但目前不強制阻擋。
               </p>
             ) : (
-              <p className="sign-terms">本簽章確認：兩端資訊與防呆管制點皆已完成填寫與覆核，符合量產試產要求。</p>
+              <p className="sign-terms">本簽章確認：確認項目已完成填寫與覆核，符合試產要求。</p>
             )}
 
             {/* QA 退件控制(僅品保、且尚未退件時):常駐的「退件原因」欄位 */}
@@ -467,15 +495,40 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
           <span className="warning-emoji">⚠️</span>
           <div className="warning-desc">
             <p className="warning-title">注意：尚有必填的防呆檢查未完成！</p>
-            <p className="warning-detail">為了避免委外加工廠遺漏正確訊息，建議先前往前述分頁完成對齊。如果您仍要強行簽章並匯出文件，請點擊下方按鈕。</p>
+            <p className="warning-detail">為了避免供應商取得不完整資訊，建議先前往前述分頁補齊。若仍需簽章並匯出，請點擊下方按鈕。</p>
           </div>
         </div>
       ) : (
         <div className="export-success">
           <span className="success-emoji">🎉</span>
           <div className="success-desc">
-            <p className="success-title">完美！兩端資訊已完全同步！</p>
-            <p className="success-detail">恭喜！所有必填與關鍵管制點皆已完成填寫與對齊。點擊下方按鈕即可匯出最終簽章版文件。</p>
+            <p className="success-title">確認項目已完成</p>
+            <p className="success-detail">所有必填與關鍵管制點皆已填寫，可匯出最終簽章版文件。</p>
+          </div>
+        </div>
+      )}
+
+      {finalApprovalComplete && (
+        <div className="final-approval-next" aria-live="polite">
+          <div className="final-approval-copy">
+            <span className="final-approval-kicker">最終簽核已完成</span>
+            <p>目前機種會先自動儲存，再依您的選擇離開系統或回到機種管理中心。</p>
+          </div>
+          <div className="final-approval-actions">
+            <button
+              type="button"
+              className="btn btn-secondary final-exit-btn"
+              onClick={onFinalExit}
+            >
+              儲存後離開系統
+            </button>
+            <button
+              type="button"
+              className="btn btn-primary final-center-btn"
+              onClick={onFinalBackToList}
+            >
+              回到機種管理中心
+            </button>
           </div>
         </div>
       )}
@@ -491,7 +544,7 @@ export default function SignOff({ data, originalWb, fileName, onChange, onExport
           <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
-          <span>列印 / 儲存為 PDF 報告 (A4直式)</span>
+          <span>列印 / 儲存 PDF (A4直式)</span>
         </button>
 
         <button type="button"

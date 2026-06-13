@@ -21,6 +21,14 @@ function cleanXrayPart(part) {
   return /_{2,}/.test(value) ? '' : value;
 }
 
+function formatSignatureDate(value) {
+  if (!value) return '';
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) return String(value);
+  const pad = (num) => String(num).padStart(2, '0');
+  return `${date.getFullYear()}/${pad(date.getMonth() + 1)}/${pad(date.getDate())} ${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 // 套用排版格式（欄寬、合併儲存格、以及簽核區對齊）
 function applyFormatting(sheet) {
   if (!sheet) return;
@@ -56,7 +64,7 @@ function applyFormatting(sheet) {
     sheet['!merges'].push({ s: { r: 39, c: 1 }, e: { r: 39, c: 2 } });
     sheet['!merges'].push({ s: { r: 39, c: 3 }, e: { r: 39, c: 4 } });
     sheet['!merges'].push({ s: { r: 39, c: 5 }, e: { r: 39, c: 6 } });
-  } catch (e) {
+  } catch {
     // ignore merge errors
   }
 
@@ -79,7 +87,7 @@ function applyFormatting(sheet) {
       sheet['!rows'][0] = sheet['!rows'][0] || {};
       sheet['!rows'][0].hpt = 22; // height in points
     }
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -89,7 +97,7 @@ function applyFormatting(sheet) {
     sheet['!pageSetup'].orientation = 'landscape';
     sheet['!pageSetup'].paperSize = 9; // A4
     sheet['!pageSetup'].fitToPage = true;
-  } catch (e) {
+  } catch {
     // ignore
   }
 
@@ -109,7 +117,9 @@ function applyFormatting(sheet) {
   try {
     const headerAddrs = ['A1','B1','C1','D1','E1','F1','G1'];
     headerAddrs.forEach(a => setThinBorder(sheet[a]));
-  } catch (e) {}
+  } catch {
+    // ignore border styling errors
+  }
 
   // 為簽核合併區設定邊框與列高
   try {
@@ -122,7 +132,9 @@ function applyFormatting(sheet) {
     setThinBorder(sheet['B40']);
     setThinBorder(sheet['D40']);
     setThinBorder(sheet['F40']);
-  } catch (e) {}
+  } catch {
+    // ignore sign area styling errors
+  }
 
   // 將簽核儲存格置中對齊（如果存在）
   const setAlign = (addr) => {
@@ -165,13 +177,14 @@ export function exportRequirementExcel(originalWorkbook, data) {
     // 基本欄位
     writeCell(sheet1, 'B4', bi.factory || '');
 
-    // 產品階段 Checkbox (mpSmall 改為 politRun)
+    // 產品階段 Checkbox
     const stage = bi.stage || {};
     writeCheckbox(sheet1, 'B5', 'EVT', stage.evt);
     writeCheckbox(sheet1, 'C5', 'DVT', stage.dvt);
     writeCheckbox(sheet1, 'E5', '量產', stage.pvt); 
     writeCheckbox(sheet1, 'F5', 'Pilot-run', stage.politRun);
-    writeCheckbox(sheet1, 'G5', 'ECN改版', stage.ecn);
+    writeCheckbox(sheet1, 'G5', 'ECN改版', !!bi.ecnChange?.has);
+    writeCheckbox(sheet1, 'H5', 'MP', stage.mp);
 
     // 烘烤 (優先使用製程管制頁填寫的詳細條件，同步避免 sheet1 殘留範本預設值)
     const bake = data.processControl?.bakeRequired || {};
@@ -270,9 +283,11 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 治工具
     const tool = bi.tooling || {};
+    const smtFirst = data.processControl?.smtFirstPiece || {};
+    const stencilApertureRatio = smtFirst.stencilApertureRatio || tool.stencil?.apertureRatio || '';
     writeCheckbox(sheet1, 'A33', '鋼板規格', true); // 強制勾選需要，因為 SMT 鋼板需求為 100%
     writeCell(sheet1, 'B33', tool.stencil?.thickness || '');
-    writeCell(sheet1, 'C33', tool.stencil?.apertureRatio || '');
+    writeCell(sheet1, 'C33', stencilApertureRatio);
     
     // 鋼板樣式與奈米塗層雙向對齊回寫 D33
     const isGeneral = (tool.stencil?.style || 'general') === 'general';
@@ -315,9 +330,9 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核回寫對齊 + 標籤修正 (A40=研發, C40=工程, F40=品保)
     const sign = bi.signOff || {};
-    writeCell(sheet1, 'B40', sign.rdSignature ? '✓ 已簽章' : '');
-    writeCell(sheet1, 'D40', sign.engineeringReviewSignature ? '✓ 已簽章' : '');
-    writeCell(sheet1, 'G40', sign.qaSignature ? '✓ 已簽章' : '');
+    writeCell(sheet1, 'B40', sign.rdSignature ? `✓ 已簽章 ${formatSignatureDate(sign.rdSignedAt)}`.trim() : '');
+    writeCell(sheet1, 'D40', sign.engineeringReviewSignature ? `✓ 已簽章 ${formatSignatureDate(sign.engineeringReviewSignedAt)}`.trim() : '');
+    writeCell(sheet1, 'G40', sign.qaSignature ? `✓ 已簽章 ${formatSignatureDate(sign.qaSignedAt)}`.trim() : '');
 
     // 修正簽核區標籤（對應實際填寫角色）
     writeCell(sheet1, 'A40', '研發確認');
@@ -330,11 +345,16 @@ export function exportRequirementExcel(originalWorkbook, data) {
         rdSignature: sign.rdSignature || '',
         engineeringReviewSignature: sign.engineeringReviewSignature || '',
         qaSignature: sign.qaSignature || ''
+      },
+      signatureDates: {
+        rdSignedAt: sign.rdSignedAt || '',
+        engineeringReviewSignedAt: sign.engineeringReviewSignedAt || '',
+        qaSignedAt: sign.qaSignedAt || ''
       }
     };
     try {
       writeCell(sheet1, 'G1', JSON.stringify(exportMetadata));
-    } catch (e) {
+    } catch {
       writeCell(sheet1, 'G1', '{}');
     }
   }
@@ -381,6 +401,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 首件
     const smtFirst = pc.smtFirstPiece || {};
+    const stencilApertureRatio = smtFirst.stencilApertureRatio || bi.tooling?.stencil?.apertureRatio || '';
     writeCheckbox(sheet2, 'B8', '極性方向', smtFirst.polarity);
     writeCheckbox(sheet2, 'D8', '量測電容、電阻、電感', smtFirst.measureLcr);
     writeCheckbox(sheet2, 'C8', 'SPI錫膏厚度測試', smtFirst.spi);
@@ -389,6 +410,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
     writeCheckbox(sheet2, 'G8', 'LED點亮測試:無(不適用)', smtFirst.ledTest === 'no');
     writeCheckbox(sheet2, 'H8', 'PCB外觀檢查(reflow)', smtFirst.pcbReflow);
     writeCheckbox(sheet2, 'I8', '濕潤性檢查 (試錫板)', smtFirst.solderability);
+    writeCell(sheet2, 'J8', stencilApertureRatio ? `鋼板開孔比例（錫膏印刷）: ${stencilApertureRatio}%` : '');
 
     // 新增: DIP 首件
     const dipFirst = pc.dipFirstPiece || {};
@@ -460,7 +482,7 @@ export function exportRequirementExcel(originalWorkbook, data) {
 
     // 簽核 (稽核人員確認 - 回寫品保確認人)
     const sign = bi.signOff || {};
-    writeCell(sheet2, 'E34', sign.qaSignature ? 'QA 已簽章' : '');
+    writeCell(sheet2, 'E34', sign.qaSignature ? `QA 已簽章 ${formatSignatureDate(sign.qaSignedAt)}`.trim() : '');
   }
 
   // 3. 更新【試產報告要求】

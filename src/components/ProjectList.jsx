@@ -5,6 +5,7 @@ import './ProjectList.css';
 export default function ProjectList({ projects, onSelectProject, onCreateProject, onDeleteProject, onImportExcel }) {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [newProjectName, setNewProjectName] = useState('');
+  const [isCreating, setIsCreating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const fileInputRef = useRef(null);
@@ -31,18 +32,36 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     setJSON('projectListPrefs', { fontSize, rowSpacing });
   }, [fontSize, rowSpacing]);
 
-  const handleSubmitCreate = (e) => {
+  // Modal 開啟時鎖定背景捲動
+  useEffect(() => {
+    if (!showCreateModal) return;
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = prevOverflow; };
+  }, [showCreateModal]);
+
+  const handleSubmitCreate = async (e) => {
     e.preventDefault();
+    if (isCreating) return; // 防止連點/連按 Enter 重複建立
     if (!newProjectName.trim()) return;
-    onCreateProject(newProjectName.trim());
-    setNewProjectName('');
-    setShowCreateModal(false);
+    setIsCreating(true);
+    try {
+      const ok = await onCreateProject(newProjectName.trim());
+      if (ok !== false) {
+        setNewProjectName('');
+        setShowCreateModal(false);
+      }
+    } finally {
+      setIsCreating(false);
+    }
   };
 
   const MAX_IMPORT_SIZE = 10 * 1024 * 1024; // 10 MB
 
   const handleFileChange = async (e) => {
     const file = e.target.files?.[0];
+    // 立即清空 input value:否則再次選同一個檔案(如格式修正後重傳)不會觸發 onChange
+    e.target.value = '';
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith('.xlsx')) {
@@ -98,7 +117,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     proj.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  // 2. 根據對齊進度過濾
+  // 2. 根據完成進度過濾
   const filteredProjects = searchedProjects.filter(proj => {
     if (filterMode === 'in-progress') {
       return proj.alignmentRate < 100;
@@ -123,7 +142,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       <div className="project-list-header glass-card">
         <div className="header-info">
           <h2>機種管理中心</h2>
-          <p>線上直接管理多個機種對齊進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
+          <p>線上管理多個機種的前置確認進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
         </div>
         <div className="header-actions">
           <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
@@ -257,8 +276,8 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <thead>
             <tr>
               <th>📁 機種與一覽表名稱</th>
-              <th>📊 雙向資訊對齊率</th>
-              <th className="hide-on-mobile">🏷️ 對齊狀態</th>
+              <th>📊 完成率</th>
+              <th className="hide-on-mobile">🏷️ 狀態</th>
               <th className="hide-on-mobile">🕒 更新時間</th>
               <th className="text-center">⚙️ 動作</th>
             </tr>
@@ -303,7 +322,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     </td>
                     <td className="hide-on-mobile">
                       <span className={`status-badge ${proj.alignmentRate === 100 ? 'aligned' : 'in-progress'}`}>
-                        {proj.alignmentRate === 100 ? '已對齊 ✓' : '進行中 ⏳'}
+                        {proj.alignmentRate === 100 ? '已完成 ✓' : '進行中 ⏳'}
                       </span>
                     </td>
                     <td className="table-date-cell hide-on-mobile">{dateStr}</td>
@@ -315,13 +334,9 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                         >
                           ✏️ 進入編輯
                         </button>
-                        <button type="button" 
+                        <button type="button"
                           className="btn btn-danger compact-btn table-action-btn btn-delete"
-                          onClick={() => {
-                            if (window.confirm(`確定要刪除「${proj.name}」嗎？此操作無法還原。`)) {
-                              onDeleteProject(proj.id);
-                            }
-                          }}
+                          onClick={() => onDeleteProject(proj.id)}
                         >
                           🗑️ 刪除
                         </button>
@@ -341,7 +356,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <button type="button" 
             className="pagination-btn"
             disabled={validCurrentPage === 1}
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage(Math.max(validCurrentPage - 1, 1))}
             title="上一頁" aria-label="上一頁"
           >
             ◀
@@ -362,7 +377,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
           <button type="button" 
             className="pagination-btn"
             disabled={validCurrentPage === totalPages}
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() => setCurrentPage(Math.min(validCurrentPage + 1, totalPages))}
             title="下一頁" aria-label="下一頁"
           >
             ▶
@@ -390,15 +405,15 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     required
                     autoFocus
                   />
-                  <p className="form-help">系統將自動以此名稱複製預設範本，建立包含基本與防呆管制的全新機種表單。</p>
+                  <p className="form-help">系統將自動以此名稱複製預設範本，建立包含基本資料與確認項目的新機種表單。</p>
                 </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowCreateModal(false)}>
                   取消
                 </button>
-                <button type="submit" className="btn btn-primary">
-                  建立機種
+                <button type="submit" className="btn btn-primary" disabled={isCreating}>
+                  {isCreating ? '建立中…' : '建立機種'}
                 </button>
               </div>
             </form>
@@ -408,7 +423,6 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     </div>
   );
 }
-
 
 
 
