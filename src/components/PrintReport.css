@@ -30,13 +30,11 @@
     print-color-adjust: exact !important;
   }
 
-  #root > :not(.print-report-container) {
-    display: none !important;
-  }
-
   /* 隱藏網頁端的所有原始元素 */
   .app-container,
+  .app-shell,
   .shell,
+  .tab-content,
   header,
   nav,
   button,
@@ -48,9 +46,15 @@
 
   .print-report-container {
     display: block !important;
+    visibility: visible !important;
+    position: static !important;
     width: 100%;
     margin: 0;
     padding: 0;
+  }
+
+  .print-report-container * {
+    visibility: visible !important;
   }
 
   .print-section {

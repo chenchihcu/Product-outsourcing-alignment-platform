@@ -24,6 +24,7 @@ export default function SignOff({
   const report = useMemo(() => validateAlignment(data), [data]);
   const { alignmentRate, warnings } = report;
   const [exportLoading, setExportLoading] = useState(false);
+  const [printLoading, setPrintLoading] = useState(false);
   const exportTimerRef = useRef(null);
 
   useEffect(() => {
@@ -156,6 +157,58 @@ export default function SignOff({
         exportTimerRef.current = null;
       }
     }, 1000);
+  };
+
+  const waitForPrintFrame = () => new Promise((resolve) => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+
+  const withTimeout = (promise, ms) => Promise.race([
+    promise.catch(() => undefined),
+    new Promise((resolve) => setTimeout(resolve, ms)),
+  ]);
+
+  const waitForReportImages = (reportNode) => {
+    const images = Array.from(reportNode.querySelectorAll('img'));
+    return Promise.all(images.map((img) => {
+      if (img.complete) return Promise.resolve();
+      if (typeof img.decode === 'function') {
+        return withTimeout(img.decode(), 1500);
+      }
+
+      return withTimeout(new Promise((resolve) => {
+        const done = () => {
+          img.removeEventListener('load', done);
+          img.removeEventListener('error', done);
+          resolve();
+        };
+        img.addEventListener('load', done);
+        img.addEventListener('error', done);
+      }), 1500);
+    }));
+  };
+
+  const handlePrintReport = async () => {
+    if (printLoading) return;
+
+    setPrintLoading(true);
+    try {
+      await waitForPrintFrame();
+      const reportNode = document.querySelector('.print-report-container');
+      if (!reportNode) {
+        alert('列印報表尚未載入完成，請稍候再試一次。');
+        return;
+      }
+
+      if (document.fonts?.ready) {
+        await withTimeout(document.fonts.ready, 1500);
+      }
+      await waitForReportImages(reportNode);
+      await waitForPrintFrame();
+      window.print();
+    } finally {
+      setPrintLoading(false);
+    }
   };
 
   const hasMissingCritical = warnings.some(w => w.type === 'error');
@@ -537,14 +590,14 @@ export default function SignOff({
       <div className="export-action-row" style={{ display: 'flex', gap: '16px', justifyContent: 'center', flexWrap: 'wrap', marginTop: '24px' }}>
         <button type="button"
           className="btn btn-primary btn-large"
-          onClick={() => window.print()}
-          disabled={isRejected || exportLoading}
+          onClick={handlePrintReport}
+          disabled={isRejected || exportLoading || printLoading}
           style={{ background: 'linear-gradient(135deg, #2563eb 0%, #3b82f6 100%)', boxShadow: '0 4px 14px rgba(37, 99, 235, 0.4)' }}
         >
           <svg className="download-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" style={{ width: '20px', height: '20px', marginRight: '8px' }} aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
           </svg>
-          <span>列印 / 儲存 PDF (A4直式)</span>
+          <span>{printLoading ? '準備列印報表...' : '列印 / 儲存 PDF (A4直式)'}</span>
         </button>
 
         <button type="button"
