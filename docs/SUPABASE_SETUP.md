@@ -56,6 +56,9 @@ npm run dev
    - **Build command**:`npm run build`
    - **Publish directory**:`dist`
    - **Node version**:18 以上(可用環境變數 `NODE_VERSION=20` 指定)
+3. Production branch 使用 `main`。完成任務後推送 feature branch,合併到 `main` 後由 Netlify Git integration 自動部署正式站。
+
+> 一般實作完成後不要執行 `netlify deploy --prod`;該命令是手動 production upload,會需要額外確認。正常流程以 GitHub → Netlify 自動同步為準。
 
 ### B. 設定環境變數(關鍵步驟)
 Site → **Site configuration → Environment variables → Add a variable**,新增與本機 `.env` **相同**的兩個變數:
