@@ -27,7 +27,7 @@
 | 程式語言 | JavaScript (JSX) |
 | 樣式 | CSS（自訂變數 + 響應式） |
 | 程式碼檢查 | ESLint 10 |
-| CI/CD | GitHub Actions → GitHub Pages |
+| CI/CD | GitHub Actions build check + Netlify Git 自動部署 |
 
 ## 目錄結構
 
@@ -80,12 +80,13 @@ npm run lint
 
 ## 部署
 
-本專案透過 GitHub Actions 自動部署到 GitHub Pages：
+本專案以 Netlify 作為正式前端站台，GitHub Actions 只做 build check：
 
-1. 推送至 `main` 分支即自動觸發部署
-2. 部署工作流程定義於 `.github/workflows/deploy.yml`
-3. 使用 `peaceiris/actions-gh-pages` 動作將 `./dist` 目錄部署至 GitHub Pages
-4. 儲存庫：<https://github.com/chenchihcu/Product-outsourcing-alignment-platform>
+1. 完成任務後先推送 feature branch，確認 `npm run build` 通過
+2. 合併或推送至 `main` 後，由 Netlify Git integration 自動建置與發布 production
+3. `.github/workflows/deploy.yml` 僅驗證 build，不再部署 GitHub Pages
+4. 一般任務不要使用 `netlify deploy --prod`；手動 production deploy 僅保留作緊急備援
+5. 儲存庫：<https://github.com/chenchihcu/Product-outsourcing-alignment-platform>
 
 ## 角色權限說明
 
