@@ -26,12 +26,17 @@ export default function SignOff({
   const [exportLoading, setExportLoading] = useState(false);
   const [printLoading, setPrintLoading] = useState(false);
   const exportTimerRef = useRef(null);
+  const printTimerRef = useRef(null);
 
   useEffect(() => {
     return () => {
       if (exportTimerRef.current) {
         clearTimeout(exportTimerRef.current);
         exportTimerRef.current = null;
+      }
+      if (printTimerRef.current) {
+        clearTimeout(printTimerRef.current);
+        printTimerRef.current = null;
       }
     };
   }, []);
@@ -159,55 +164,39 @@ export default function SignOff({
     }, 1000);
   };
 
-  const waitForPrintFrame = () => new Promise((resolve) => {
-    requestAnimationFrame(() => requestAnimationFrame(resolve));
-  });
-
-  const withTimeout = (promise, ms) => Promise.race([
-    promise.catch(() => undefined),
-    new Promise((resolve) => setTimeout(resolve, ms)),
-  ]);
-
-  const waitForReportImages = (reportNode) => {
-    const images = Array.from(reportNode.querySelectorAll('img'));
-    return Promise.all(images.map((img) => {
-      if (img.complete) return Promise.resolve();
-      if (typeof img.decode === 'function') {
-        return withTimeout(img.decode(), 1500);
-      }
-
-      return withTimeout(new Promise((resolve) => {
-        const done = () => {
-          img.removeEventListener('load', done);
-          img.removeEventListener('error', done);
-          resolve();
-        };
-        img.addEventListener('load', done);
-        img.addEventListener('error', done);
-      }), 1500);
-    }));
-  };
-
-  const handlePrintReport = async () => {
+  const handlePrintReport = () => {
     if (printLoading) return;
 
     setPrintLoading(true);
+
+    const resetPrintLoading = () => {
+      if (printTimerRef.current) {
+        clearTimeout(printTimerRef.current);
+        printTimerRef.current = null;
+      }
+      setPrintLoading(false);
+    };
+
     try {
-      await waitForPrintFrame();
       const reportNode = document.querySelector('.print-report-container');
       if (!reportNode) {
         alert('列印報表尚未載入完成，請稍候再試一次。');
+        resetPrintLoading();
         return;
       }
 
-      if (document.fonts?.ready) {
-        await withTimeout(document.fonts.ready, 1500);
+      if (typeof window.print !== 'function') {
+        alert('此瀏覽器不支援網頁列印，請改用瀏覽器的分享/列印功能或桌面版 Chrome。');
+        resetPrintLoading();
+        return;
       }
-      await waitForReportImages(reportNode);
-      await waitForPrintFrame();
+
       window.print();
-    } finally {
-      setPrintLoading(false);
+      printTimerRef.current = setTimeout(resetPrintLoading, 1000);
+    } catch (err) {
+      console.error(err);
+      alert('列印視窗開啟失敗，請稍後再試一次。');
+      resetPrintLoading();
     }
   };
 

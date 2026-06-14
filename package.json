@@ -7,7 +7,13 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "qa:storage": "node scripts/testLocalStorage.mjs",
+    "qa:concurrency": "node scripts/concurrencyTest.mjs",
+    "qa:stress": "node scripts/stressTest.mjs",
+    "qa:buttons": "node scripts/buttonAudit.mjs",
+    "qa:offline": "npm run qa:storage && npm run qa:concurrency && npm run qa:stress",
+    "qa:gate": "npm run build && npm run qa:offline && npm run qa:buttons"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.108.0",
