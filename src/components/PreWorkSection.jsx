@@ -70,7 +70,6 @@ export default function PreWorkSection({ data, onChange, currentUser, highlightF
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">生產前置作業</h2>
-      <p className="section-subtitle">請回填樣品提供狀態、烘烤確認及包材種類等生產前置項目。</p>
 
       <div className="form-row-grid" data-accent="indigo">
         <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'sampleProvided')}`}>

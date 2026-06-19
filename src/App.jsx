@@ -1165,8 +1165,7 @@ export default function App() {
 
         {/* 頁尾(瘦身,credit 移出黃金區) */}
         <footer className="app-footer">
-          <p>© 2026 醫電鼎眾股份有限公司. All rights reserved.</p>
-          <p className="footer-meta">網頁負責人:SQE 陳智富 · Vite + React</p>
+          <p>© 2026 醫電鼎眾股份有限公司</p>
         </footer>
       </AppShell>
       </ErrorBoundary>

@@ -14,7 +14,6 @@ export default function DipSpecialProcessSection({ data, onChange, currentUser, 
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">DIP 與特殊製程</h2>
-      <p className="section-subtitle">依加工項目確認 DIP 首件、焊接順序與 Underfill 製程條件。</p>
 
       {!applicable ? (
         <div className="workflow-na-note glass-card">

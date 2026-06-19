@@ -28,7 +28,6 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
     <div className={`section-form animate-fade-in ${getFieldHighlightClass(highlightField, 'trialReport')}`}>
       <h2 className="section-title">試產交付確認</h2>
       <h3 className="sub-section-title"><span className="card-icon-circle card-icon-sm">{sectionSvg.clipboard}</span>試產交付文件、檢驗紀錄與照片清單</h3>
-      <p className="description-text">請勾選確認已完成的項目以利兩端追蹤。</p>
 
       <div className="record-list-section">
         <h4 className="list-group-title" data-accent="blue"><span className="card-icon-circle card-icon-xs">{sectionSvg.printer}</span>A. 印刷品質 / 迴焊紀錄</h4>

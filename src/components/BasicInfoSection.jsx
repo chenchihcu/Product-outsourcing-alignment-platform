@@ -11,7 +11,6 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">機種基本資訊</h2>
-      <p className="section-subtitle">先確認委外加工廠、產品識別、產品階段及工程變更狀態。</p>
 
       <div className="form-section-card glass-card" data-accent="indigo">
         <div className="card-header"><span className="card-icon-circle">{sectionSvg.chip}</span>機種基本資訊</div>

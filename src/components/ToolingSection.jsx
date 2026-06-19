@@ -11,7 +11,6 @@ export default function ToolingSection({ data, onChange, currentUser, highlightF
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">鋼板與治工具</h2>
-      <p className="section-subtitle">依加工項目確認鋼板、載具及各類治工具需求與數量。</p>
 
       <div className="form-section-card glass-card" data-accent="slate">
         <div className="card-header"><span className="card-icon-circle">{sectionSvg.wrench}</span>鋼板與治工具一覽表</div>

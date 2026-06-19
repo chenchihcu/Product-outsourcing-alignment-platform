@@ -12,7 +12,6 @@ export default function SmtControlSection({ data, onChange, currentUser, highlig
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">SMT 首件管制</h2>
-      <p className="section-subtitle">確認 SMT 首件檢查、鋼板開孔比例、LED 測試與焊接順序。</p>
 
       {!applicable ? (
         <div className="workflow-na-note glass-card">

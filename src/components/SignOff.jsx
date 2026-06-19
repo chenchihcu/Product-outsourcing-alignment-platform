@@ -206,7 +206,6 @@ export default function SignOff({
   return (
     <div className="signoff-container glass-card animate-fade-in">
       <h2 className="section-title">簽章與匯出</h2>
-      <p className="section-subtitle">完成前置確認後，請於下方簽章並下載文件。</p>
 
       {/* 品保退件提示(硬性鎖定:簽章與匯出皆已封鎖) */}
       {isRejected && (

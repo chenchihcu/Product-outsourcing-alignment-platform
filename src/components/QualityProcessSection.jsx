@@ -11,7 +11,6 @@ export default function QualityProcessSection({ data, onChange, currentUser, hig
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">品質與加工需求</h2>
-      <p className="section-subtitle">確認品質標準、檢驗方式與本機種需要的主要加工項目。</p>
 
       <div className="form-section-card glass-card" data-accent="emerald">
         <div className="card-header"><span className="card-icon-circle">{sectionSvg.shield}</span>品質與驗收標準</div>

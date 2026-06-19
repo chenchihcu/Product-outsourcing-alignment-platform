@@ -228,9 +228,6 @@ export default function Settings({
   return (
     <div className="settings-container animate-fade-in">
       <h2 className="section-title">⚙️ 系統資料與權限設定管理</h2>
-      <p className="section-subtitle">
-        在此管理委外加工廠的基本資料，並設定各單位的登入帳號、密碼與權限等級。
-      </p>
 
       <div className="settings-grid">
         {/* 雲端模式：Admin 使用者管理（取代本機帳號管理） */}

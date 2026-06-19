@@ -77,7 +77,6 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
           </svg>
           <div>
             <p className="clear-title">確認項目已完成</p>
-            <p className="clear-desc">無漏失項目，可進行簽章並下載 Excel。</p>
           </div>
         </div>
       ) : (

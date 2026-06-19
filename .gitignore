@@ -41,6 +41,7 @@ cloud-*.png
 fix-*.png
 reject-*.png
 bugfix-*.png
+preview-*.png
 
 # Button-audit / browser scratch profiles (transient runtime output)
 scratch/*

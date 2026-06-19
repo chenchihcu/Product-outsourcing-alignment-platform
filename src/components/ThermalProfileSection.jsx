@@ -11,7 +11,6 @@ export default function ThermalProfileSection({ data, onChange, currentUser, hig
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">測溫點配置</h2>
-      <p className="section-subtitle">先確認是否有關鍵零件；有關鍵零件時至少指定一個測溫位置。</p>
 
       <h3 className="sub-section-title"><span className="card-icon-circle card-icon-sm">{sectionSvg.thermometer}</span>關鍵零件與測溫位置</h3>
       <div className={`form-group required-highlight ${getFieldHighlightClass(highlightField, 'keyParts')}`}>

@@ -10,7 +10,6 @@ export default function DocumentsSection({ data, onChange, currentUser, onNext }
   return (
     <div className="section-form animate-fade-in">
       <h2 className="section-title">工程文件確認</h2>
-      <p className="section-subtitle">請確認以下 8 項關鍵工程文件，勾選結果將寫入 Excel 報表。</p>
 
       <div className="documents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
         {[
