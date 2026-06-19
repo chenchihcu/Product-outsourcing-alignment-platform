@@ -144,6 +144,20 @@
 }
 .nav-item.active .nav-step-num { border-color: var(--c-accent); color: var(--c-accent-hover); }
 .nav-step-num.done { background: var(--c-success-weak); border-color: var(--c-success); color: var(--c-success); }
+.nav-step-num.in-progress { background: #fff7ed; border-color: #f59e0b; color: #b45309; }
+.nav-step-num.not-applicable { background: var(--c-surface-2); border-color: var(--c-border-strong); color: var(--c-text-2); }
+
+.nav-state {
+  flex-shrink: 0;
+  padding: 1px 6px;
+  border-radius: var(--r-full);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--c-success);
+  background: var(--c-success-weak);
+}
+.nav-state.inProgress { color: #b45309; background: #fff7ed; }
+.nav-state.not-applicable { color: var(--c-text-2); background: var(--c-surface-2); }
 
 .nav-badge {
   font-size: var(--fs-xs);
@@ -296,6 +310,7 @@
   .shell[data-collapsed='true'] .nav-group-label,
   .shell[data-collapsed='true'] .nav-label,
   .shell[data-collapsed='true'] .nav-badge,
+  .shell[data-collapsed='true'] .nav-state,
   .shell[data-collapsed='true'] .user-meta { display: none; }
   .shell[data-collapsed='true'] .shell-brand { justify-content: center; padding: var(--sp-3); }
   .shell[data-collapsed='true'] .nav-item { justify-content: center; padding: 0; }
@@ -365,8 +380,11 @@
     font-weight: 700;
     display: inline-flex; align-items: center; justify-content: center;
   }
-  .step-pill.done:not(.active) { color: var(--c-success); border-color: var(--c-success); }
-  .step-pill.done:not(.active) .pill-num { background: var(--c-success-weak); }
+  .step-pill.status-done:not(.active) { color: var(--c-success); border-color: var(--c-success); }
+  .step-pill.status-done:not(.active) .pill-num { background: var(--c-success-weak); }
+  .step-pill.status-inProgress:not(.active) { color: #b45309; border-color: #f59e0b; background: #fff7ed; }
+  .step-pill.not-applicable:not(.active) { color: var(--c-text-2); border-color: var(--c-border-strong); background: var(--c-surface-2); }
+  .pill-state { font-size: 0.65rem; font-weight: 700; }
   .pill-badge {
     font-size: 0.65rem; font-weight: 700;
     background: rgba(255, 255, 255, 0.2);

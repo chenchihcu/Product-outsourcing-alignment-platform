@@ -1,8 +1,8 @@
 import { useMemo, useState } from 'react';
+import PropTypes from 'prop-types';
 import { validateAlignment } from '../utils/validator';
+import { WORKFLOW_STEP_KEYS } from '../utils/workflow';
 import './Dashboard.css';
-
-const STEP_KEYS = ['basicInfo', 'preparation', 'processControl', 'trialReport', 'documents', 'signOff'];
 
 /* 責任歸屬:本需求一覽表由「發包方(研發/工程)」填寫全部項目;
    供應商(委外加工廠)不負責填寫任何一項。電子簽章為獨立的簽核階段。 */
@@ -20,7 +20,7 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
   const errors = useMemo(() => warnings.filter((w) => w.type === 'error'), [warnings]);
   const warns = useMemo(() => warnings.filter((w) => w.type === 'warning'), [warnings]);
   const todos = errors;
-  const doneSteps = STEP_KEYS.filter((k) => sectionStatus[k]).length;
+  const doneSteps = WORKFLOW_STEP_KEYS.filter((key) => sectionStatus[key]?.state === 'done').length;
 
   const byParty = useMemo(() => {
     const g = { oem: [], sign: [] };
@@ -41,21 +41,8 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
   const [showAll, setShowAll] = useState(false);
   const [filterParty, setFilterParty] = useState(null);
 
-  // 對應警示訊息的導航(沿用原關鍵字對應表)
-  const handleWarningClick = (msg) => {
-    let tab = 'basicInfo';
-    if (msg.includes('日期') || msg.includes('料號') || msg.includes('描述') || msg.includes('階段') || msg.includes('類別') || msg.includes('品質') || msg.includes('IPC') || msg.includes('PCBA') || msg.includes('加工') || msg.includes('文件') || msg.includes('鋼板') || msg.includes('治具') || msg.includes('委外加工廠')) {
-      tab = 'basicInfo';
-    } else if (msg.includes('烘烤') || msg.includes('樣品') || msg.includes('包材') || msg.includes('包裝')) {
-      tab = 'preparation';
-    } else if (msg.includes('首件') || msg.includes('剪腳') || msg.includes('順序') || msg.includes('焊接') || msg.includes('測溫') || msg.includes('關鍵零件') || msg.includes('Underfill') || msg.includes('維修記號') || msg.includes('備註')) {
-      tab = 'processControl';
-    } else if (msg.includes('良率') || msg.includes('板彎') || msg.includes('翹曲') || msg.includes('Cpk') || msg.includes('DFM') || msg.includes('紀錄') || msg.includes('照片')) {
-      tab = 'trialReport';
-    } else if (msg.includes('簽章')) {
-      tab = 'signOff';
-    }
-    onGoToSection(tab, msg);
+  const handleWarningClick = (warning) => {
+    onGoToSection(warning.stepKey || 'basicInfo', warning.fieldKey || warning.message);
   };
 
   const visibleTodos = filterParty
@@ -68,14 +55,14 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
       <div className="dash-hero glass-card">
         <div className="hero-rate" data-ok={alignmentRate === 100}>
           <span className="rate-num">{alignmentRate}<small>%</small></span>
-          <span className="rate-label">完成率</span>
+          <span className="rate-label">欄位對齊率</span>
         </div>
         <div className="hero-main">
           <div className="hero-bar">
             <div className="hero-bar-fill" data-ok={alignmentRate === 100} style={{ width: `${alignmentRate}%` }} />
           </div>
           <div className="hero-stats">
-            <span className="stat"><b>{doneSteps}</b>/6 步驟完成</span>
+            <span className="stat"><b>{doneSteps}</b>/{WORKFLOW_STEP_KEYS.length} 流程完成</span>
             {errors.length > 0 && <span className="stat stat-error">● {errors.length} 異常</span>}
             {warns.length > 0 && <span className="stat stat-warn">● {warns.length} 警告</span>}
             {warnings.length === 0 && <span className="stat stat-ok">✓ 已完成</span>}
@@ -90,14 +77,13 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
           </svg>
           <div>
             <p className="clear-title">確認項目已完成</p>
-            <p className="clear-desc">無漏失項目，可進行簽章並下載 Excel。</p>
           </div>
         </div>
       ) : (
         <>
           {/* ===== 下一步:最優先一件事 ===== */}
           {nextItem && (
-            <button type="button" className="dash-next glass-card" onClick={() => handleWarningClick(nextItem.message)}>
+            <button type="button" className="dash-next glass-card" onClick={() => handleWarningClick(nextItem)}>
               <span className="next-left">
                 <span className="next-kicker">
                   <span className={`next-dot ${nextItem.type}`} />下一步 · 最優先
@@ -145,7 +131,10 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
                   <div
                     key={`${w.type}-${i}`}
                     className={`todo-row ${w.type}`}
-                    onClick={() => handleWarningClick(w.message)}
+                    onClick={() => handleWarningClick(w)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => { if (e.key === 'Enter') { handleWarningClick(w); } }}
                     title="點擊前往該填寫區塊"
                   >
                     <span className={`todo-tag ${w.type}`}>{w.type === 'error' ? '異常' : '警告'}</span>
@@ -161,6 +150,15 @@ export default function Dashboard({ data, onGoToSection, sectionStatus = {}, cur
     </div>
   );
 }
+
+Dashboard.propTypes = {
+  data: PropTypes.object.isRequired,
+  onGoToSection: PropTypes.func.isRequired,
+  sectionStatus: PropTypes.object,
+  currentUser: PropTypes.shape({
+    role: PropTypes.string,
+  }),
+};
 
 
 

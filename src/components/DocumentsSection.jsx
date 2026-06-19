@@ -1,16 +1,15 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { useFieldOwner } from '../hooks/useFieldOwner';
 import { isFieldDisabled } from '../utils/fieldUtils';
 import { getDocumentIcon } from '../utils/svgIcons';
 import './FormSections.css';
 
-export default function DocumentsSection({ data, onChange, currentUser, highlightField, onNext }) {
+export default function DocumentsSection({ data, onChange, currentUser, onNext }) {
   const { setField } = useFieldOwner(onChange, currentUser);
 
   return (
     <div className="section-form animate-fade-in">
-      <h2 className="section-title">工程文件</h2>
-      <p className="section-subtitle">請確認以下 8 項關鍵工程文件，勾選結果將寫入 Excel 報表。</p>
+      <h2 className="section-title">工程文件確認</h2>
 
       <div className="documents-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))', gap: '16px', marginTop: '20px' }}>
         {[
@@ -46,9 +45,16 @@ export default function DocumentsSection({ data, onChange, currentUser, highligh
       </div>
 
       <div className="action-row" style={{ marginTop: '24px' }}>
-        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：線上簽核</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：簽章與匯出</button>
       </div>
     </div>
   );
 }
+
+DocumentsSection.propTypes = {
+  data: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  currentUser: PropTypes.object,
+  onNext: PropTypes.func.isRequired,
+};
 

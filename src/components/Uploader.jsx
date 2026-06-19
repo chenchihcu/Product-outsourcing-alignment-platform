@@ -1,4 +1,5 @@
-import React, { useState, useRef } from 'react';
+import { useState, useRef } from 'react';
+import PropTypes from 'prop-types';
 import { parseRequirementExcel } from '../utils/excelParser';
 import * as XLSX from 'xlsx';
 import './Uploader.css';
@@ -66,7 +67,7 @@ export default function Uploader({ onDataLoaded }) {
         setLoading(false);
       };
       reader.readAsArrayBuffer(file);
-    } catch (err) {
+    } catch {
       setError('讀取檔案出錯，請重試。');
       setLoading(false);
     }
@@ -96,7 +97,15 @@ export default function Uploader({ onDataLoaded }) {
         onDragOver={handleDrag}
         onDragLeave={handleDrag}
         onDrop={handleDrop}
-        onClick={() => fileInputRef.current.click()} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); fileInputRef.current.click(); } }}
+        onClick={() => fileInputRef.current.click()}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === 'Space') {
+            e.preventDefault();
+            fileInputRef.current.click();
+          }
+        }}
       >
         <input 
           ref={fileInputRef}
@@ -153,6 +162,10 @@ export default function Uploader({ onDataLoaded }) {
     </div>
   );
 }
+
+Uploader.propTypes = {
+  onDataLoaded: PropTypes.func.isRequired,
+};
 
 
 

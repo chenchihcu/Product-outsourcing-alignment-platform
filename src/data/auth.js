@@ -30,20 +30,14 @@ export async function signIn(account, password) {
   return getCurrentUser();
 }
 
-/** 註冊新帳號(角色/單位寫入 user metadata,trigger 會建立 profile) */
-export async function signUp({ email, password, username, unit, role, level }) {
-  const { error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: { data: { username, unit, role, level } },
-  });
-  if (error) throw error;
-}
-
 export async function signOut() {
-  if (isSupabaseEnabled) {
-    try { await supabase.auth.signOut(); } catch { /* 忽略登出錯誤 */ }
-  }
+  if (!isSupabaseEnabled) return { remoteRevoked: true };
+  const { error } = await supabase.auth.signOut();
+  if (!error) return { remoteRevoked: true };
+
+  const { error: localError } = await supabase.auth.signOut({ scope: 'local' });
+  if (localError) throw localError;
+  return { remoteRevoked: false, error };
 }
 
 /** 從現有 session 還原 currentUser(無 session 回傳 null) */

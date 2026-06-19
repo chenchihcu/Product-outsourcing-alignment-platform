@@ -1,5 +1,4 @@
 .sections-container {
-  padding: 1.25rem;
   margin-top: 0.75rem;
 }
 
@@ -760,9 +759,6 @@ input:checked + .slider:before {
     gap: 4px !important;
     font-size: 0.88rem !important;
   }
-  .sections-container {
-    padding: 0.75rem 0.5rem !important;
-  }
 }
 
 /* 中等尺寸平板優化：確保 2 欄在平板直向也能易讀 */
@@ -773,6 +769,56 @@ input:checked + .slider:before {
   .tooling-grid {
     grid-template-columns: 1fr !important;
   }
+}
+
+/* Ten-step workflow helpers */
+.workflow-na-note {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px dashed var(--c-border-strong);
+  background: var(--c-surface-2);
+  color: var(--c-text-2);
+}
+
+.workflow-na-note strong { color: var(--c-text-1); }
+
+.temp-points-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
+.temp-point-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.temp-point-field label {
+  color: var(--c-text-1);
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.smt-control-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+.inline-control-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.inline-control-row .form-input { max-width: 160px; }
+
+@media (max-width: 720px) {
+  .temp-points-grid { grid-template-columns: 1fr; }
 }
 
 

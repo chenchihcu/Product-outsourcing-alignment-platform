@@ -1,5 +1,6 @@
 export function getFieldHighlightClass(highlightField, fieldName) {
   if (!highlightField) return '';
+  if (highlightField === fieldName) return 'highlight-pulse';
   const mapping = {
     factory: ['加工廠'],
     productNo: ['產品料號', '料號'],

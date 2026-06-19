@@ -325,7 +325,7 @@ async function runAudit(appUrl) {
     await waitFor("document.body.innerText.includes('建立新機種')", 'create modal');
     await setValue('#projectName', `按鍵巡檢_${Date.now()}`);
     await clickText('建立機種');
-    await waitFor("document.body.innerText.includes('儀表板') && document.body.innerText.includes('完成率')", 'created project opened');
+    await waitFor("document.body.innerText.includes('儀表板') && document.body.innerText.includes('欄位對齊率')", 'created project opened');
   });
 
   await step('回列表按鈕', async () => {
@@ -368,7 +368,7 @@ async function runAudit(appUrl) {
 
   await step('進入編輯', async () => {
     await clickText('進入編輯');
-    await waitFor("document.body.innerText.includes('儀表板') && document.body.innerText.includes('簽章匯出')", 'project shell');
+    await waitFor("document.body.innerText.includes('儀表板') && document.body.innerText.includes('簽章與匯出')", 'project shell');
   });
 
   await step('儀表板待辦展開/篩選/清除', async () => {
@@ -381,22 +381,34 @@ async function runAudit(appUrl) {
   });
 
   await step('流程下一步按鈕串接', async () => {
-    await clickText('基本資料');
-    await waitFor("document.body.innerText.includes('下一步：製程管制與前置作業')", 'basic next');
+    await clickText('機種基本資訊');
+    await waitFor("document.body.innerText.includes('下一步：品質與加工需求')", 'basic next');
     await clickText('下一步');
-    await waitFor("document.body.innerText.includes('下一步：製程管制')", 'prework next');
+    await waitFor("document.body.innerText.includes('下一步：鋼板與治工具')", 'quality/process next');
     await clickText('下一步');
-    await waitFor("document.body.innerText.includes('下一步：試產報告要求')", 'process next');
+    await waitFor("document.body.innerText.includes('下一步：生產前置作業')", 'tooling next');
     await clickText('下一步');
-    await waitFor("document.body.innerText.includes('下一步：工程文件一覽表')", 'trial next');
+    await waitFor("document.body.innerText.includes('下一步：測溫點配置')", 'preparation next');
     await clickText('下一步');
-    await waitFor("document.body.innerText.includes('下一步：線上簽核')", 'docs next');
+    await waitFor("document.body.innerText.includes('下一步：SMT 首件管制')", 'thermal next');
+    await clickText('下一步');
+    await waitFor("document.body.innerText.includes('下一步：DIP 與特殊製程')", 'SMT next');
+    await clickText('下一步');
+    await waitFor("document.body.innerText.includes('下一步：試產交付確認')", 'DIP/special next');
+    await clickText('下一步');
+    await waitFor("document.body.innerText.includes('下一步：工程文件確認')", 'trial next');
+    await clickText('下一步');
+    await waitFor("document.body.innerText.includes('下一步：簽章與匯出')", 'docs next');
     await clickText('下一步');
     await waitFor("document.body.innerText.includes('列印 / 儲存 PDF')", 'signoff page');
   });
 
   await step('流程導覽按鈕', async () => {
-    for (const label of ['儀表板', '基本資料', '前置作業', '製程管制', '試產要求', '工程文件', '簽章匯出']) {
+    for (const label of [
+      '儀表板', '機種基本資訊', '品質與加工需求', '鋼板與治工具', '生產前置作業',
+      '測溫點配置', 'SMT 首件管制', 'DIP 與特殊製程', '試產交付確認',
+      '工程文件確認', '簽章與匯出',
+    ]) {
       await clickText(label);
       await sleep(120);
     }
@@ -445,6 +457,18 @@ async function runAudit(appUrl) {
   });
 
   await step('列印 PDF 按鈕', async () => {
+    const pdfPath = process.env.BUTTON_AUDIT_PDF_PATH;
+    if (pdfPath) {
+      const pdf = await send('Page.printToPDF', {
+        printBackground: true,
+        preferCSSPageSize: true,
+      });
+      const bytes = Buffer.from(pdf.data, 'base64');
+      fs.mkdirSync(path.dirname(pdfPath), { recursive: true });
+      fs.writeFileSync(pdfPath, bytes);
+      assert(bytes.length > 1000, `print PDF is unexpectedly small: ${bytes.length} bytes`);
+    }
+
     const result = await evalPage(`(() => {
       window.__printCalled = 0;
       window.print = () => { window.__printCalled += 1; };
@@ -455,6 +479,7 @@ async function runAudit(appUrl) {
       return window.__printCalled;
     })()`);
     assert(result === 1, `window.print call count ${result}`);
+    return pdfPath ? `rendered ${pdfPath}` : '';
   });
 
   await step('匯出 Excel 按鈕與成功 Overlay', async () => {
@@ -469,7 +494,7 @@ async function runAudit(appUrl) {
     await waitFor("document.body.innerText.includes('機種管理中心') && document.body.innerText.includes('進入編輯')", 'final back to list');
     await clickText('進入編輯');
     await waitFor("document.body.innerText.includes('儀表板')", 're-enter after final back');
-    await clickText('簽章匯出');
+    await clickText('簽章與匯出');
     await waitFor("document.body.innerText.includes('列印 / 儲存 PDF')", 'signoff again');
   });
 

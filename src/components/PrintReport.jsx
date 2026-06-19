@@ -1,4 +1,5 @@
 import { Fragment } from 'react';
+import PropTypes from 'prop-types';
 import './PrintReport.css';
 
 function cleanXrayPart(part) {
@@ -507,3 +508,7 @@ export default function PrintReport({ data }) {
     </div>
   );
 }
+
+PrintReport.propTypes = {
+  data: PropTypes.object.isRequired,
+};

@@ -1,4 +1,4 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import { useFieldOwner } from '../hooks/useFieldOwner';
 import { isFieldDisabled, getFieldHighlightClass } from '../utils/fieldUtils';
 import { sectionSvg } from '../utils/svgIcons';
@@ -26,9 +26,8 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
 
   return (
     <div className={`section-form animate-fade-in ${getFieldHighlightClass(highlightField, 'trialReport')}`}>
-      <h2 className="section-title">試產要求</h2>
+      <h2 className="section-title">試產交付確認</h2>
       <h3 className="sub-section-title"><span className="card-icon-circle card-icon-sm">{sectionSvg.clipboard}</span>試產交付文件、檢驗紀錄與照片清單</h3>
-      <p className="description-text">請勾選確認已完成的項目以利兩端追蹤。</p>
 
       <div className="record-list-section">
         <h4 className="list-group-title" data-accent="blue"><span className="card-icon-circle card-icon-xs">{sectionSvg.printer}</span>A. 印刷品質 / 迴焊紀錄</h4>
@@ -109,10 +108,18 @@ export default function TrialReportSection({ data, onChange, currentUser, highli
       </div>
 
       <div className="action-row">
-        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：工程文件一覽表</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：工程文件確認</button>
       </div>
     </div>
   );
 }
+
+TrialReportSection.propTypes = {
+  data: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  currentUser: PropTypes.object,
+  highlightField: PropTypes.string,
+  onNext: PropTypes.func.isRequired,
+};
 
 

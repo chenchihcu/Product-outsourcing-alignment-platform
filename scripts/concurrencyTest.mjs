@@ -72,7 +72,11 @@ assert(arr[99].id === 99, '陣列順序正確 (最後一筆 id=99)');
 console.log('\n── [3] 分頁切換效能測試 (模擬快速切換) ──');
 
 function simulateTabSwitch(count) {
-  const tabs = ['dashboard', 'basicInfo', 'processControl', 'trialReport', 'signOff'];
+  const tabs = [
+    'dashboard', 'basicInfo', 'qualityProcess', 'tooling', 'preparation',
+    'thermalProfile', 'smtControl', 'dipSpecialProcess', 'trialReport',
+    'documents', 'signOff',
+  ];
   let activeTab = 'dashboard';
   const times = [];
 
@@ -86,8 +90,8 @@ function simulateTabSwitch(count) {
   return { lastTab: activeTab, avgMs: times.reduce((a, b) => a + b, 0) / times.length };
 }
 
-const result = simulateTabSwitch(1000);
-assert(result.lastTab === 'signOff', '1000 次分頁切換後最終分頁正確');
+const result = simulateTabSwitch(1100);
+assert(result.lastTab === 'signOff', '1100 次分頁切換後最終分頁正確');
 assert(result.avgMs < 0.01, `分頁切換平均耗時 < 0.01ms (實際 ${result.avgMs.toFixed(5)}ms)`);
 
 // ── 測試 4: 長時間操作 timeout 保護 ──

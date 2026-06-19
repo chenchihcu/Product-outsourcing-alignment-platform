@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
+import PropTypes from 'prop-types';
 import { getJSON, setJSON } from '../utils/storage';
 import './ProjectList.css';
 
@@ -142,7 +143,6 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
       <div className="project-list-header glass-card">
         <div className="header-info">
           <h2>機種管理中心</h2>
-          <p>線上管理多個機種的前置確認進度，免除每次上傳 Excel 檔案的繁瑣流程。</p>
         </div>
         <div className="header-actions">
           <button type="button" className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
@@ -288,7 +288,6 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                 <td colSpan={5} className="table-empty-state">
                   <span className="empty-icon">📂</span>
                   <h4>無符合此篩選條件的機種</h4>
-                  <p>請點選上方「新增機種」或變更篩選狀態。</p>
                 </td>
               </tr>
             ) : (
@@ -387,7 +386,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
 
       {showCreateModal && (
         <div className="modal-backdrop animate-fade-in" onClick={() => setShowCreateModal(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowCreateModal(false); } }}>
-          <div className="modal-content glass-card animate-scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-content glass-card animate-scale-in" onClick={(e) => e.stopPropagation()} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); e.stopPropagation(); } }}>
             <div className="modal-header">
               <h3>建立新機種</h3>
               <button type="button" className="close-btn" onClick={() => setShowCreateModal(false)}>×</button>
@@ -403,9 +402,7 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
                     value={newProjectName}
                     onChange={(e) => setNewProjectName(e.target.value)}
                     required
-                    autoFocus
                   />
-                  <p className="form-help">系統將自動以此名稱複製預設範本，建立包含基本資料與確認項目的新機種表單。</p>
                 </div>
               </div>
               <div className="modal-footer">
@@ -423,6 +420,21 @@ export default function ProjectList({ projects, onSelectProject, onCreateProject
     </div>
   );
 }
+
+ProjectList.propTypes = {
+  projects: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      alignmentRate: PropTypes.number,
+      updatedAt: PropTypes.string,
+    })
+  ).isRequired,
+  onSelectProject: PropTypes.func.isRequired,
+  onCreateProject: PropTypes.func.isRequired,
+  onDeleteProject: PropTypes.func.isRequired,
+  onImportExcel: PropTypes.func.isRequired,
+};
 
 
 

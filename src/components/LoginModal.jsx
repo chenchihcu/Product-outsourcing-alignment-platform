@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import PropTypes from 'prop-types';
 import './LoginModal.css';
 import { isSupabaseEnabled } from '../data/supabaseClient';
 import { signIn } from '../data/auth';
@@ -55,8 +56,9 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
           {error && <div className="login-error-msg">{error}</div>}
 
           <div className="form-group">
-            <label className="form-label">帳號</label>
+            <label className="form-label" htmlFor="username-input">帳號</label>
             <input
+              id="username-input"
               type="text"
               className="form-input edit-active"
               value={username}
@@ -70,8 +72,9 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
           </div>
 
           <div className="form-group">
-            <label className="form-label">密碼</label>
+            <label className="form-label" htmlFor="password-input">密碼</label>
             <input
+              id="password-input"
               type="password"
               className="form-input edit-active"
               value={password}
@@ -114,4 +117,17 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
     </div>
   );
 }
+
+LoginModal.propTypes = {
+  onLogin: PropTypes.func.isRequired,
+  defaultAccounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      username: PropTypes.string.isRequired,
+      password: PropTypes.string.isRequired,
+      unit: PropTypes.string,
+      role: PropTypes.string,
+      level: PropTypes.string,
+    })
+  ).isRequired,
+};
 

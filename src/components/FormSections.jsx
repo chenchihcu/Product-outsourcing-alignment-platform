@@ -1,22 +1,38 @@
-import React from 'react';
+import PropTypes from 'prop-types';
 import BasicInfoSection from './BasicInfoSection';
+import QualityProcessSection from './QualityProcessSection';
+import ToolingSection from './ToolingSection';
 import PreWorkSection from './PreWorkSection';
-import ProcessControlSection from './ProcessControlSection';
+import ThermalProfileSection from './ThermalProfileSection';
+import SmtControlSection from './SmtControlSection';
+import DipSpecialProcessSection from './DipSpecialProcessSection';
 import TrialReportSection from './TrialReportSection';
 import DocumentsSection from './DocumentsSection';
 import './FormSections.css';
 
 export default function FormSections({ data, activeSection, onChange, onNext, currentUser, factories, highlightField }) {
   return (
-    <div className="sections-container glass-card">
+    <div className="sections-container">
       {activeSection === 'basicInfo' && (
         <BasicInfoSection {...{ data, onChange, currentUser, factories, highlightField, onNext }} />
+      )}
+      {activeSection === 'qualityProcess' && (
+        <QualityProcessSection {...{ data, onChange, currentUser, highlightField, onNext }} />
+      )}
+      {activeSection === 'tooling' && (
+        <ToolingSection {...{ data, onChange, currentUser, highlightField, onNext }} />
       )}
       {activeSection === 'preparation' && (
         <PreWorkSection {...{ data, onChange, currentUser, highlightField, onNext }} />
       )}
-      {activeSection === 'processControl' && (
-        <ProcessControlSection {...{ data, onChange, currentUser, highlightField, onNext }} />
+      {activeSection === 'thermalProfile' && (
+        <ThermalProfileSection {...{ data, onChange, currentUser, highlightField, onNext }} />
+      )}
+      {activeSection === 'smtControl' && (
+        <SmtControlSection {...{ data, onChange, currentUser, highlightField, onNext }} />
+      )}
+      {activeSection === 'dipSpecialProcess' && (
+        <DipSpecialProcessSection {...{ data, onChange, currentUser, highlightField, onNext }} />
       )}
       {activeSection === 'trialReport' && (
         <TrialReportSection {...{ data, onChange, currentUser, highlightField, onNext }} />
@@ -27,3 +43,13 @@ export default function FormSections({ data, activeSection, onChange, onNext, cu
     </div>
   );
 }
+
+FormSections.propTypes = {
+  data: PropTypes.object.isRequired,
+  activeSection: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onNext: PropTypes.func.isRequired,
+  currentUser: PropTypes.object,
+  factories: PropTypes.arrayOf(PropTypes.string),
+  highlightField: PropTypes.string,
+};

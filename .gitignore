@@ -40,6 +40,12 @@ e2e-*.png
 cloud-*.png
 fix-*.png
 reject-*.png
+bugfix-*.png
+preview-*.png
+
+# Button-audit / browser scratch profiles (transient runtime output)
+scratch/*
+!scratch/read_layout.js
 
 # Local Netlify folder
 .netlify
