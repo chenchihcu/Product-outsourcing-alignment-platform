@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { validateAlignment } from '../utils/validator';
 import { exportRequirementExcel } from '../utils/excelExporter';
 import { compressImage } from '../utils/imageCompressor';
@@ -204,7 +205,7 @@ export default function SignOff({
 
   return (
     <div className="signoff-container glass-card animate-fade-in">
-      <h2 className="section-title">D. 簽章與匯出</h2>
+      <h2 className="section-title">簽章與匯出</h2>
       <p className="section-subtitle">完成前置確認後，請於下方簽章並下載文件。</p>
 
       {/* 品保退件提示(硬性鎖定:簽章與匯出皆已封鎖) */}
@@ -255,7 +256,7 @@ export default function SignOff({
       <div className="status-banner">
         <div className="status-progress-bar-wrapper">
           <div className="status-progress-info">
-            <span className="status-label">完成率</span>
+            <span className="status-label">欄位對齊率</span>
             <span className="status-percentage">{alignmentRate}%</span>
           </div>
           <div className="status-bar-bg">
@@ -281,7 +282,7 @@ export default function SignOff({
           <div className="sign-body">
             {/* 電子簽章預覽及上傳 */}
             <div className="signature-preview-area">
-              <label className="form-label">電子簽章</label>
+              <span className="form-label">電子簽章</span>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.rdSignature ? (
                   <img src={data.basicInfo.signOff.rdSignature} alt="RD Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
@@ -356,7 +357,7 @@ export default function SignOff({
           <div className="sign-body">
             {/* 電子簽章預覽及上傳 */}
             <div className="signature-preview-area">
-              <label className="form-label">電子簽章</label>
+              <span className="form-label">電子簽章</span>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.engineeringReviewSignature ? (
                   <img src={data.basicInfo.signOff.engineeringReviewSignature} alt="PE Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
@@ -431,7 +432,7 @@ export default function SignOff({
           <div className="sign-body">
             {/* 電子簽章預覽及上傳 */}
             <div className="signature-preview-area">
-              <label className="form-label">電子簽章</label>
+              <span className="form-label">電子簽章</span>
               <div className="signature-container-preview">
                 {data.basicInfo.signOff?.qaSignature ? (
                   <img src={data.basicInfo.signOff.qaSignature} alt="QA Signature" loading="lazy" className="signature-img-preview" onError={(e) => { e.target.style.display = "none" }} />
@@ -504,8 +505,9 @@ export default function SignOff({
             {/* QA 退件控制(僅品保、且尚未退件時):常駐的「退件原因」欄位 */}
             {isQA && !isRejected && (
               <div className="qa-reject-control">
-                <label className="form-label reject-label">退件原因 <span className="req">*</span>（如需退件，請於下方說明原由）</label>
+                <label htmlFor="reject-reason" className="form-label reject-label">退件原因 <span className="req">*</span>（如需退件，請於下方說明原由）</label>
                 <textarea
+                  id="reject-reason"
                   className="form-textarea reject-textarea"
                   rows={3}
                   placeholder="例：製程管制分頁的 SMT 焊接順序與測溫點配置尚未填寫，請補齊後重新送審。" name="rejectReason"
@@ -613,6 +615,23 @@ export default function SignOff({
     </div>
   );
 }
+
+SignOff.propTypes = {
+  data: PropTypes.object.isRequired,
+  originalWb: PropTypes.object,
+  fileName: PropTypes.string.isRequired,
+  onChange: PropTypes.func.isRequired,
+  onExportComplete: PropTypes.func.isRequired,
+  currentUser: PropTypes.shape({
+    username: PropTypes.string,
+    unit: PropTypes.string,
+    role: PropTypes.string,
+    signature: PropTypes.string,
+  }),
+  onUpdateAccountSignature: PropTypes.func.isRequired,
+  onFinalExit: PropTypes.func.isRequired,
+  onFinalBackToList: PropTypes.func.isRequired,
+};
 
 
 

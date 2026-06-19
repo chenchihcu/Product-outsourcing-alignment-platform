@@ -1,5 +1,4 @@
-import React from 'react';
-
+// No React import needed — JSX is handled by the framework transform
 const svg = (path, viewBox = '0 0 24 24') => (
   <svg viewBox={viewBox} fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="section-svg">
     {path}

@@ -1,30 +1,25 @@
 import { useState, useEffect, useRef } from 'react';
+import PropTypes from 'prop-types';
+import { WORKFLOW_STEPS } from '../utils/workflow';
 import './AppShell.css';
 
-/* 確認流程的五個步驟(順序固定) */
-const STEPS = [
-  { key: 'basicInfo', label: '基本資料', icon: '📋' },
-  { key: 'preparation', label: '前置作業', icon: '🔧' },
-  { key: 'processControl', label: '製程管制', icon: '🔰' },
-  { key: 'trialReport', label: '試產要求', icon: '🎯' },
-  { key: 'documents', label: '工程文件', icon: '📂' },
-  { key: 'signOff', label: '簽章匯出', icon: '✍️' },
-];
-
 /* 側欄導覽項目(獨立元件,避免於 render 內建立元件) */
-function NavItem({ tab, icon, label, badge, status, index, activeTab, collapsed, alignmentRate, onGo }) {
+function NavItem({ tab, icon, label, badge, status, applicable, index, activeTab, collapsed, alignmentRate, onGo }) {
   const active = activeTab === tab;
+  const isDone = status === 'done';
+  const isNotApplicable = isDone && applicable === false;
+  const stateLabel = isNotApplicable ? '不適用' : status === 'inProgress' ? '進行中' : isDone ? '完成' : '';
   return (
     <button
       type="button"
-      className={`nav-item ${active ? 'active' : ''}`}
+      className={`nav-item ${active ? 'active' : ''} ${status ? `status-${status}` : ''} ${isNotApplicable ? 'not-applicable' : ''}`}
       onClick={() => onGo(tab)}
-      title={collapsed ? label : undefined}
+      title={collapsed ? `${label}${stateLabel ? ` · ${stateLabel}` : ''}` : undefined}
     >
       <span className="nav-icon">
         {typeof index === 'number' ? (
-          <span className={`nav-step-num ${status === 'done' ? 'done' : ''}`}>
-            {status === 'done' ? '✓' : index}
+          <span className={`nav-step-num ${isDone ? 'done' : ''} ${status === 'inProgress' ? 'in-progress' : ''} ${isNotApplicable ? 'not-applicable' : ''}`}>
+            {isNotApplicable ? '—' : isDone ? '✓' : index}
           </span>
         ) : (
           icon
@@ -34,12 +29,29 @@ function NavItem({ tab, icon, label, badge, status, index, activeTab, collapsed,
       {badge != null && (
         <span className={`nav-badge ${alignmentRate === 100 ? 'ok' : ''}`}>{badge}</span>
       )}
+      {stateLabel && typeof index === 'number' && (
+        <span className={`nav-state ${status} ${isNotApplicable ? 'not-applicable' : ''}`}>{stateLabel}</span>
+      )}
       {status && typeof index !== 'number' && (
         <span className={`nav-dot ${status}`} aria-hidden="true" />
       )}
     </button>
   );
 }
+
+NavItem.propTypes = {
+  tab: PropTypes.string.isRequired,
+  icon: PropTypes.string,
+  label: PropTypes.string.isRequired,
+  badge: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  status: PropTypes.string,
+  applicable: PropTypes.bool,
+  index: PropTypes.number,
+  activeTab: PropTypes.string.isRequired,
+  collapsed: PropTypes.bool.isRequired,
+  alignmentRate: PropTypes.number,
+  onGo: PropTypes.func.isRequired,
+};
 
 /**
  * 自適應導覽外殼。
@@ -89,7 +101,7 @@ export default function AppShell({
     setDrawerOpen(false);
   };
 
-  const completedSteps = STEPS.filter((s) => sectionStatus[s.key]).length;
+  const completedSteps = WORKFLOW_STEPS.filter((step) => sectionStatus[step.key]?.state === 'done').length;
   const navShared = { activeTab, collapsed, alignmentRate, onGo: go };
 
   return (
@@ -112,16 +124,17 @@ export default function AppShell({
 
               <div className="nav-group-label">
                 確認流程
-                <span className="nav-group-count">{completedSteps}/{STEPS.length}</span>
+                <span className="nav-group-count">{completedSteps}/{WORKFLOW_STEPS.length}</span>
               </div>
-              {STEPS.map((s, i) => (
+              {WORKFLOW_STEPS.map((step, index) => (
                 <NavItem
                   {...navShared}
-                  key={s.key}
-                  tab={s.key}
-                  label={s.label}
-                  index={i + 1}
-                  status={sectionStatus[s.key] ? 'done' : 'pending'}
+                  key={step.key}
+                  tab={step.key}
+                  label={step.label}
+                  index={index + 1}
+                  status={sectionStatus[step.key]?.state || 'pending'}
+                  applicable={sectionStatus[step.key]?.applicable !== false}
                 />
               ))}
 
@@ -208,19 +221,25 @@ export default function AppShell({
               <span className={`pill-badge ${alignmentRate === 100 ? 'ok' : ''}`}>{alignmentRate}%</span>
             </button>
 
-            {STEPS.map((s, i) => (
+            {WORKFLOW_STEPS.map((step, index) => {
+              const stepStatus = sectionStatus[step.key] || { state: 'pending', applicable: true };
+              const isDone = stepStatus.state === 'done';
+              const isNotApplicable = isDone && stepStatus.applicable === false;
+              return (
               <button type="button"
-                key={s.key}
-                ref={activeTab === s.key ? activePillRef : null}
-                className={`step-pill ${activeTab === s.key ? 'active' : ''} ${sectionStatus[s.key] ? 'done' : ''}`}
-                onClick={() => go(s.key)}
+                key={step.key}
+                ref={activeTab === step.key ? activePillRef : null}
+                className={`step-pill ${activeTab === step.key ? 'active' : ''} status-${stepStatus.state} ${isNotApplicable ? 'not-applicable' : ''}`}
+                onClick={() => go(step.key)}
               >
-                <span className={`pill-num ${sectionStatus[s.key] ? 'done' : ''}`}>
-                  {sectionStatus[s.key] ? '✓' : i + 1}
+                <span className={`pill-num ${isDone ? 'done' : ''}`}>
+                  {isNotApplicable ? '—' : isDone ? '✓' : index + 1}
                 </span>
-                {s.label}
+                {step.label}
+                {isNotApplicable && <span className="pill-state">不適用</span>}
               </button>
-            ))}
+              );
+            })}
             {currentUser?.role === 'admin' && (
               <button type="button"
                 ref={activeTab === 'settings' ? activePillRef : null}
@@ -246,4 +265,25 @@ export default function AppShell({
     </div>
   );
 }
+
+AppShell.propTypes = {
+  currentUser: PropTypes.shape({
+    username: PropTypes.string,
+    unit: PropTypes.string,
+    level: PropTypes.string,
+    role: PropTypes.string,
+  }),
+  onLogout: PropTypes.func.isRequired,
+  inProject: PropTypes.bool.isRequired,
+  projectName: PropTypes.string,
+  onBackToList: PropTypes.func.isRequired,
+  activeTab: PropTypes.string.isRequired,
+  onTabChange: PropTypes.func.isRequired,
+  sectionStatus: PropTypes.object,
+  alignmentRate: PropTypes.number,
+  saveState: PropTypes.string,
+  savedAt: PropTypes.number,
+  onlineCount: PropTypes.number,
+  children: PropTypes.node,
+};
 

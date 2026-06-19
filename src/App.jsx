@@ -1,4 +1,5 @@
 import { Component, lazy, Suspense } from 'react';
+import PropTypes from 'prop-types';
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import AppShell from './components/AppShell';
 import ProjectList from './components/ProjectList';
@@ -12,6 +13,7 @@ import Settings from './components/Settings';
 
 import LoginModal from './components/LoginModal';
 import { validateAlignment } from './utils/validator';
+import { getNextWorkflowStep, getWorkflowStatuses } from './utils/workflow';
 import { parseRequirementExcel } from './utils/excelParser';
 import { getJSON, setJSON, removeKey } from './utils/storage';
 import { isSupabaseEnabled } from './data/supabaseClient';
@@ -273,6 +275,10 @@ class ErrorBoundary extends Component {
   }
 }
 
+ErrorBoundary.propTypes = {
+  children: PropTypes.node.isRequired,
+};
+
 export default function App() {
   const [projects, setProjects] = useState([]);
   const projectsRef = useRef([]);
@@ -313,8 +319,9 @@ export default function App() {
 
   // 登入狀態與使用者管理
   const [currentUser, setCurrentUser] = useState(() => {
-    return getJSON('current_user', null);
+    return isSupabaseEnabled ? null : getJSON('current_user', null);
   });
+  const [authReady, setAuthReady] = useState(!isSupabaseEnabled);
   const currentUserRef = useRef(null);
   useEffect(() => { currentUserRef.current = currentUser; }, [currentUser]);
 
@@ -331,23 +338,10 @@ export default function App() {
     [data]
   );
 
-  const sectionStatus = useMemo(() => {
-    if (!data) return {};
-    const bi = data.basicInfo || {};
-    const pc = data.processControl || {};
-    const tr = data.trialReport || {};
-    const sign = bi.signOff || {};
-    return {
-      basicInfo: !!(bi.factory && bi.productNo && Object.values(bi.stage || {}).some(v => v)),
-      preparation: !!((pc.sampleProvided?.trialBoard || pc.sampleProvided?.tempBoard || pc.sampleProvided?.standardPart) &&
-        (pc.bakeRequired?.need || pc.bakeRequired?.noNeed) &&
-        !!pc.packagingType),
-      processControl: !!(pc.smtOrder?.bToT || pc.smtOrder?.tToB),
-      trialReport: !!(tr.printRecords?.some(r => r.checked) || tr.inspectRecords?.some(r => r.checked) || tr.photoRecords?.some(r => r.checked)),
-      documents: !!Object.values(bi.documents || {}).some(v => v),
-      signOff: !!(sign.rdSignature || sign.engineeringReviewSignature || sign.qaSignature)
-    };
-  }, [data]);
+  const sectionStatus = useMemo(
+    () => data ? getWorkflowStatuses(data) : {},
+    [data]
+  );
 
   // 1. 初始化與讀取本地機種清單 (若清單為空，非同步下載預設範本)
   useEffect(() => {
@@ -412,7 +406,7 @@ export default function App() {
         } else {
           const local = getJSON(localKey, []);
           if (local.length > 0) {
-            await migrateLocalProjects(ws, local);
+            await migrateLocalProjects(ws, local, currentUser.id);
             if (cancelled) return; // E6 — 遷移後再次檢查
           }
         }
@@ -601,24 +595,33 @@ export default function App() {
 
   // 共用登出流程:先儲存當前編輯(write-through 落盤+上雲),再清除登入狀態與
   // 「上次開啟機種」記錄,避免共用工作站上下一位登入者自動開啟上一位的機種
-  const handleLogout = () => {
+  const handleLogout = async () => {
     flushPendingSaveRef.current();
     if (currentProjectId && data) {
       saveProjectData(currentProjectId, fileName, data);
     }
-    signOut();
-    setCurrentUser(null);
-    setData(null);
-    setOriginalWb(null);
-    setFileName('');
-    setCurrentProjectId(null);
-    setActiveTab('dashboard');
-    setShowSuccessOverlay(false);
-    setRemoteUpdate(null);
-    setSaveState('idle');
-    removeKey('last_project_id');
-    lastIdRef.current = null;
-    setProjects([]);
+    try {
+      const result = await signOut();
+      if (result?.remoteRevoked === false && import.meta.env.DEV) {
+        console.warn('[auth] 遠端 session 撤銷失敗，本機 session 已清除。', result.error);
+      }
+    } catch (err) {
+      if (import.meta.env.DEV) console.error('[auth] 本機 session 清除失敗', err);
+    } finally {
+      removeKey('current_user');
+      setCurrentUser(null);
+      setData(null);
+      setOriginalWb(null);
+      setFileName('');
+      setCurrentProjectId(null);
+      setActiveTab('dashboard');
+      setShowSuccessOverlay(false);
+      setRemoteUpdate(null);
+      setSaveState('idle');
+      removeKey('last_project_id');
+      lastIdRef.current = null;
+      setProjects([]);
+    }
   };
   const handleLogoutRef = useRef(handleLogout);
   useEffect(() => { handleLogoutRef.current = handleLogout; });
@@ -632,8 +635,9 @@ export default function App() {
       clearTimeout(timerId);
       timerId = setTimeout(() => {
         // 透過 ref 取最新版本,避免 30 分鐘前的 stale closure 漏存當前編輯
-        handleLogoutRef.current();
-        alert('因長時間無操作，已自動登出，請重新登入。');
+        void handleLogoutRef.current().finally(() => {
+          alert('因長時間無操作，已自動登出，請重新登入。');
+        });
       }, TIMEOUT_MS);
     };
     const events = ['mousedown', 'keydown', 'scroll', 'touchstart'];
@@ -681,14 +685,24 @@ export default function App() {
   useEffect(() => {
     if (!isSupabaseEnabled) return;
     let cancelled = false;
-    getCurrentUser().then((u) => { if (!cancelled && u) setCurrentUser(u); }).catch((err) => {
-      if (import.meta.env.DEV) console.error('[auth] 工作階段還原失敗', err);
-      if (!cancelled) setSyncError('雲端驗證失敗，已切換為本機模式。');
-    });
-    const unsub = onAuthChange(async () => {
-      const u = await getCurrentUser();
-      if (!cancelled) setCurrentUser(u);
-    });
+    const syncSession = async () => {
+      try {
+        const user = await getCurrentUser();
+        if (cancelled) return;
+        setCurrentUser(user);
+        if (!user) removeKey('current_user');
+      } catch (err) {
+        if (import.meta.env.DEV) console.error('[auth] 工作階段還原失敗', err);
+        if (!cancelled) {
+          removeKey('current_user');
+          setCurrentUser(null);
+        }
+      } finally {
+        if (!cancelled) setAuthReady(true);
+      }
+    };
+    void syncSession();
+    const unsub = onAuthChange(() => { void syncSession(); });
     return () => { cancelled = true; unsub(); };
   }, []);
 
@@ -699,7 +713,7 @@ export default function App() {
     if (projectsKeyRef.current !== key) return;
     // U10 — 偵測 localStorage 容量滿
     const ok = setJSON(key.replace('ag_', ''), sanitizeProjects(projects));
-    if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。');
+    if (!ok) setSyncError('本機儲存空間不足，資料可能無法完整保存。請清理瀏覽器資料或改用雲端模式。'); // eslint-disable-line react-hooks/set-state-in-effect
   }, [projects, currentUser]);
 
   // 自動恢復上次編輯的機種
@@ -711,11 +725,13 @@ export default function App() {
       lastIdRef.current = lastId;
       const project = projects.find(p => p.id === lastId);
       if (project) {
+        /* eslint-disable react-hooks/set-state-in-effect */
         editedSinceLoadRef.current = false;
         setSaveState('saved');
         setSavedAt(project.updatedAt ? Date.parse(project.updatedAt) : Date.now());
         setData(sanitizeProjectData(project.data));
         setFileName(project.name);
+        /* eslint-enable react-hooks/set-state-in-effect */
         if (project.originalWbBase64) {
           try {
             const binaryString = atob(project.originalWbBase64);
@@ -1014,65 +1030,26 @@ export default function App() {
   // 渲染分頁
   const renderTabContent = () => {
     if (!data) return null;
+    const nextWorkflowStep = getNextWorkflowStep(activeTab);
     
     switch (activeTab) {
       case 'dashboard':
         return <Dashboard data={data} onGoToSection={handleGoToSection} sectionStatus={sectionStatus} currentUser={currentUser} />;
       case 'basicInfo':
-        return (
-          <FormSections 
-            data={data} 
-            activeSection="basicInfo" 
-            onChange={setData} 
-            onNext={() => setActiveTab('preparation')} 
-            currentUser={currentUser}
-            factories={factories}
-            highlightField={highlightField}
-          />
-        );
+      case 'qualityProcess':
+      case 'tooling':
       case 'preparation':
-        return (
-          <FormSections 
-            data={data} 
-            activeSection="preparation" 
-            onChange={setData} 
-            onNext={() => setActiveTab('processControl')} 
-            currentUser={currentUser}
-            factories={factories}
-            highlightField={highlightField}
-          />
-        );
-      case 'processControl':
-        return (
-          <FormSections 
-            data={data} 
-            activeSection="processControl" 
-            onChange={setData} 
-            onNext={() => setActiveTab('trialReport')} 
-            currentUser={currentUser}
-            factories={factories}
-            highlightField={highlightField}
-          />
-        );
+      case 'thermalProfile':
+      case 'smtControl':
+      case 'dipSpecialProcess':
       case 'trialReport':
-        return (
-          <FormSections 
-            data={data} 
-            activeSection="trialReport" 
-            onChange={setData} 
-            onNext={() => setActiveTab('documents')} 
-            currentUser={currentUser}
-            factories={factories}
-            highlightField={highlightField}
-          />
-        );
       case 'documents':
         return (
           <FormSections 
             data={data} 
-            activeSection="documents" 
+            activeSection={activeTab}
             onChange={setData} 
-            onNext={() => setActiveTab('signOff')} 
+            onNext={() => nextWorkflowStep && setActiveTab(nextWorkflowStep)}
             currentUser={currentUser}
             factories={factories}
             highlightField={highlightField}
@@ -1110,6 +1087,20 @@ export default function App() {
         return null;
     }
   };
+
+  if (!authReady) {
+    return (
+      <div className="login-overlay" role="status" aria-live="polite">
+        <div className="login-card glass-card animate-fade-in">
+          <div className="login-header">
+            <span className="login-logo-icon">🔐</span>
+            <h2>正在驗證工作階段…</h2>
+            <p>請稍候，系統正在確認雲端登入狀態。</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   if (!currentUser) {
     return (
@@ -1183,7 +1174,7 @@ export default function App() {
       {/* 簽核成功慶祝 Overlay */}
       {showSuccessOverlay && (
         <div className="success-overlay animate-fade-in" onClick={() => setShowSuccessOverlay(false)} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); setShowSuccessOverlay(false); } }}>
-          <div className="success-card glass-card text-center" onClick={(e) => e.stopPropagation()}>
+          <div className="success-card glass-card text-center" onClick={(e) => e.stopPropagation()} role="button" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter' || e.key === 'Space') { e.preventDefault(); e.stopPropagation(); } }}>
             <span className="big-check-icon">✓</span>
             <h2>Excel 已匯出</h2>
             <p>簽核版文件已完成下載。</p>

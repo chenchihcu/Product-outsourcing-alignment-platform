@@ -1,4 +1,5 @@
-import React from 'react';
+/* eslint-disable jsx-a11y/label-has-associated-control */
+import PropTypes from 'prop-types';
 import { useFieldOwner } from '../hooks/useFieldOwner';
 import { isFieldDisabled, getFieldHighlightClass, updateFieldWithOwner } from '../utils/fieldUtils';
 import { sectionSvg } from '../utils/svgIcons';
@@ -68,7 +69,7 @@ export default function PreWorkSection({ data, onChange, currentUser, highlightF
 
   return (
     <div className="section-form animate-fade-in">
-      <h2 className="section-title">前置作業</h2>
+      <h2 className="section-title">生產前置作業</h2>
       <p className="section-subtitle">請回填樣品提供狀態、烘烤確認及包材種類等生產前置項目。</p>
 
       <div className="form-row-grid" data-accent="indigo">
@@ -182,8 +183,16 @@ export default function PreWorkSection({ data, onChange, currentUser, highlightF
       </div>
 
       <div className="action-row">
-        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：製程管制</button>
+        <button type="button" className="btn btn-primary" onClick={onNext}>下一步：測溫點配置</button>
       </div>
     </div>
   );
 }
+
+PreWorkSection.propTypes = {
+  data: PropTypes.object.isRequired,
+  onChange: PropTypes.func.isRequired,
+  currentUser: PropTypes.object,
+  highlightField: PropTypes.string,
+  onNext: PropTypes.func.isRequired,
+};

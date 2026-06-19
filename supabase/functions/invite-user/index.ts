@@ -1,10 +1,12 @@
 import { serve } from 'https://deno.land/std@0.208.0/http/server.ts';
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.108.0';
 
 const CORS = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+const ALLOWED_ROLES = new Set(['rd', 'eng', 'qa', 'admin']);
 
 const json = (body: unknown, status = 200) =>
   new Response(JSON.stringify(body), {
@@ -14,6 +16,7 @@ const json = (body: unknown, status = 200) =>
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: CORS });
+  if (req.method !== 'POST') return json({ error: 'Method not allowed' }, 405);
 
   try {
     const authHeader = req.headers.get('Authorization');
@@ -41,7 +44,10 @@ serve(async (req) => {
 
     // 解析 body
     const { email, username, unit, role, level } = await req.json();
-    if (!email || !role) return json({ error: '缺少必要欄位：email、role' }, 400);
+    const normalizedEmail = String(email || '').trim().toLowerCase();
+    const normalizedRole = String(role || '').trim();
+    if (!normalizedEmail || !normalizedRole) return json({ error: '缺少必要欄位：email、role' }, 400);
+    if (!ALLOWED_ROLES.has(normalizedRole)) return json({ error: '不支援的角色' }, 400);
 
     // 以 service_role 執行實際邀請（傳入 metadata，trigger 建 profile 時使用）
     const supabaseAdmin = createClient(
@@ -50,16 +56,28 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } },
     );
 
-    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+    const { data, error } = await supabaseAdmin.auth.admin.inviteUserByEmail(normalizedEmail, {
       data: {
-        username: username || email.split('@')[0],
-        unit: unit ?? '',
-        role,
-        level: level ?? '',
+        username: String(username || '').trim() || normalizedEmail.split('@')[0],
       },
     });
 
     if (error) throw error;
+
+    const { error: profileError } = await supabaseAdmin
+      .from('profiles')
+      .update({
+        username: String(username || '').trim() || normalizedEmail.split('@')[0],
+        unit: String(unit || '').trim(),
+        role: normalizedRole,
+        level: String(level || '').trim(),
+      })
+      .eq('id', data.user.id);
+
+    if (profileError) {
+      await supabaseAdmin.auth.admin.deleteUser(data.user.id);
+      throw profileError;
+    }
 
     return json({ success: true, userId: data.user.id });
   } catch (err: unknown) {

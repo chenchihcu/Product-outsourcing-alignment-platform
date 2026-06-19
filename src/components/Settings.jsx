@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { useState, useEffect } from 'react';
 import './Settings.css';
 import { compressImage } from '../utils/imageCompressor';
 import { isSupabaseEnabled } from '../data/supabaseClient';
@@ -28,7 +29,7 @@ function CloudUserManagement({ currentUser }) {
       .finally(() => setLoading(false));
   };
 
-  useEffect(() => { reload(); }, []);
+  useEffect(() => { reload(); }, []); // eslint-disable-line
 
   const handleInvite = async (e) => {
     e.preventDefault();
@@ -149,6 +150,13 @@ function CloudUserManagement({ currentUser }) {
   );
 }
 
+CloudUserManagement.propTypes = {
+  currentUser: PropTypes.shape({
+    id: PropTypes.string,
+    role: PropTypes.string,
+  }),
+};
+
 export default function Settings({
   factories,
   onAddFactory,
@@ -189,7 +197,7 @@ export default function Settings({
       alert('密碼至少需要 6 個字元。');
       return;
     }
-    if (!/^[a-zA-Z0-9_@.\-]+$/.test(trimUser)) {
+    if (!/^[a-zA-Z0-9_@.-]+$/.test(trimUser)) {
       alert('帳號只能包含英數字、底線、@、點與連字符。');
       return;
     }
@@ -234,7 +242,7 @@ export default function Settings({
         <div className="settings-section-card glass-card" style={{ gridColumn: '1 / -1' }}>
           <h3>🖋️ 個人電子簽章設定</h3>
           <p className="card-desc">
-             在此上傳您的個人電子簽章圖片（建議使用透明背景的 PNG 圖檔，比例約 3:1）。設定後，您在「簽章匯出」進行線上簽名時，系統將直接以簽章圖檔作為簽核依據，使報告更顯正式與專業。
+                  在此上傳您的個人電子簽章圖片（建議使用透明背景的 PNG 圖檔，比例約 3:1）。設定後，您在「簽章與匯出」進行線上簽名時，系統將直接以簽章圖檔作為簽核依據，使報告更顯正式與專業。
           </p>
           <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap', marginTop: '16px' }}>
             <div 
@@ -483,6 +491,34 @@ export default function Settings({
     </div>
   );
 }
+
+Settings.propTypes = {
+  factories: PropTypes.arrayOf(PropTypes.string).isRequired,
+  onAddFactory: PropTypes.func.isRequired,
+  onRemoveFactory: PropTypes.func.isRequired,
+  accounts: PropTypes.arrayOf(
+    PropTypes.shape({
+      username: PropTypes.string.isRequired,
+      password: PropTypes.string.isRequired,
+      unit: PropTypes.string,
+      role: PropTypes.string,
+      level: PropTypes.string,
+      signature: PropTypes.string,
+    })
+  ).isRequired,
+  onAddAccount: PropTypes.func.isRequired,
+  onRemoveAccount: PropTypes.func.isRequired,
+  onUpdateAccountLevel: PropTypes.func.isRequired,
+  onUpdateAccountSignature: PropTypes.func.isRequired,
+  currentUser: PropTypes.shape({
+    id: PropTypes.string,
+    username: PropTypes.string,
+    unit: PropTypes.string,
+    role: PropTypes.string,
+    level: PropTypes.string,
+    signature: PropTypes.string,
+  }),
+};
 
 
 

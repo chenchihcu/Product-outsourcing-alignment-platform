@@ -11,9 +11,10 @@
 - **多角色驗證系統**：支援 RD（研發）、ENG（工程）、QA（品保）、Admin（系統管理員）四種角色，各自擁有不同的編輯權限與簽署責任
 - **Excel 匯入/匯出**：基於 SheetJS 函式庫，完整保留原始 Excel 格式（合併儲存格、樣式、背景色等）
 - **簽署流程**：RD → PE → QA 三階簽核，支援圖片簽章上傳與嵌入式簽名欄位
-- **無伺服器儲存**：所有資料儲存於瀏覽器 localStorage，無需後端伺服器
+- **離線／雲端雙模式**：未設定 Supabase 時使用 localStorage；正式環境可啟用登入、RLS、即時同步與跨裝置協作
 - **製程防呆管制**：欄位編輯鎖定（`_owners` 機制），防止不同角色互相覆蓋
 - **製程項目管理**：SMT 鋼板/載具/治具、DIP、試產報告、6 點測溫記錄、PCBA/FPCA 包材管理
+- **十步驟確認流程**：將機種、品質、治工具、前置、測溫、SMT、DIP、試產、文件與簽章分開確認，並顯示待處理、進行中、完成或不適用狀態
 - **列印報表**：支援 A4 格式 PDF 列印，含分頁控制
 - **跨裝置響應式**：支援桌上型電腦與行動裝置
 
@@ -36,8 +37,9 @@
 ├── src/
 │   ├── assets/             靜態資產
 │   ├── components/         React 元件
-│   │   ├── BasicInfo.jsx        基本資料
-│   │   ├── FormSections.jsx     表單區段
+│   │   ├── BasicInfoSection.jsx 機種基本資訊
+│   │   ├── FormSections.jsx     十步驟表單路由
+│   │   ├── *Section.jsx         品質、治工具、製程與交付步驟
 │   │   ├── LoginModal.jsx       登入視窗
 │   │   ├── PrintReport.jsx      列印報表
 │   │   ├── Settings.jsx         設定頁面
@@ -76,7 +78,18 @@ npm run preview
 
 # 執行程式碼檢查
 npm run lint
+
+# 執行生產建置與完整 QA gate
+npm run qa:gate
+
+# 檢查正式依賴的高風險公告
+npm audit --omit=dev --audit-level=high
+
+# 僅檢查安全設定與 migration 合約（不連線、不寫遠端資料）
+npm run qa:security
 ```
+
+`qa:gate` 是離線／瀏覽器日常 gate，不代表 Supabase RLS 已驗證。正式雲端權限測試必須先完成備份，再依 [正式安全發布手冊](docs/SECURITY_ROLLOUT.md) 執行 opt-in 的 `npm run qa:cloud-security`。
 
 ## 部署
 
@@ -88,6 +101,8 @@ npm run lint
 4. 一般任務不要使用 `netlify deploy --prod`；手動 production deploy 僅保留作緊急備援
 5. 儲存庫：<https://github.com/chenchihcu/Product-outsourcing-alignment-platform>
 
+涉及 Supabase migration、RLS、角色或 production 資料的修改必須走隔離分支與 PR，並遵守 [正式安全發布手冊](docs/SECURITY_ROLLOUT.md) 的備份、go/no-go、負向權限測試與回滾步驟。
+
 ## 角色權限說明
 
 | 角色 | 帳號 | 單位 | 權限說明 |
@@ -96,6 +111,8 @@ npm run lint
 | ENG | eng | 工程單位 | 表單編輯與簽核 |
 | QA | qa | 審核單位（品保處） | 最終審核與簽核 |
 | Admin | admin | 管理處 | 系統設定與帳號管理 |
+
+雲端權限邊界：RD／ENG／QA 可共同讀寫 `default` 機種；只有 Admin 可存取 `admin_test`；加工廠主檔全員可讀、僅 Admin 可維護；一般使用者只能讀取自己的 profile 並更新自己的簽章，不能讀取他人 profile 或修改角色、單位、職級。
 
 ## 授權
 
