@@ -13,8 +13,6 @@ export default function DipSpecialProcessSection({ data, onChange, currentUser, 
 
   return (
     <div className="section-form animate-fade-in">
-      <h2 className="section-title">DIP 與特殊製程</h2>
-
       {!applicable ? (
         <div className="workflow-na-note glass-card">
           <strong>此機種未選擇 DIP 或 Underfill，這一步目前不適用。</strong>

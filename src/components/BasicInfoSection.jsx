@@ -10,8 +10,6 @@ export default function BasicInfoSection({ data, onChange, currentUser, factorie
 
   return (
     <div className="section-form animate-fade-in">
-      <h2 className="section-title">機種基本資訊</h2>
-
       <div className="form-section-card glass-card" data-accent="indigo">
         <div className="card-header"><span className="card-icon-circle">{sectionSvg.chip}</span>機種基本資訊</div>
         <div className="card-body">

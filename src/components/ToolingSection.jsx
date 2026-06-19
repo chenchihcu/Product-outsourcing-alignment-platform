@@ -10,8 +10,6 @@ export default function ToolingSection({ data, onChange, currentUser, highlightF
 
   return (
     <div className="section-form animate-fade-in">
-      <h2 className="section-title">鋼板與治工具</h2>
-
       <div className="form-section-card glass-card" data-accent="slate">
         <div className="card-header"><span className="card-icon-circle">{sectionSvg.wrench}</span>鋼板與治工具一覽表</div>
         <div className="card-body">

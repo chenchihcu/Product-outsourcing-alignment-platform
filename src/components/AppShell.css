@@ -293,7 +293,7 @@
   width: 100%;
   max-width: var(--shell-content-max);
   margin: 0 auto;
-  padding: var(--sp-6) var(--sp-6) var(--sp-8);
+  padding: var(--sp-5) var(--sp-6) var(--sp-6);
 }
 
 /* ---------------- 抽屜遮罩(預設隱藏) ---------------- */
