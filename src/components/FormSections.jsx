@@ -12,7 +12,7 @@ import './FormSections.css';
 
 export default function FormSections({ data, activeSection, onChange, onNext, currentUser, factories, highlightField }) {
   return (
-    <div className="sections-container glass-card">
+    <div className="sections-container">
       {activeSection === 'basicInfo' && (
         <BasicInfoSection {...{ data, onChange, currentUser, factories, highlightField, onNext }} />
       )}
