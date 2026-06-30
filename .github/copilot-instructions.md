@@ -1,0 +1,116 @@
+<!-- BEGIN ui-ux-universal (auto-synced; edit ~/.claude/ui-ux-universal.md) -->
+# 通用 UI/UX 規則(單一真本 / Single Source of Truth)
+
+本檔是跨專案、跨工具的通用 UI/UX 規則。各專案的 `AGENTS.md` 可加嚴、不可放寬;
+專案特有的檔案路徑、token 實際色值、widget 名稱寫在各專案,不寫在這裡。
+
+維護方式:只編輯本檔(`~/.claude/ui-ux-universal.md`),再執行
+`~/.claude/sync-ai-rules.ps1` 同步到各工具全域設定。手動改散佈出去的副本會在下次同步被覆蓋。
+
+**stack 標記**:各段標明適用範圍,不符的段落略過即可。
+- `[全]` 不分 stack,所有專案適用。
+- `[桌面 Qt]` 桌面 Qt / PySide6 專案適用;純 Web 專案略過。
+- `[Web]` Web / 前端專案適用;純桌面專案略過。
+
+## 0. 適用場景(When to Use)[全]
+
+任務涉及下列任一項時,適用本檔:版面、元件樣式、表單、導覽、表格、儀表板、
+主題配色、互動狀態、視覺打磨、無障礙。
+與視覺無關的工作(資料處理、純後端、Excel 稽核等)可略過。
+
+## 1. 設計原則 [全]
+
+- 取捨順序:清晰 > 裝飾、一致 > 創新、必要 > 可選。
+- 非必要不引入新視覺樣式;版面保持可預測、可掃描。
+- 避免無目的的動畫、漸層、裝飾元素。
+
+## 2. 互動與一致性 [全]
+
+- 對話框主要按鈕順序固定:確認/儲存在左、取消在右(對齊 Windows 原生對話框排序;Qt `QDialogButtonBox` 預設即符合此序),全專案一致。
+- 可能耗時的操作要有狀態回饋(載入中 / 進度 / 完成),不要讓介面在無提示下凍結。
+- 必填欄位用統一的視覺標記(例如紅色 `*` 元件),同一程式不混用多種標法。
+- 表單有未儲存變更時,關閉前要提示(dirty tracking),所有編輯類對話框一致。
+- 驗證在欄位層級即時呈現(錯誤邊框 / inline 提示),不要只在送出時才用彈窗報錯。
+- 錯誤訊息說明「如何修正」,不只說「有錯」;狀態不可只靠顏色傳達。
+- 破壞性動作(刪除 / 停用)在未選取對象前維持 disabled,並先確認再執行。
+- 空資料、載入中、錯誤、成功四種狀態都要有明確畫面,不留空白。
+- Tab 鍵焦點順序依視覺閱讀順序明確設定,不依賴元件建立順序。
+
+## 3. 視覺與排版 [全]
+
+- 顏色、間距、字級、圓角、控件尺寸集中在共用 token / 常數,不在頁面內寫死 hex 或裸 px。
+- token 用語意命名(`TEXT_DISABLED`、`SURFACE_ACTIVE`),不用外觀命名(`GREY_DARK`)。
+- `DISABLED`(不可互動)與 `MUTED`(次要但可讀)分開,不互換。
+- 色彩對比要充足;色彩用於傳達意義,而非純裝飾。
+- 導覽 / 側欄要有可分辨的角色色:底色、面板 / footer、群組標籤、hover、選取、
+  選取指示、徽章、主要動作、次要動作。避免單一色調而看不出狀態層次。
+- Typography:用既有字級 scale,不隨意放大字級;標題明確分段;行高與字重一致。
+- 密集桌面頁面保持可掃描:直接的標籤、穩定的表格欄寬、可見的動作列;
+  不用 card-in-card 包裝層或裝飾性封面。
+- 內容可能溢出時保留可見的捲動 / 溢出提示,不要為了乾淨截圖而隱藏捲軸。
+- 視覺品質是驗收項目,不是事後再補的 polish。
+
+## 4. 元件 [全]
+
+- 先找既有元件復用,不重複實作相同邏輯。
+- 非必要不改既有元件 API。
+- 元件狀態補齊:default / hover / focus / disabled / loading / error / empty / success(依適用)。
+
+## 5. 無障礙(Accessibility)[全]
+
+- 鍵盤可完成主要操作;每個互動元件有可見 focus。
+- 有意義的 icon / 圖片提供無障礙標籤(Qt `accessibleName`;Web `alt` / `aria-label`)。
+- 文字對比足夠可讀;狀態不可只靠顏色區分(配合圖示或文字)。
+
+## 6. CJK / 多語 [全]
+
+- 長中文文字在表格 / 標籤要省略(elide)並用 tooltip 顯示完整內容,不靜默截斷。
+- 確認無缺字方塊(□ tofu);字型要涵蓋 CJK。
+- 在最小可用寬度下檢查內容是否被切除(clipping)。
+- CJK 字重優先用 `400` 與 `700`,避免 `500` / `600`(Windows 渲染不一致)。
+
+## 7. 表單密度 [全]
+
+- 並排欄位只用於低風險、標籤短、寬度需求相近、關係明確的群組。
+- 大文字、附件、長下拉清單欄位維持單欄,除非視覺驗證證明並排仍可讀。
+- 長文字框用「行數」決定初始高度,而非固定大高度;維持單欄。
+
+## 8. 桌面 Qt / PySide6 專屬 [桌面 Qt]
+
+- Qt QSS 不支援:`box-shadow`、`transition`、`animation`、`transform`、`outline`、`opacity`。
+  需強調用 `border` + 對比;需動畫用 `QPropertyAnimation`;需透明用 `rgba()`。
+- focus ring 標準:`border: 2px solid <accent>`。
+- 先 `setPalette()` 再 `setStyleSheet()`;Palette 角色要含 disabled 覆寫。
+- 逐元件狀態矩陣:`QPushButton`(default/hover/focus/disabled/pressed/checked)、
+  `QLineEdit`(default/hover/focus/disabled/read-only)、`QComboBox`、`QCheckBox`、
+  `QTabBar::tab`、`QListWidget::item` 各自的狀態組在同一次提交補齊,不做部分狀態。
+- 固定尺寸元件要做幾何稽核:`(總寬高) − padding − border` 須足以容納內容(含最小寬度)。
+- 樣式隔離優先用 `role` / property-based QSS,不直接改全域變體;
+  f-string CSS 內不放邏輯運算式,fallback 先算好再格式化。
+
+## 9. Web / 響應式 [Web]
+
+- 版面同時考量桌面與行動寬度;觸控目標約 ≥ 44px。
+- 版面型態:滿版利用主內容區 vs 限寬可讀,依頁型選擇,勿自訂繞過共用版型 / 模板。
+- 捲動只給長 / 無界區域(清單、長堆疊);避免整頁捲動破壞固定預覽高度。
+- 用語意 HTML;互動元件補必要 ARIA(對應第 5 節無障礙)。
+- client-side 關鍵狀態(含 lock / owner 等衍生旗標)要寫入持久層並於載入還原;持久化物件需涵蓋這些旗標,勿只存主資料。檢查:重整 / 切換後狀態完整還原。
+- 離線可用的 web app:build 後 precache 不可變 artifact,並跑切過主要路由的離線 smoke。
+
+## 10. 圖表 / 資料視覺化 [全;有圖表才適用]
+
+- 圖框(figure / page)背景與繪圖區(plot area)背景分開,各自用語意 token。
+- 集中的 base chart 樣式(單一入口),不逐圖重複設定。
+- 密集圖(hexbin / heatmap 等)在稀疏區仍要可見;colorbar / legend 文字可讀。
+- 標籤密集重疊時:縮小標籤字級、保留 tooltip 冗餘、必要時只標 Top-N。檢查:高密度下標籤不互疊、tooltip 顯示完整值。
+- 純視覺修改不得改動公式、門檻、metadata 語意或資料解讀。
+- 圖表視覺變更需回歸測試(樣式套用、可讀性訊號如 colorbar)。
+
+## 11. 驗證(視覺改動報告完成前)[全]
+
+- 桌面 Qt:用原生截圖實際檢視後再宣稱完成;offscreen 僅算結構檢查,不能當視覺證據。
+  檢查清單:長 CJK 文字、密集表格 / 圖表、按鈕可見性、捲動邊界、最小寬度不切字。
+  視覺驗收在 100% / 125% / 150% DPI 各看一次(badge、limit labels、sample disclosure 無裁切)。
+- Web:在桌面與行動寬度都檢查;確認空 / 載入 / 錯誤狀態;確認鍵盤可操作。
+- 不確定或無法判定的項目標記為 VERIFY,單獨列出,不臆測填值。
+<!-- END ui-ux-universal -->

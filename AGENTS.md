@@ -1,0 +1,46 @@
+# AGENTS.md — 新機種委外加工對齊系統
+
+本檔是本專案的 repo-local 規則,所有 AI 助手(Cursor / Claude Code / Codex / Antigravity)共用。
+可加嚴全域 baseline,不可放寬。
+
+## Knowledge Map
+
+- 專案總覽:`README.md`
+- 風險帳(Excel / localStorage / 欄位鎖定 / 雲端衝突):`docs/risk-ledger.md`
+- QA 測試計畫:`docs/QA_TEST_PLAN.md`
+- 安全 / Supabase rollout:`docs/SECURITY_ROLLOUT.md`、`docs/SUPABASE_SETUP.md`
+- 通用 UI/UX 規則:`.cursor/rules/ui-ux-universal.mdc`(全域真本同步;本專案為純 Web,適用 §9 Web 段)
+- 全域 Excel 規則:`~/.claude/skills/excel-workbook-toolkit/references/excel_master_spec.md`(Part A 共用紀律)
+
+## Stack
+
+React 19 + Vite + SheetJS(Excel 匯入/匯出)+ 選用 Supabase(雲端多人)。
+指令:`npm run dev` / `build` / `lint`;驗收 `npm run qa:gate`(= build + qa:offline + qa:buttons),
+雲端安全 `npm run qa:cloud-security`(需 `.env`)。
+
+## Guardrails(取自風險帳)
+
+- **Excel 解析 / 匯出**:遵循全域 Excel 真本 Part A #9–#10——解析用表頭關鍵詞動態定位、不寫死座標(A5/B2);
+  匯出採「複製原 workbook、只改值」保留 `!merges` / 樣式;匯出後本機實開驗外觀,並跑往返測試確保 100% 還原。
+- **狀態持久化**:`projects` 與**欄位擁有權鎖定 `_owners`** 都要寫入 `localStorage`(及 Supabase,若啟用)並於載入還原;
+  重整 / 切機種後資料與鎖定狀態完整還原(對應通用真本 §9 Web)。
+- **雲端協作(Supabase)**:RLS 為安全邊界,前端不重複硬寫角色判斷;動 RLS / schema / 正式資料前先備份,
+  依 `docs/SECURITY_ROLLOUT.md` 走 go/no-go 與負面測試。
+- **PDF 列印**:長備註 / 測溫點過長時用 `page-break-inside: avoid` 與必要強制分頁,確保 A4 不溢出。
+- **React 表單狀態原子化更新**:
+  在 JSX 交互中，若單一事件需要同時更新多個相關欄位狀態（例如 SMT 鋼板切換需要重設 `need`、`noNeed` 與其子欄位值），**嚴禁重複非同步呼叫 `onChange` 或狀態變更函數**。必須將所有變更欄位打包至單一物件中，以**單次 `onChange` 呼叫**完成原子化更新，防範 React 異步更新時資料被覆蓋。
+- **欄位擁有權鎖定與共享機制**:
+  為兼顧防呆與發包方協作：
+  1. 委外加工廠選擇欄位 (`basicInfo.factory`) 為全域公共資料，全體角色皆可填寫，不應受 `_owners` 鎖定限制。
+  2. 發包方內部（研發單位與工程單位）共享編輯基本資料與治工具項目，彼此之間不互相鎖定（當 `_owners` 為研發單位或工程單位時，雙方皆可繼續共編），僅鎖定非發包方的加工廠角色編輯。
+
+## 驗收 gate
+
+- 離線:`npm run qa:offline`(storage / concurrency / stress / workflow / security)。
+- 動 Excel 格式:跑 Excel 往返測試確保解析與還原 100% 正確,不過不合併。
+- 動雲端(RLS / 正式資料):先備份,再跑 `npm run qa:cloud-security`。
+
+## Coexistence
+
+- Trunk-based:直接上 `main`,不開 feature branch。
+- 各 AI 工具視本檔為本專案權威規則;與全域 baseline 衝突時,以更嚴者為準。
