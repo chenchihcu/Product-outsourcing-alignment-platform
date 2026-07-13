@@ -241,10 +241,11 @@ const getCachedFactories = (user) => {
 // 雲端工作區(對應 storage suffix):admin 測試庫與正式庫分離
 const getWorkspace = (user) => (user?.role === 'admin' ? 'admin_test' : 'default');
 
-// S2 — 測試帳號僅在開發模式下啟用，正式部署不攜帶預設憑證
-const DEFAULT_ACCOUNTS = import.meta.env.DEV ? [
+// S2 — 本機模式至少保留一個管理員帳號作為入口。
+// 若啟用 Supabase 雲端模式，帳號由 Supabase Auth 管理，本機預設值不影響雲端安全。
+const DEFAULT_ACCOUNTS = [
   { username: 'guest', password: 'guest123', unit: '測試單位', role: 'admin', level: 'Administrator' }
-] : [];
+];
 
 class ErrorBoundary extends Component {
   constructor(props) {
@@ -330,7 +331,13 @@ export default function App() {
   });
 
   const [accounts, setAccounts] = useState(() => {
-    return getJSON('accounts' + getStorageSuffix(currentUser), DEFAULT_ACCOUNTS);
+    const suffix = getStorageSuffix(currentUser);
+    const saved = getJSON('accounts' + suffix, null);
+    // 沒有存檔，或存檔為空陣列（被前次 session 清空）→ 用預設值填回，確保至少一個入口
+    if (saved === null || (Array.isArray(saved) && saved.length === 0 && DEFAULT_ACCOUNTS.length > 0)) {
+      return DEFAULT_ACCOUNTS;
+    }
+    return saved;
   });
 
   const currentAlignmentRate = useMemo(
@@ -667,7 +674,8 @@ export default function App() {
     const suffix = getStorageSuffix(currentUser);
     if (suffix !== accountsSuffixRef.current) {
       accountsSuffixRef.current = suffix;
-      setAccounts(getJSON('accounts' + suffix, DEFAULT_ACCOUNTS));
+      const saved = getJSON('accounts' + suffix, null);
+      setAccounts(saved === null || (Array.isArray(saved) && saved.length === 0 && DEFAULT_ACCOUNTS.length > 0) ? DEFAULT_ACCOUNTS : saved);
       return;
     }
     setJSON('accounts' + suffix, accounts);
@@ -680,6 +688,19 @@ export default function App() {
       removeKey('current_user');
     }
   }, [currentUser]);
+
+  // 啟動安全網：在 localStorage 中確保至少有預設帳號可用
+  useEffect(() => {
+    if (isSupabaseEnabled) return;
+    const suffix = getStorageSuffix(currentUser);
+    const raw = (() => {
+      try { return localStorage.getItem('ag_accounts' + suffix); } catch { return null; }
+    })();
+    if (raw === null || raw === '[]' || raw === 'null') {
+      setJSON('accounts' + suffix, DEFAULT_ACCOUNTS);
+      setAccounts(DEFAULT_ACCOUNTS);
+    }
+  }, []); // mount only
 
   // Supabase:啟動時以既有 session 還原登入,並監聽登入/登出狀態
   useEffect(() => {

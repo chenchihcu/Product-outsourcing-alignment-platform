@@ -10,18 +10,26 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
-  const performLocalLogin = (uname, pw) => {
+  const tryLocalLogin = (uname, pw) => {
     const account = defaultAccounts.find((a) => a.username === uname && a.password === pw);
     if (account) { onLogin(account); setError(''); return true; }
-    setError('帳號或密碼錯誤！');
     return false;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!isSupabaseEnabled) { performLocalLogin(username, password); return; }
+    setError('');
 
-    setBusy(true); setError('');
+    // 無論本機/雲端模式，先試本機帳號清單（讓 guest 帳號在部屬站台也能登入）
+    if (tryLocalLogin(username, password)) return;
+
+    if (!isSupabaseEnabled) {
+      setError('帳號或密碼錯誤！');
+      return;
+    }
+
+    // 雲端模式：本機沒比對到，改走 Supabase Auth
+    setBusy(true);
     try {
       const user = await signIn(username, password);
       if (user) onLogin(user);
@@ -37,7 +45,7 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
     setUsername(acc.username);
     setPassword(acc.password);
     // 先讓 state 更新 flush 到輸入欄位，再執行登入
-    setTimeout(() => performLocalLogin(acc.username, acc.password), 0);
+    setTimeout(() => tryLocalLogin(acc.username, acc.password), 0);
   };
 
   return (
@@ -91,14 +99,18 @@ export default function LoginModal({ onLogin, defaultAccounts }) {
 
           {isSupabaseEnabled && (
             <p className="login-contact-hint">
-              尚無帳號？請聯絡系統管理員開通。
+              尚無 Supabase 帳號？請聯絡系統管理員開通。
             </p>
           )}
         </form>
 
-        {!isSupabaseEnabled && (
+        {defaultAccounts.length > 0 && (
           <div className="quick-login-section">
-            <p className="quick-login-title">⚡ 快速測試登入 (免手動輸入)：</p>
+            <p className="quick-login-title">
+              {isSupabaseEnabled
+                ? '⚡ 本機測試帳號（快速登入，資料儲存於本機瀏覽器）：'
+                : '⚡ 快速測試登入 (免手動輸入)：'}
+            </p>
             <div className="quick-login-grid">
               {defaultAccounts.map((acc) => (
                 <button
